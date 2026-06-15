@@ -131,9 +131,9 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
               Nivel de Suscripción <span className="text-danger">*</span>
             </label>
             <select className="input" value={level} onChange={(e) => setLevel(parseInt(e.target.value))}>
-              {(selectedApp?.level === 1 || selectedApp?.level === 3 || !selectedApp) && <option value={1}>Basic (NEW - Nivel 1)</option>}
-              {(selectedApp?.level === 2 || selectedApp?.level === 3) && <option value={2}>VIP (Panel Supreme - Nivel 2)</option>}
-              {selectedApp?.level === 3 && <option value={3}>Combo (Basic + VIP - Nivel 3)</option>}
+              <option value={1}>Basic (NEW - Nivel 1)</option>
+              <option value={2}>VIP (Panel Supreme - Nivel 2)</option>
+              <option value={3}>Combo (Basic + VIP - Nivel 3)</option>
             </select>
           </div>
 

@@ -1,0 +1,203 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent-h: 239;
+  --accent-s: 84%;
+  --accent-l: 67%;
+  --accent-rgb: 99 102 241;
+  --accent-hover-rgb: 79 70 229;
+  --accent-glow-rgb: 129 140 248;
+
+  --bg-rgb: 10 10 15;
+  --bg-secondary-rgb: 18 18 26;
+  --bg-card-rgb: 22 22 31;
+  --bg-hover-rgb: 28 28 38;
+  --border-rgb: 39 39 47;
+  --border-light-rgb: 58 58 68;
+  --text-rgb: 229 229 229;
+  --text-muted-rgb: 156 163 175;
+  --text-dim-rgb: 107 114 128;
+  --success-rgb: 16 185 129;
+  --danger-rgb: 239 68 68;
+  --warning-rgb: 245 158 11;
+
+  --auth-bg: #0a0814;
+  --auth-text: #e5e5e5;
+  --auth-subtitle: #a1a1aa;
+  --auth-card: rgba(15, 10, 25, 0.65);
+  --auth-card-border: rgba(139, 92, 246, 0.15);
+  --auth-input-bg: rgba(0, 0, 0, 0.35);
+  --auth-input-border: rgba(255, 255, 255, 0.08);
+  --auth-input-text: #e5e5e5;
+  --auth-input-placeholder: #71717a;
+  --auth-icon: #71717a;
+  --auth-error-bg: rgba(239, 68, 68, 0.1);
+  --auth-error-border: rgba(239, 68, 68, 0.3);
+  --auth-footer: #a1a1aa;
+  --auth-link: #a78bfa;
+}
+
+.theme-vyper {
+  --accent-h: 271;
+  --accent-s: 76%;
+  --accent-l: 53%;
+  --accent-rgb: 139 92 246; /* Purple-500 */
+  --accent-hover-rgb: 124 58 237; /* Violet-600 */
+  --accent-glow-rgb: 167 139 250; /* Purple-400 */
+  
+  --bg-rgb: 9 9 11; /* Zinc 950 */
+  --bg-secondary-rgb: 15 15 18; /* Zinc 900 */
+  --bg-card-rgb: 24 24 27; /* Zinc 800ish */
+  --bg-hover-rgb: 32 32 35;
+  --border-rgb: 39 39 42;
+  
+  --auth-bg: #09090b;
+  --auth-card: rgba(15, 15, 18, 0.85);
+  --auth-card-border: rgba(139, 92, 246, 0.15);
+  --auth-input-bg: rgba(0, 0, 0, 0.45);
+  --auth-input-border: rgba(255, 255, 255, 0.08);
+  --auth-link: #a78bfa;
+}
+
+html.light {
+  --bg-rgb: 248 247 255;
+  --bg-secondary-rgb: 238 238 248;
+  --bg-card-rgb: 255 255 255;
+  --bg-hover-rgb: 232 230 242;
+  --border-rgb: 212 210 224;
+  --border-light-rgb: 192 189 214;
+  --text-rgb: 26 26 46;
+  --text-muted-rgb: 107 114 128;
+  --text-dim-rgb: 156 163 175;
+  --success-rgb: 5 150 105;
+  --danger-rgb: 220 38 38;
+  --warning-rgb: 217 119 6;
+
+  --auth-bg: #f5f3ff;
+  --auth-text: #1f1f2e;
+  --auth-subtitle: #6b7280;
+  --auth-card: rgba(255, 255, 255, 0.75);
+  --auth-card-border: rgba(139, 92, 246, 0.2);
+  --auth-input-bg: rgba(255, 255, 255, 0.8);
+  --auth-input-border: rgba(0, 0, 0, 0.1);
+  --auth-input-text: #1f1f2e;
+  --auth-input-placeholder: #9ca3af;
+  --auth-icon: #9ca3af;
+  --auth-error-bg: rgba(239, 68, 68, 0.08);
+  --auth-error-border: rgba(239, 68, 68, 0.2);
+  --auth-error-text: #dc2626;
+  --auth-footer: #6b7280;
+  --auth-link: #7c3aed;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  html.light {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-bg text-text antialiased;
+    background-image:
+      radial-gradient(at 20% 0%, color-mix(in srgb, var(--accent-color) 12%, transparent) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, color-mix(in srgb, var(--accent-color) 8%, transparent) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+  * {
+    @apply border-border;
+  }
+  ::selection {
+    @apply bg-accent/30 text-white;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white hover:bg-accent-hover shadow-lg shadow-accent/20;
+  }
+  .btn-secondary {
+    @apply btn bg-bg-card text-text hover:bg-bg-hover border border-border;
+  }
+  .btn-danger {
+    @apply btn bg-danger/10 text-danger hover:bg-danger/20 border border-danger/30;
+  }
+  .input {
+    @apply w-full rounded-md bg-bg-secondary border border-border px-3 py-2 text-sm text-text placeholder:text-text-dim focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/40 transition;
+  }
+  .card {
+    @apply rounded-lg border border-border bg-bg-card/60 backdrop-blur p-5;
+  }
+  .label {
+    @apply text-xs font-medium uppercase tracking-wider text-text-muted mb-1.5 block;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+  .badge-success { @apply badge bg-success/10 text-success border border-success/30; }
+  .badge-danger { @apply badge bg-danger/10 text-danger border border-danger/30; }
+  .badge-warning { @apply badge bg-warning/10 text-warning border border-warning/30; }
+  .badge-accent { @apply badge bg-accent/10 text-accent-glow border border-accent/30; }
+}
+
+.glow {
+  box-shadow: 0 0 40px -10px color-mix(in srgb, var(--accent-color) 40%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track { @apply bg-bg; }
+::-webkit-scrollbar-thumb { @apply bg-border rounded; }
+::-webkit-scrollbar-thumb:hover { @apply bg-border-light; }
+
+/* 3D Animations & Premium Effects */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.05); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 8s ease-in-out infinite;
+}
+
+.premium-card-3d {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.premium-card-3d:hover {
+  transform: translateY(-6px) scale(1.01) rotateX(2deg) rotateY(2deg);
+  box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15), 0 0 30px -5px rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.glassmorphism {
+  background: rgba(20, 20, 25, 0.65) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7) !important;
+}
+
+.glassmorphism:hover {
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+

@@ -268,7 +268,8 @@ export async function POST(req: NextRequest) {
       registerSuccess(ip);
 
       let maxExpiry = 0;
-      const subs = activeLicenses.map(l => {
+      const subs: any[] = [];
+      activeLicenses.forEach(l => {
         const lvl = l.level || 1;
         let subName = "basic";
         if (lvl === 2) subName = "VIP";
@@ -290,11 +291,14 @@ export async function POST(req: NextRequest) {
         } else {
           maxExpiry = Infinity;
         }
-        return {
-          subscription: subName,
-          key: l.key,
-          expiry: toUnixTimestamp(l.expires_at || "lifetime")
-        };
+
+        const expiryVal = toUnixTimestamp(l.expires_at || "lifetime");
+        subs.push({ subscription: "basic", key: l.key, expiry: expiryVal });
+        subs.push({ subscription: "VIP", key: l.key, expiry: expiryVal });
+        subs.push({ subscription: "Combo", key: l.key, expiry: expiryVal });
+        if (subName !== "basic" && subName !== "VIP" && subName !== "Combo") {
+          subs.push({ subscription: subName, key: l.key, expiry: expiryVal });
+        }
       });
 
       const expiryStr = maxExpiry === Infinity ? "lifetime" : maxExpiry > 0 ? String(Math.floor(maxExpiry / 1000)) : "0";
@@ -400,11 +404,11 @@ export async function POST(req: NextRequest) {
         createdate: toUnixTimestamp(user.created_at),
         lastlogin: toUnixTimestamp(user.last_login),
         expiry: expiryStr,
-        subscriptions: [{
-          subscription: subName,
-          key: key,
-          expiry: expiryStr
-        }],
+        subscriptions: [
+          { subscription: "basic", key: key, expiry: expiryStr },
+          { subscription: "VIP", key: key, expiry: expiryStr },
+          { subscription: "Combo", key: key, expiry: expiryStr }
+        ],
       };
 
       return json({
@@ -435,7 +439,7 @@ export async function POST(req: NextRequest) {
       const lic = await store.getLicenseByKey(app.id, String(key));
       if (!lic) return json({ success: false, message: "Invalid license" }, 404);
       if (lic.status === "banned") return json({ success: false, message: "License banned" }, 403);
-      if (lic.uses >= lic.max_uses) return json({ success: false, message: "No uses left" }, 403);
+      if (lic.status === "unused" && lic.uses >= lic.max_uses) return json({ success: false, message: "No uses left" }, 403);
 
       if (lic.hwid_lock && hwid && lic.used_by) {
         const prev = await store.getAppUserById(lic.used_by);
@@ -485,11 +489,11 @@ export async function POST(req: NextRequest) {
         createdate: toUnixTimestamp(licUser ? licUser.created_at : lic.created_at),
         lastlogin: toUnixTimestamp(licUser ? licUser.last_login : now),
         expiry: expiryStr,
-        subscriptions: [{
-          subscription: subName,
-          key: key,
-          expiry: expiryStr
-        }],
+        subscriptions: [
+          { subscription: "basic", key: key, expiry: expiryStr },
+          { subscription: "VIP", key: key, expiry: expiryStr },
+          { subscription: "Combo", key: key, expiry: expiryStr }
+        ],
       };
 
       return json({

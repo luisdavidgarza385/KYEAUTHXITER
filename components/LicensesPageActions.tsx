@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Key, Trash2, Plus } from "lucide-react";
 import { CreateMenu, BulkDeleteLicensesModal } from "./CreateMenu";
@@ -58,6 +58,16 @@ function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { app
   const [copied, setCopied] = useState(false);
   const router = useRouter();
 
+  const [packageName, setPackageName] = useState("basic");
+
+  useEffect(() => {
+    if (level === 1) {
+      setPackageName("basic");
+    } else if (level === 2) {
+      setPackageName("VIP");
+    }
+  }, [level]);
+
   async function submit() {
     setErr(null);
     if (!appId) { setErr("Application required"); return; }
@@ -67,7 +77,7 @@ function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { app
     const res = await fetch("/api/admin/licenses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ appId, count, durationDays: duration, level, maxUses: 1, hwidLock, ipLock, prefix }),
+      body: JSON.stringify({ appId, count, durationDays: duration, level, maxUses: 1, hwidLock, ipLock, prefix, packageName }),
     });
     setLoading(false);
     const data = await res.json();
@@ -140,11 +150,28 @@ function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { app
               </div>
               <div>
                 <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">Nivel de suscripción *</label>
-                <select className="input" value={level} onChange={(e) => setLevel(parseInt(e.target.value) || 1)}>
-                  <option value={1}>Basic (NEW - Nivel 1)</option>
-                  <option value={2}>VIP (Panel Supreme - Nivel 2)</option>
-                  <option value={3}>Ultra VIP (Nivel 3)</option>
-                </select>
+                <div className="flex items-center gap-4 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+                    <input 
+                      type="radio" 
+                      name="inline-license-action-level"
+                      checked={level === 1} 
+                      onChange={() => setLevel(1)} 
+                      className="accent-accent w-4 h-4 cursor-pointer" 
+                    />
+                    <span>Basic</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+                    <input 
+                      type="radio" 
+                      name="inline-license-action-level"
+                      checked={level === 2} 
+                      onChange={() => setLevel(2)} 
+                      className="accent-accent w-4 h-4 cursor-pointer" 
+                    />
+                    <span>VIP</span>
+                  </label>
+                </div>
               </div>
               <div>
                 <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">Nota de licencia</label>

@@ -58,6 +58,61 @@ export function Sidebar({ role, email }: { role: "admin" | "seller" | "developer
       setDark(false);
       document.documentElement.classList.add("light");
     }
+
+    let rgbInterval: NodeJS.Timeout | null = null;
+    let hueVal = 0;
+
+    function applyRGB(r: string, hr: string, gr: string, hue?: string) {
+      const d = document.documentElement;
+      d.style.setProperty("--accent-rgb", r);
+      d.style.setProperty("--accent-hover-rgb", hr);
+      d.style.setProperty("--accent-glow-rgb", gr);
+      if (hue) d.style.setProperty("--accent-h", hue);
+    }
+
+    function hslToRgb(h: number, s: number, l: number): string {
+      s /= 100;
+      l /= 100;
+      const k = (n: number) => (n + h / 30) % 12;
+      const a = s * Math.min(l, 1 - l);
+      const f = (n: number) => {
+        const y = Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+        return Math.round(255 * (l - a * y));
+      };
+      return `${f(0)} ${f(8)} ${f(4)}`;
+    }
+
+    function updateAccent() {
+      if (rgbInterval) {
+        clearInterval(rgbInterval);
+        rgbInterval = null;
+      }
+
+      const isRgbMode = localStorage.getItem("gx-accent-rgb") === "true";
+      if (isRgbMode) {
+        rgbInterval = setInterval(() => {
+          hueVal = (hueVal + 1.5) % 360; // Increments slightly faster for a nice fluid speed
+          const r = hslToRgb(hueVal, 84, 60);
+          const hr = hslToRgb(hueVal, 84, 50);
+          const gr = hslToRgb(hueVal, 84, 70);
+          applyRGB(r, hr, gr, String(hueVal));
+        }, 30);
+      } else {
+        const stored = localStorage.getItem("gx-accent");
+        if (stored) {
+          const parts = stored.split(",");
+          applyRGB(parts[1], parts[2], parts[0]);
+        }
+      }
+    }
+
+    updateAccent();
+    window.addEventListener("gx-accent-change", updateAccent);
+
+    return () => {
+      if (rgbInterval) clearInterval(rgbInterval);
+      window.removeEventListener("gx-accent-change", updateAccent);
+    };
   }, []);
 
   function toggleTheme() {

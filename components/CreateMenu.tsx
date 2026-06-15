@@ -203,11 +203,28 @@ function CreateUserModal({ apps, onClose, defaultAppId }: { apps: App[]; onClose
           </div>
           <div>
             <FieldLabel required>Nivel de suscripción</FieldLabel>
-            <select className="input" value={level} onChange={(e) => setLevel(parseInt(e.target.value) || 1)}>
-              <option value={1}>Basic (NEW - Nivel 1)</option>
-              <option value={2}>VIP (Panel Supreme - Nivel 2)</option>
-              <option value={3}>Ultra VIP (Nivel 3)</option>
-            </select>
+            <div className="flex items-center gap-4 mt-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+                <input 
+                  type="radio" 
+                  name="user-level"
+                  checked={level === 1} 
+                  onChange={() => setLevel(1)} 
+                  className="accent-accent w-4 h-4 cursor-pointer" 
+                />
+                <span>Basic</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+                <input 
+                  type="radio" 
+                  name="user-level"
+                  checked={level === 2} 
+                  onChange={() => setLevel(2)} 
+                  className="accent-accent w-4 h-4 cursor-pointer" 
+                />
+                <span>VIP</span>
+              </label>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -275,12 +292,14 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
   const appLevel = selectedApp?.level || 1;
 
   useEffect(() => {
-    if (appLevel === 2) {
-      setLevel(2);
-    } else {
-      setLevel(1);
+    if (level === 1) {
+      setPackageName("basic");
+      setPrefix("Guate Xiter");
+    } else if (level === 2) {
+      setPackageName("VIP");
+      setPrefix("Guate Xiter");
     }
-  }, [appId, appLevel]);
+  }, [level]);
   const [hwidLock, setHwidLock] = useState(false);
   const [ipLock, setIpLock] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -362,29 +381,29 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
           </div>
 
           <div>
-            <FieldLabel>Paquete (Opcional)</FieldLabel>
-            <input 
-              className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-600 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition" 
-              value={packageName} 
-              onChange={(e) => {
-                setPackageName(e.target.value);
-                setPrefix(e.target.value || "Guate Xiter");
-              }}
-              placeholder="Ej. VIP, Premium, Silent"
-            />
-          </div>
-
-          <div>
             <FieldLabel required>Nivel de Suscripción</FieldLabel>
-            <select 
-              className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition" 
-              value={level} 
-              onChange={(e) => setLevel(parseInt(e.target.value))}
-            >
-              {(appLevel === 1 || appLevel === 3) && <option value={1} className="bg-zinc-950">Basic (NEW - Nivel 1)</option>}
-              {(appLevel === 2 || appLevel === 3) && <option value={2} className="bg-zinc-950">VIP (Panel Supreme - Nivel 2)</option>}
-              {appLevel === 3 && <option value={3} className="bg-zinc-950">Combo (Basic + VIP - Nivel 3)</option>}
-            </select>
+            <div className="flex items-center gap-4 mt-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-zinc-300 hover:text-white">
+                <input 
+                  type="radio" 
+                  name="license-level"
+                  checked={level === 1} 
+                  onChange={() => setLevel(1)} 
+                  className="accent-emerald-500 w-4 h-4 cursor-pointer" 
+                />
+                <span>Basic</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-zinc-300 hover:text-white">
+                <input 
+                  type="radio" 
+                  name="license-level"
+                  checked={level === 2} 
+                  onChange={() => setLevel(2)} 
+                  className="accent-emerald-500 w-4 h-4 cursor-pointer" 
+                />
+                <span>VIP</span>
+              </label>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -489,7 +508,7 @@ function CreateAppModal({ onClose }: { onClose: () => void }) {
     const res = await fetch("/api/admin/apps", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), level }),
+      body: JSON.stringify({ name: name.trim(), level: 3 }),
     });
     setLoading(false);
     const data = await res.json();
@@ -506,18 +525,7 @@ function CreateAppModal({ onClose }: { onClose: () => void }) {
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. MySoftware" />
           <p className="text-xs text-text-dim mt-1">You can change the name later.</p>
         </div>
-        <div>
-          <FieldLabel required>Subscription Level</FieldLabel>
-          <select 
-            className="input" 
-            value={level} 
-            onChange={(e) => setLevel(parseInt(e.target.value) || 1)}
-          >
-            <option value={1}>Basic (NEW - Nivel 1)</option>
-            <option value={2}>VIP (Panel Supreme - Nivel 2)</option>
-            <option value={3}>Combo (Basic + VIP - Nivel 3)</option>
-          </select>
-        </div>
+
         {err && <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded px-3 py-2">{err}</div>}
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onClose} className="btn-secondary text-sm">Cancel</button>

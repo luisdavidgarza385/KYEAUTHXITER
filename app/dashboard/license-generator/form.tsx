@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Copy, Check, Info, Eye, EyeOff } from "lucide-react";
 
@@ -13,6 +13,15 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
   const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Guate Xiter");
   const [suffix, setSuffix] = useState("****-****-****-****");
   const [level, setLevel] = useState(1);
+  useEffect(() => {
+    if (level === 1) {
+      setPackageName("basic");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Guate Xiter");
+    } else if (level === 2) {
+      setPackageName("VIP");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Guate Xiter");
+    }
+  }, [level, forcePrefix]);
   const [note, setNote] = useState("");
   const [durationDisplay, setDurationDisplay] = useState("1|days");
   const [hwidLock, setHwidLock] = useState(false);
@@ -112,12 +121,7 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
             )}
           </div>
 
-          <div>
-            <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">
-              Paquete (Opcional)
-            </label>
-            <input className="input" value={packageName} onChange={(e) => { setPackageName(e.target.value); setPrefix(e.target.value || (forcePrefix ? "KEYAUTHPRO" : "Guate Xiter")); }} placeholder="e.g. VIP, Premium, Silent" />
-          </div>
+
 
           <div>
             <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">
@@ -130,11 +134,28 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
             <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">
               Nivel de Suscripción <span className="text-danger">*</span>
             </label>
-            <select className="input" value={level} onChange={(e) => setLevel(parseInt(e.target.value))}>
-              <option value={1}>Basic (NEW - Nivel 1)</option>
-              <option value={2}>VIP (Panel Supreme - Nivel 2)</option>
-              <option value={3}>Combo (Basic + VIP - Nivel 3)</option>
-            </select>
+            <div className="flex items-center gap-4 mt-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+                <input 
+                  type="radio" 
+                  name="generator-level"
+                  checked={level === 1} 
+                  onChange={() => setLevel(1)} 
+                  className="accent-accent w-4 h-4 cursor-pointer" 
+                />
+                <span>Basic</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+                <input 
+                  type="radio" 
+                  name="generator-level"
+                  checked={level === 2} 
+                  onChange={() => setLevel(2)} 
+                  className="accent-accent w-4 h-4 cursor-pointer" 
+                />
+                <span>VIP</span>
+              </label>
+            </div>
           </div>
 
           <div>
@@ -188,12 +209,7 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
             </p>
           </div>
 
-          <div>
-            <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">
-              Nivel (Level)
-            </label>
-            <input type="number" min={1} max={255} className="input" value={level} onChange={(e) => setLevel(parseInt(e.target.value) || 1)} />
-          </div>
+
 
           <div>
             <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">

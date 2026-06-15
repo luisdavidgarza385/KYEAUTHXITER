@@ -26,6 +26,7 @@ export function CreateLicenseForApp({ appId }: { appId: string }) {
         level,
         maxUses,
         hwidLock,
+        packageName: level === 1 ? "basic" : "VIP"
       }),
     });
     setLoading(false);
@@ -74,11 +75,32 @@ export function CreateLicenseForApp({ appId }: { appId: string }) {
           <label className="label">Days</label>
           <input type="number" min={1} className="input text-sm" value={duration} onChange={(e) => setDuration(parseInt(e.target.value) || 30)} />
         </div>
-        <div>
+        <div className="col-span-2 my-1">
           <label className="label">Level</label>
-          <input type="number" min={1} className="input text-sm" value={level} onChange={(e) => setLevel(parseInt(e.target.value) || 1)} />
+          <div className="flex items-center gap-4 mt-1">
+            <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+              <input 
+                type="radio" 
+                name="inline-license-level"
+                checked={level === 1} 
+                onChange={() => setLevel(1)} 
+                className="accent-accent w-4 h-4 cursor-pointer" 
+              />
+              <span>Basic</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+              <input 
+                type="radio" 
+                name="inline-license-level"
+                checked={level === 2} 
+                onChange={() => setLevel(2)} 
+                className="accent-accent w-4 h-4 cursor-pointer" 
+              />
+              <span>VIP</span>
+            </label>
+          </div>
         </div>
-        <div>
+        <div className="col-span-2">
           <label className="label">Max uses</label>
           <input type="number" min={1} className="input text-sm" value={maxUses} onChange={(e) => setMaxUses(parseInt(e.target.value) || 1)} />
         </div>

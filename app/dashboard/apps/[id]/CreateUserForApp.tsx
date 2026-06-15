@@ -82,11 +82,28 @@ export function CreateUserForApp({ appId }: { appId: string }) {
       </div>
       <div>
         <label className="label text-xs">Nivel de suscripción</label>
-        <select className="input text-sm" value={level} onChange={(e) => setLevel(parseInt(e.target.value) || 1)}>
-          <option value={1}>Basic (NEW - Nivel 1)</option>
-          <option value={2}>VIP (Panel Supreme - Nivel 2)</option>
-          <option value={3}>Combo (Basic + VIP - Nivel 3)</option>
-        </select>
+        <div className="flex items-center gap-4 mt-1">
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+            <input 
+              type="radio" 
+              name="app-user-level"
+              checked={level === 1} 
+              onChange={() => setLevel(1)} 
+              className="accent-accent w-4 h-4 cursor-pointer" 
+            />
+            <span>Basic</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text">
+            <input 
+              type="radio" 
+              name="app-user-level"
+              checked={level === 2} 
+              onChange={() => setLevel(2)} 
+              className="accent-accent w-4 h-4 cursor-pointer" 
+            />
+            <span>VIP</span>
+          </label>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div>

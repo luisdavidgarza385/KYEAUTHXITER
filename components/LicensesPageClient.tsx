@@ -322,7 +322,7 @@ export function LicensesPageClient({
         <div className="rounded-xl border border-zinc-850 bg-zinc-950/20 py-16 text-center">
           <Key className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
           <p className="text-zinc-400 font-semibold text-sm">No se encontraron licencias</p>
-          <p className="text-xs text-zinc-550 mt-1">Usa el botÃ³n "Crear" para generar licencias.</p>
+          <p className="text-xs text-zinc-550 mt-1">Usa el botón 'Crear' para generar licencias.</p>
         </div>
       ) : viewMode === "grid" ? (
         // Grid view cards

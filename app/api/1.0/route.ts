@@ -293,11 +293,23 @@ export async function POST(req: NextRequest) {
         }
 
         const expiryVal = toUnixTimestamp(l.expires_at || "lifetime");
-        subs.push({ subscription: "basic", key: l.key, expiry: expiryVal });
-        subs.push({ subscription: "VIP", key: l.key, expiry: expiryVal });
-        subs.push({ subscription: "Combo", key: l.key, expiry: expiryVal });
+        const isVahalla = req.headers.get("x-vahalla-client") === "1.0" || 
+                          req.headers.get("user-agent")?.includes("Vahalla") || 
+                          String(p.name).toUpperCase().includes("WHITE") || 
+                          String(p.name).toUpperCase().includes("BLK") ||
+                          String(p.name).toUpperCase().includes("XITER");
+
+        if (isVahalla) {
+          subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
+          subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
+          subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+        } else {
+          subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
+          subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
+          subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+        }
         if (subName !== "basic" && subName !== "VIP" && subName !== "Combo") {
-          subs.push({ subscription: subName, key: l.key, expiry: expiryVal });
+          subs.push({ subscription: subName, name: subName, key: l.key, expiry: expiryVal });
         }
       });
 
@@ -404,10 +416,20 @@ export async function POST(req: NextRequest) {
         createdate: toUnixTimestamp(user.created_at),
         lastlogin: toUnixTimestamp(user.last_login),
         expiry: expiryStr,
-        subscriptions: [
-          { subscription: "basic", key: key, expiry: expiryStr },
-          { subscription: "VIP", key: key, expiry: expiryStr },
-          { subscription: "Combo", key: key, expiry: expiryStr }
+        subscriptions: (
+          req.headers.get("x-vahalla-client") === "1.0" || 
+          req.headers.get("user-agent")?.includes("Vahalla") || 
+          String(p.name).toUpperCase().includes("WHITE") || 
+          String(p.name).toUpperCase().includes("BLK") ||
+          String(p.name).toUpperCase().includes("XITER")
+        ) ? [
+          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+        ] : [
+          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
         ],
       };
 
@@ -489,10 +511,20 @@ export async function POST(req: NextRequest) {
         createdate: toUnixTimestamp(licUser ? licUser.created_at : lic.created_at),
         lastlogin: toUnixTimestamp(licUser ? licUser.last_login : now),
         expiry: expiryStr,
-        subscriptions: [
-          { subscription: "basic", key: key, expiry: expiryStr },
-          { subscription: "VIP", key: key, expiry: expiryStr },
-          { subscription: "Combo", key: key, expiry: expiryStr }
+        subscriptions: (
+          req.headers.get("x-vahalla-client") === "1.0" || 
+          req.headers.get("user-agent")?.includes("Vahalla") || 
+          String(p.name).toUpperCase().includes("WHITE") || 
+          String(p.name).toUpperCase().includes("BLK") ||
+          String(p.name).toUpperCase().includes("XITER")
+        ) ? [
+          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+        ] : [
+          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
         ],
       };
 

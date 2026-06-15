@@ -1,6 +1,7 @@
 import { store } from "@/lib/store";
 import { requireAdmin, canAccessApp } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { AppActions } from "./AppActions";
 import { CreateLicenseForApp } from "./CreateLicenseForApp";
@@ -26,7 +27,10 @@ export default async function AppDetailPage({ params }: { params: { id: string }
   ]);
 
   const usedLicenses = licenses.filter((l) => l.status === "used").length;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const headersList = headers();
+  const host = headersList.get("host") || "www.keyauthpro.xyz";
+  const protocol = host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
   const apiUrl = `${baseUrl}/api/1.0`;
 
   return (

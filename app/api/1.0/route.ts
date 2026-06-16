@@ -299,14 +299,21 @@ export async function POST(req: NextRequest) {
                           String(p.name).toUpperCase().includes("BLK") ||
                           String(p.name).toUpperCase().includes("XITER");
 
+        const isVipLic = lvl >= 2 || (l.package_name && l.package_name.toLowerCase() === "vip");
         if (isVahalla) {
           subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
           subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
           subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
         } else {
-          subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
-          subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
-          subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+          if (isVipLic) {
+            subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+          } else {
+            subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+          }
         }
         if (subName !== "basic" && subName !== "VIP" && subName !== "Combo") {
           subs.push({ subscription: subName, name: subName, key: l.key, expiry: expiryVal });
@@ -426,11 +433,17 @@ export async function POST(req: NextRequest) {
           { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
           { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
           { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
-        ] : [
-          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
-          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
-          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
-        ],
+        ] : (
+          (lic.level >= 2 || (lic.package_name && lic.package_name.toLowerCase() === "vip")) ? [
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ] : [
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ]
+        ),
       };
 
       return json({
@@ -521,11 +534,17 @@ export async function POST(req: NextRequest) {
           { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
           { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
           { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
-        ] : [
-          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
-          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
-          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
-        ],
+        ] : (
+          (lic.level >= 2 || (lic.package_name && lic.package_name.toLowerCase() === "vip")) ? [
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ] : [
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ]
+        ),
       };
 
       return json({

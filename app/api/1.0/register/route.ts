@@ -78,7 +78,25 @@ export async function POST(req: NextRequest) {
     await store.updateSession(String(sessionId), { user_id: user.id, hwid, ip });
     await store.createLog({ app_id: app.id, user_id: user.id, message: `registered ${username}`, level: "info" });
 
-    return json({ success: true, data: { status: true, message: "Registered", username: user.username, expires_at: expires.toISOString() } });
+    // Devolver suscripciones igual que el login para que el loader pueda verificar VIP
+    const expiry = expires.toISOString();
+    const subscriptions = [{ name: "VIP", expiry }];
+
+    return json({
+      success: true,
+      message: "Registered",
+      info: {
+        username: user.username,
+        ip,
+        hwid: hwid || null,
+        createdate: user.created_at,
+        lastlogin: user.last_login,
+        subscription: "VIP",
+        subscriptions,
+        expiry,
+      },
+      data: { status: true, message: "Registered", username: user.username, expires_at: expiry }
+    });
   } catch (e: any) {
     return json({ success: false, message: e?.message || "Server error" }, 500);
   }

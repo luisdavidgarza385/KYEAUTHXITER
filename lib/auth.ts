@@ -48,8 +48,18 @@ export function clearAdminSession() {
 
 export async function getScopedAppIds(me: AdminSession): Promise<string[] | null> {
   if (me.role === "admin" || me.role === "developer") return null;
-  const apps = await store.listApps({ sellerId: me.id });
-  return apps.map((a) => a.id);
+
+  // Apps assigned via seller_id (legacy managers)
+  const sellerApps = await store.listApps({ sellerId: me.id });
+  const sellerAppIds = sellerApps.map((a) => a.id);
+
+  // Apps assigned via subscriptions array (sub-resellers)
+  const adminData = await store.getAdminById(me.id);
+  const subscriptionIds: string[] = Array.isArray(adminData?.subscriptions) ? adminData!.subscriptions : [];
+
+  // Merge both sources, deduplicate
+  const merged = Array.from(new Set([...sellerAppIds, ...subscriptionIds]));
+  return merged;
 }
 
 export async function canAccessApp(me: AdminSession, appId: string): Promise<boolean> {

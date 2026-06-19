@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       role: "seller",
       created_by: me.id,
       credits: plan === "ilimitado" ? 0 : credits,
-      status: "Activo",
+      status: "active",
       permissions,
       subscriptions,
     });

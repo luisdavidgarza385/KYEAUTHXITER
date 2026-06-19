@@ -44,7 +44,12 @@ export async function POST(req: NextRequest) {
     const admin = await store.getAdminById(me.id);
     if (!admin) return { status: 404, data: { success: false, message: "User not found" } };
 
-    const isUnlimited = admin.email === "admin@example.com" || admin.role === "developer";
+    // Ilimitado si: es admin/developer, o es seller con plan ilimitado (credits === 0 significa plan ilimitado)
+    const isUnlimited =
+      admin.role === "admin" ||
+      admin.role === "developer" ||
+      (admin.role === "seller" && (admin.credits === 0 || admin.credits === null || admin.credits === undefined));
+
     const cost = count * 20;
 
     if (!isUnlimited) {

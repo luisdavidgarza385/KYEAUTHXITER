@@ -6,8 +6,8 @@ import { LicenseCardMenu } from "@/components/LicenseCardMenu";
 import { CopyKeyButton } from "@/components/CopyKeyButton";
 import Link from "next/link";
 
-function SubscriptionBadge({ level, packageName }: { level: number; packageName?: string }) {
-  let label = "Basic (NEW)";
+export function SubscriptionBadge({ level, packageName }: { level: number; packageName?: string }) {
+  let label = "Basic";
   let cls = "bg-zinc-900 text-zinc-400 border-zinc-800";
   let isVip = false;
 
@@ -20,14 +20,14 @@ function SubscriptionBadge({ level, packageName }: { level: number; packageName?
   }
 
   if (subName === "vip" || subName === "vip (supreme)" || subName === "vip (panel supreme)") {
-    label = "VIP (Supreme)";
+    label = "VIP";
     cls = "bg-purple-950/20 text-purple-400 border-purple-900/30";
     isVip = true;
   } else if (subName === "combo" || subName === "ultra vip") {
     label = "Ultra VIP";
     cls = "bg-amber-950/20 text-amber-400 border-amber-900/30";
   } else {
-    label = "Basic (NEW)";
+    label = "Basic";
   }
 
   return (

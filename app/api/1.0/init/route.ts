@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
       ownerid: app.app_id,
       message: "",
       appinfo: { name: app.name, version: app.version, download_link: app.download_link, numUsers: "0", numOnlineUsers: "0", numKeys: "0", customerPanelLink: "" },
-      appInfo: { name: app.name, version: app.version, download_link: app.download_link, numUsers: "0", numOnlineUsers: "0", numKeys: "0", customerPanelLink: "" },
       subscriptions: [],
       userdata: { username: "", ip: "", hwid: "", createdate: "", lastlogin: "", subscription: "", subscriptions: [], expiry: "" },
       user_data: { username: "", ip: "", hwid: "", createdate: "", lastlogin: "", subscription: "", subscriptions: [], expiry: "" },

@@ -16,6 +16,9 @@ export async function PATCH(
     if (!(await canAccessApp(me, existing.app_id))) {
       return { status: 403, data: { success: false, message: "Forbidden" } };
     }
+    if (me.role === "seller" && existing.created_by !== me.id) {
+      return { status: 403, data: { success: false, message: "Forbidden" } };
+    }
 
     const body = await req.json().catch(() => ({}));
     const update: any = {};
@@ -46,6 +49,9 @@ export async function DELETE(
     const existing = await store.getLicenseById(params.id);
     if (!existing) return { status: 404, data: { success: false, message: "License not found" } };
     if (!(await canAccessApp(me, existing.app_id))) {
+      return { status: 403, data: { success: false, message: "Forbidden" } };
+    }
+    if (me.role === "seller" && existing.created_by !== me.id) {
       return { status: 403, data: { success: false, message: "Forbidden" } };
     }
     await store.deleteLicense(params.id);

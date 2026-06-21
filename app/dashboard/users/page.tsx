@@ -25,8 +25,14 @@ export default async function UsersPage({
     limit: 10000,
   });
   
-  const filteredUsers = scopedIds === null ? users : users.filter((u) => scopedIds.includes(u.app_id));
+  let filteredUsers = scopedIds === null ? users : users.filter((u) => scopedIds.includes(u.app_id));
   const licenses = await store.listLicenses({ limit: 10000 });
+
+  if (me.role === "seller") {
+    const sellerLicenses = licenses.filter((l) => l.created_by === me.id);
+    const sellerUserIds = new Set(sellerLicenses.map((l) => l.used_by).filter(Boolean));
+    filteredUsers = filteredUsers.filter((u) => sellerUserIds.has(u.id));
+  }
 
   const usersWithLevel = filteredUsers.map(u => {
     const userLics = licenses.filter(l => l.used_by === u.id && l.status === "used" && (!l.expires_at || new Date(l.expires_at) > new Date()));

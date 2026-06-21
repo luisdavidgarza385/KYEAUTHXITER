@@ -24,9 +24,12 @@ export async function POST(req: NextRequest) {
     }
 
     const all = await store.listLicenses({ appId, limit: 5000 });
-    const toDelete = scopedIds
+    let toDelete = scopedIds
       ? all.filter((l) => scopedIds.includes(l.app_id))
       : all;
+    if (me.role === "seller") {
+      toDelete = toDelete.filter((l) => l.created_by === me.id);
+    }
     const filtered = toDelete.filter((l) => {
       if (mode === "all") return true;
       return l.status === mode;

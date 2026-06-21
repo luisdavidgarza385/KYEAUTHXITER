@@ -14,6 +14,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!(await canAccessApp(me, existing.app_id))) {
       return { status: 403, data: { success: false, message: "Forbidden" } };
     }
+    if (me.role === "seller") {
+      const licenses = await store.listLicenses({ appId: existing.app_id, limit: 10000 });
+      const hasLicenseFromSeller = licenses.some((l) => l.used_by === existing.id && l.created_by === me.id);
+      if (!hasLicenseFromSeller) {
+        return { status: 403, data: { success: false, message: "Forbidden" } };
+      }
+    }
 
     const body = await req.json().catch(() => ({}));
     const update: any = {};
@@ -57,6 +64,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     if (!existing) return { status: 404, data: { success: false, message: "User not found" } };
     if (!(await canAccessApp(me, existing.app_id))) {
       return { status: 403, data: { success: false, message: "Forbidden" } };
+    }
+    if (me.role === "seller") {
+      const licenses = await store.listLicenses({ appId: existing.app_id, limit: 10000 });
+      const hasLicenseFromSeller = licenses.some((l) => l.used_by === existing.id && l.created_by === me.id);
+      if (!hasLicenseFromSeller) {
+        return { status: 403, data: { success: false, message: "Forbidden" } };
+      }
     }
     await store.deleteAppUser(params.id);
     return { data: { success: true } };

@@ -26,7 +26,9 @@ export default async function LicensesPage({
     limit: 10000,
   });
   
-  const filteredLicenses = scopedIds === null ? licenses : licenses.filter((l) => scopedIds.includes(l.app_id));
+  const filteredLicenses = me.role === "seller"
+    ? licenses.filter((l) => l.created_by === me.id)
+    : (scopedIds === null ? licenses : licenses.filter((l) => scopedIds.includes(l.app_id)));
 
   const admins = await store.listAdmins();
   const adminsById: Record<string, string> = {};

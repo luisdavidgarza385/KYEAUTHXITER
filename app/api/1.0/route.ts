@@ -66,34 +66,9 @@ async function getParams(req: NextRequest): Promise<Record<string, string>> {
     const sp = new URLSearchParams(text);
     for (const [k, v] of sp) params[k] = v;
   } catch {}
-  // Detect hex-encoded params (original KeyAuth v1.0 protocol)
-  // If ALL values look like hex, decode them
-  let hexEncoded = true;
-  for (const v of Object.values(params)) {
-    if (v.length > 0 && !/^[0-9a-fA-F]+$/.test(v)) { hexEncoded = false; break; }
-  }
-  if (hexEncoded && Object.keys(params).length > 0) {
-    console.log("[HEX ENCODED DETECTED]", params);
-    const decoded: Record<string, string> = {};
-    for (const [k, v] of Object.entries(params)) {
-      decoded[k] = hex2bin(v);
-    }
-    // merge decoded into params (original values take priority for keys we already handle)
-    for (const [k, v] of Object.entries(decoded)) {
-      params[k] = v;
-    }
-  }
-  // If SDK sent encrypted data, decrypt using session enckey
-  if (params["data"] && params["sessionid"]) {
-    const session = sessionsMap.get(params["sessionid"]);
-    if (session && session.enckey) {
-      const decrypted = xorDecrypt(params["data"], params["sessionid"] + session.enckey);
-      try {
-        const sp = new URLSearchParams(decrypted);
-        for (const [k, v] of sp) params[k] = v;
-      } catch {}
-    }
-  }
+  // NOTE: hex-decode deshabilitado — el SDK C++ no usa este protocolo
+  // if (hexEncoded && Object.keys(params).length > 0) { ... }
+
   for (const [k, v] of new URL(req.url).searchParams) {
     if (!params[k]) params[k] = v;
   }
@@ -207,7 +182,6 @@ export async function POST(req: NextRequest) {
         message: "",
         ownerid: app.app_id,
         appinfo: appInfoData,
-        appInfo: appInfoData,
         subscriptions: [],
         userdata: userData,
         user_data: userData,
@@ -247,19 +221,10 @@ export async function POST(req: NextRequest) {
         return json({ success: false, message: "Invalid credentials" }, 401);
       }
 
-      // Enforce VIP subscription level (level 2) check based on application required level
-      const requiredLevel = app.level || 1;
+      // Cualquier usuario autenticado correctamente tiene acceso
       const userLicenses = await store.listLicenses({ appId: app.id });
       const myLicenses = userLicenses.filter(l => l.used_by === user.id);
       const activeLicenses = myLicenses.filter(l => l.status === "used" && (!l.expires_at || new Date(l.expires_at) > new Date()));
-
-      if (requiredLevel >= 2) {
-        const hasVipLicense = activeLicenses.some(l => l.level >= 2);
-        if (!hasVipLicense) {
-          registerFailure(ip);
-          return json({ success: false, message: "You need a VIP subscription to access. Contact the administrator." }, 403);
-        }
-      }
 
       await store.updateAppUser(user.id, { last_login: new Date().toISOString(), ip, hwid: hwid || user.hwid });
       await store.updateSession(String(sessionId), { user_id: user.id, hwid, ip });
@@ -571,8 +536,13 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const type = url.searchParams.get("type");
+  // Si tiene parámetro type, procesarlo como POST (el SDK de C++ manda GET con query params)
+  if (type) {
+    return POST(req);
+  }
   return json({
-    success: true, message: "KeyAuth API 1.0",
-    endpoints: ["init", "login", "register", "license", "log", "var"],
+    success: false, message: "Method not allowed. Use POST.",
   });
 }

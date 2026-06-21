@@ -16,6 +16,9 @@ export async function POST(
     if (!(await canAccessApp(me, existing.app_id))) {
       return { status: 403, data: { success: false, message: "Forbidden" } };
     }
+    if (me.role === "seller" && existing.created_by !== me.id) {
+      return { status: 403, data: { success: false, message: "Forbidden" } };
+    }
     const updated = await store.updateLicense(params.id, { hwid_lock: false });
     return { data: { success: true, data: updated } };
   });

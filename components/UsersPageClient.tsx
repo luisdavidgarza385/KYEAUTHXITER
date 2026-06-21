@@ -4,6 +4,7 @@ import { Users, Search, Filter, LayoutGrid, Clock, RotateCcw, FileText, Trash2, 
 import { UserCardMenu } from "@/components/UserCardMenu";
 import { CreateUserInlineButton } from "@/components/CreateMenu";
 import Link from "next/link";
+import { SubscriptionBadge } from "./LicensesPageClient";
 
 function ClientDate({ iso }: { iso: string }) {
   const [mounted, setMounted] = React.useState(false);
@@ -103,7 +104,7 @@ export function UsersPageClient({
 
   function exportUsers() {
     const content = sortedUsers
-      .map((u) => `User: ${u.username} | IP: ${u.ip || "N/A"} | HWID: ${u.hwid || "N/A"} | Level: ${u.level === 2 ? "VIP (Panel Supreme)" : "Basic (NEW)"}`)
+      .map((u) => `User: ${u.username} | IP: ${u.ip || "N/A"} | HWID: ${u.hwid || "N/A"} | Level: ${u.level === 2 ? "VIP" : "Basic"}`)
       .join("\n");
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -302,15 +303,7 @@ export function UsersPageClient({
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-zinc-900">
                   <span className="text-[10px] uppercase font-bold text-zinc-500">Suscripción</span>
-                  {u.level === 2 ? (
-                    <span className="inline-flex items-center gap-1 rounded bg-purple-950/20 border border-purple-900/30 px-2.5 py-0.5 text-[9px] font-bold text-purple-400 uppercase">
-                      <Star className="w-2.5 h-2.5 fill-purple-400" /> VIP (Supreme)
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 text-[9px] font-bold text-zinc-400 uppercase">
-                      Basic (NEW)
-                    </span>
-                  )}
+                  <SubscriptionBadge level={u.level || 1} />
                 </div>
               </div>
             );
@@ -348,15 +341,7 @@ export function UsersPageClient({
                       </td>
                       <td className="px-5 py-4 font-bold text-zinc-200">{u.username}</td>
                       <td className="px-5 py-4">
-                        {u.level === 2 ? (
-                          <span className="inline-flex items-center gap-1 rounded bg-purple-950/20 border border-purple-900/30 px-2.5 py-0.5 text-[9px] font-bold text-purple-400 uppercase">
-                            <Star className="w-2.5 h-2.5 fill-purple-400" /> VIP (Supreme)
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 text-[9px] font-bold text-zinc-400 uppercase">
-                            Basic (NEW)
-                          </span>
-                        )}
+                        <SubscriptionBadge level={u.level || 1} />
                       </td>
                       <td className="px-5 py-4 font-mono text-xs text-zinc-400">{u.ip || "—"}</td>
                       <td className="px-5 py-4 font-mono text-xs text-zinc-500">

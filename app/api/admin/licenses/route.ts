@@ -103,7 +103,10 @@ export async function GET(req: NextRequest) {
     const appId = new URL(req.url).searchParams.get("app") || undefined;
     const scopedIds = await getScopedAppIds(me);
     const all = await store.listLicenses({ appId, limit: 200 });
-    const filtered = scopedIds ? all.filter((l) => scopedIds.includes(l.app_id)) : all;
+    let filtered = scopedIds ? all.filter((l) => scopedIds.includes(l.app_id)) : all;
+    if (me.role === "seller") {
+      filtered = filtered.filter((l) => l.created_by === me.id);
+    }
     return { data: { success: true, data: filtered } };
   });
 }

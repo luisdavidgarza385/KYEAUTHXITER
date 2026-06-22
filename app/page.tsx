@@ -95,7 +95,7 @@ export default function Home() {
                 <span className="w-3 h-3 rounded-full bg-[#febc2e] shadow-sm shadow-[#febc2e]/30" />
                 <span className="w-3 h-3 rounded-full bg-[#28c840] shadow-sm shadow-[#28c840]/30" />
               </div>
-              <div className="ml-3 flex-1 text-[11px] text-text-dim font-mono truncate">guate-xiter.cc/dashboard</div>
+              <div className="ml-3 flex-1 text-[11px] text-text-dim font-mono truncate">dark-hacks.cc/dashboard</div>
             </div>
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-4 gap-2">
@@ -134,7 +134,7 @@ export default function Home() {
 
               <div className="rounded-md border border-border/60 bg-bg-secondary/30 p-3 space-y-2.5">
                 {[
-                  { name: "Guate Xiter Loader", color: "bg-emerald-400" },
+                  { name: "Dark Hacks Loader", color: "bg-emerald-400" },
                   { name: "Xiter Free", color: "bg-violet-400" },
                   { name: "Premium Xiter", color: "bg-amber-400" },
                 ].map((r) => (

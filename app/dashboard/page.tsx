@@ -1,7 +1,8 @@
 import { store } from "@/lib/store";
 import { requireAdmin, getScopedAppIds } from "@/lib/auth";
-import { Users, Coins, Sparkles, LayoutDashboard, ChevronRight, Activity, Calendar, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, ChevronRight, Activity, Calendar, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { DashboardStats } from "@/components/DashboardStats";
 
 export const dynamic = "force-dynamic";
 
@@ -79,37 +80,6 @@ export default async function DashboardPage() {
   const credits = typeof fullAdmin?.credits === "number" ? fullAdmin.credits : 0.0;
   const isUnlimited = fullAdmin?.role === "developer" || fullAdmin?.role === "admin";
 
-  const stats = [
-    {
-      label: "USUARIOS ACTIVOS",
-      value: onlineUsersCount,
-      icon: Users,
-      color: "border-l-4 border-green-500 bg-green-500/5 text-green-400",
-      sub: `${activeUsersCount} Clientes registrados`
-    },
-    {
-      label: "CREDITOS DISPONIBLES",
-      value: isUnlimited ? "Ilimitado" : credits.toFixed(1),
-      icon: Coins,
-      color: "border-l-4 border-blue-500 bg-blue-500/5 text-blue-400",
-      sub: isUnlimited ? "Plan sin costo" : "Monedas de generación"
-    },
-    {
-      label: "COSTO BASE X USUARIO",
-      value: "1.0",
-      icon: Coins,
-      color: "border-l-4 border-orange-500 bg-orange-500/5 text-orange-400",
-      sub: "Créditos por licencia"
-    },
-    {
-      label: "PAQUETES",
-      value: packagesCount,
-      icon: Sparkles,
-      color: "border-l-4 border-purple-500 bg-purple-500/5 text-purple-400",
-      sub: "Suscripciones activas"
-    }
-  ];
-
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto text-zinc-300">
       {/* Header */}
@@ -129,23 +99,13 @@ export default async function DashboardPage() {
       </div>
 
       {/* Top Cards (Premium 3D & Glassmorphism) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {stats.map((s) => (
-          <div 
-            key={s.label} 
-            className="premium-card-3d glassmorphism rounded-xl p-5 flex items-center justify-between border border-zinc-800/80 hover:border-emerald-500/40 transition-all duration-300"
-          >
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{s.label}</div>
-              <div className="text-2xl font-black mt-1.5 font-mono text-zinc-150">{s.value}</div>
-              <div className="text-[10px] text-zinc-500 mt-1.5 font-medium">{s.sub}</div>
-            </div>
-            <div className="p-3 bg-zinc-900/60 rounded-lg text-emerald-400 shrink-0 shadow-inner group-hover:scale-110 transition duration-300">
-              <s.icon className="w-6 h-6 text-emerald-400" />
-            </div>
-          </div>
-        ))}
-      </div>
+      <DashboardStats
+        initialOnlineUsersCount={onlineUsersCount}
+        initialActiveUsersCount={activeUsersCount}
+        credits={credits}
+        isUnlimited={isUnlimited}
+        packagesCount={packagesCount}
+      />
 
       {/* Account Info Box */}
       <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 p-6 space-y-6">

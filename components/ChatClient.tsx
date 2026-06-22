@@ -36,43 +36,15 @@ export function ChatClient({ role, email }: { role: string; email: string }) {
 
   const isAdmin = role === "admin" || role === "developer";
 
-  // Web Audio API Synthesizer - plays a premium futuristic double-beep chime
+  // Plays PlayStation App notification sound chime
   function playFuturisticChime() {
     if (!soundEnabled) return;
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContextClass) return;
-      const audioCtx = new AudioContextClass();
-
-      // First beep - A5 note, short decay
-      const osc1 = audioCtx.createOscillator();
-      const gain1 = audioCtx.createGain();
-      osc1.type = "sine";
-      osc1.frequency.setValueAtTime(880, audioCtx.currentTime); // 880Hz
-      gain1.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
-
-      osc1.connect(gain1);
-      gain1.connect(audioCtx.destination);
-      osc1.start();
-      osc1.stop(audioCtx.currentTime + 0.12);
-
-      // Second beep - C6 note, slightly higher pitch, slightly delayed
-      setTimeout(() => {
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = "sine";
-        osc2.frequency.setValueAtTime(1046.5, audioCtx.currentTime); // 1046.5Hz (C6)
-        gain2.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
-
-        osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
-        osc2.start();
-        osc2.stop(audioCtx.currentTime + 0.18);
-      }, 100);
+      const audio = new Audio("https://www.myinstants.com/media/sounds/ps-app-notificacion.mp3");
+      audio.volume = 0.35;
+      audio.play().catch((e) => console.warn("Audio play blocked by browser:", e));
     } catch (e) {
-      console.warn("Audio chime play blocked by browser policy or failed:", e);
+      console.warn("Audio chime play failed:", e);
     }
   }
 

@@ -14,7 +14,7 @@ export function generateId(length = 16): string {
   return result;
 }
 
-export function generateKey(prefix = "Guate Xiter", segments = 4, segmentLen = 4): string {
+export function generateKey(prefix = "Dark Hacks", segments = 4, segmentLen = 4): string {
   const segs: string[] = [];
   for (let i = 0; i < segments; i++) {
     segs.push(generateId(segmentLen).toUpperCase());

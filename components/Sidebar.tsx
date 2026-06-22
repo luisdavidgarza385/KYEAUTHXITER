@@ -15,6 +15,7 @@ import {
   Shield,
   Layers,
   Terminal,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +35,7 @@ const SECTIONS = [
       { href: "/dashboard/sub-resellers", label: "Sub resellers", icon: Users, adminOnly: false },
       { href: "/dashboard/sub-users", label: "Sub-usuarios", icon: Layers, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
-      { href: "/dashboard/shop", label: "Comprar VIP / PayPal", icon: Coins, adminOnly: false },
+      { href: "/dashboard/shop", label: "Comprar VIP / PayPal", icon: Coins, adminOnly: false, hideForSubReseller: true },
     ],
   },
   {
@@ -42,11 +43,12 @@ const SECTIONS = [
     items: [
       { href: "/dashboard/security", label: "Seguridad (2FA)", icon: Lock, adminOnly: false },
       { href: "/dashboard/api", label: "API", icon: Code, adminOnly: false },
+      { href: "/dashboard/settings", label: "Configuración", icon: Settings, adminOnly: false },
     ],
   },
 ];
 
-export function Sidebar({ role, email }: { role: "admin" | "seller" | "developer"; email: string }) {
+export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" | "seller" | "developer"; email: string; isSubReseller?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = role === "admin" || role === "developer";
@@ -141,13 +143,17 @@ export function Sidebar({ role, email }: { role: "admin" | "seller" | "developer
     <aside className="w-60 border-r border-zinc-800 bg-[#09090b] flex flex-col h-screen sticky top-0 text-zinc-300">
       <div className="p-5 flex items-center justify-center border-b border-zinc-800/60">
         <span className="font-extrabold text-lg tracking-wider bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">
-          GUATE XITER
+          DARK HACKS
         </span>
       </div>
 
       <nav className="flex-1 overflow-y-auto py-5 px-3">
         {SECTIONS.map((section) => {
-          const items = section.items.filter((i) => isAdmin || !i.adminOnly);
+          const items = section.items.filter((i) => {
+            if (i.adminOnly && !isAdmin) return false;
+            if (i.hideForSubReseller && isSubReseller) return false;
+            return true;
+          });
           if (items.length === 0) return null;
           return (
             <div key={section.label} className="mb-5">

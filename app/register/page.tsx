@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import styles from "../login/auth.module.css";
 
-export const metadata = { title: "Create Account — Guate Xiter" };
+export const metadata = { title: "Create Account — Dark Hacks" };
 
 export default function RegisterPage() {
   return (

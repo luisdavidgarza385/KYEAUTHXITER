@@ -24,6 +24,12 @@ export default async function DashboardPage() {
   const subResellers = allAdmins.filter((a) => a.created_by === me.id);
   const subResellerIds = subResellers.map((sr) => sr.id);
 
+  // Active sessions per app (online users)
+  const sessionsLists = await Promise.all(
+    apps.map((app) => store.listSessionsForApp(app.id, 10000))
+  );
+  const onlineUsersCount = sessionsLists.reduce((acc, list) => acc + list.length, 0);
+
   // Licenses created by me or my sub-resellers
   const myLicenses = allLicenses.filter((l) => l.created_by === me.id);
   const subLicenses = allLicenses.filter((l) => l.created_by && subResellerIds.includes(l.created_by));
@@ -76,10 +82,10 @@ export default async function DashboardPage() {
   const stats = [
     {
       label: "USUARIOS ACTIVOS",
-      value: activeUsersCount,
+      value: onlineUsersCount,
       icon: Users,
       color: "border-l-4 border-green-500 bg-green-500/5 text-green-400",
-      sub: "Clientes registrados"
+      sub: `${activeUsersCount} Clientes registrados`
     },
     {
       label: "CREDITOS DISPONIBLES",

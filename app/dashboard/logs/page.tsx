@@ -1,5 +1,5 @@
 import { store } from "@/lib/store";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, getScopedAppIds } from "@/lib/auth";
 import { FileText } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -10,13 +10,20 @@ export default async function LogsPage({
 }: {
   searchParams: { app?: string; level?: string };
 }) {
-  await requireAdmin();
-  const apps = await store.listApps();
-  const logs = await store.listLogs({
+  const me = await requireAdmin();
+  const scopedIds = await getScopedAppIds(me);
+  const allApps = await store.listApps();
+  const apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+
+  const allLogs = await store.listLogs({
     appId: searchParams.app || undefined,
     level: searchParams.level || undefined,
-    limit: 300,
+    limit: 500,
   });
+
+  const logs = scopedIds === null
+    ? allLogs
+    : allLogs.filter((log) => log.app_id === null || (log.app_id && scopedIds.includes(log.app_id)));
 
   const appsById = new Map(apps.map((a) => [a.id, a]));
 
@@ -60,30 +67,38 @@ export default async function LogsPage({
           </div>
         ) : (
           <div className="divide-y divide-border max-h-[70vh] overflow-y-auto">
-            {logs.map((l) => (
-              <div key={l.id} className="px-4 py-3 hover:bg-bg-hover/40 flex items-start gap-3 text-sm">
-                <span
-                  className={
-                    l.level === "error"
-                      ? "badge-danger"
-                      : l.level === "warn"
-                      ? "badge-warning"
-                      : l.level === "debug"
-                      ? "badge-accent"
-                      : "badge-success"
-                  }
-                >
-                  {l.level}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="font-mono text-xs text-text-muted truncate">{l.message}</div>
-                  <div className="text-[10px] text-text-dim mt-0.5">
-                    {l.app_id ? appsById.get(l.app_id)?.name || "—" : "—"} · {formatDate(l.created_at)}
+            {logs.map((l) => {
+              const isBroadcast = l.message.startsWith("[Broadcast] ");
+              const cleanMessage = isBroadcast ? l.message.replace("[Broadcast] ", "") : l.message;
+              const displayAppName = isBroadcast ? "Administrador" : (l.app_id ? appsById.get(l.app_id)?.name || "—" : "—");
+              const displayLevel = isBroadcast ? "Anuncio" : l.level;
+
+              return (
+                <div key={l.id} className="px-4 py-3 hover:bg-bg-hover/40 flex items-start gap-3 text-sm">
+                  <span
+                    className={
+                      isBroadcast
+                        ? "bg-purple-950/40 border border-purple-900/40 text-purple-400 px-2 py-0.5 rounded text-[10px] uppercase font-bold"
+                        : l.level === "error"
+                        ? "badge-danger"
+                        : l.level === "warn"
+                        ? "badge-warning"
+                        : l.level === "debug"
+                        ? "badge-accent"
+                        : "badge-success"
+                    }
+                  >
+                    {displayLevel}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-mono text-xs text-text-muted truncate">{cleanMessage}</div>
+                    <div className="text-[10px] text-text-dim mt-0.5">
+                      {displayAppName} · {formatDate(l.created_at)}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              );
+            })}</div>
         )}
       </div>
     </div>

@@ -46,6 +46,7 @@ export default async function LicensesPage({
       adminsById={adminsById}
       role={me.role}
       subscriptionEnd={fullAdmin?.subscription_end || null}
+      hasPrefixPerm={fullAdmin?.permissions?.includes("prefix") || false}
     />
   );
 }

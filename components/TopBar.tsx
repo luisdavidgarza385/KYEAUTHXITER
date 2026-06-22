@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight, Home, AlertCircle } from "lucide-react";
 import { store } from "@/lib/store";
 import { CreateMenu, CreateAppInlineButton } from "@/components/CreateMenu";
-import { getScopedAppIds } from "@/lib/auth";
+import { getScopedAppIds, getCurrentAdmin } from "@/lib/auth";
 import { cookies } from "next/headers";
 
 interface Props {
@@ -13,6 +13,8 @@ interface Props {
 }
 
 export async function TopBar({ current, showCreate = true, apps, currentAppId }: Props) {
+  const me = await getCurrentAdmin();
+  const role = me?.role || "seller";
   const list = apps ?? (await store.listApps());
   const cookieStore = await cookies();
   const cookieApp = cookieStore.get("ka_current_app")?.value;
@@ -52,8 +54,8 @@ export async function TopBar({ current, showCreate = true, apps, currentAppId }:
           </>
         )}
       </div>
-      {showCreate && list.length > 0 && <CreateMenu apps={list} />}
-      {showCreate && list.length === 0 && <CreateAppInlineButton label="Create Application" className="btn-primary text-sm" />}
+      {showCreate && list.length > 0 && <CreateMenu apps={list} role={role} />}
+      {showCreate && list.length === 0 && role !== "seller" && <CreateAppInlineButton label="Create Application" className="btn-primary text-sm" />}
     </div>
   );
 }

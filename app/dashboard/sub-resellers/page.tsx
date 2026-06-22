@@ -33,6 +33,7 @@ export default function SubResellersPage() {
   const [permResetHwid, setPermResetHwid] = useState(false);
   const [permBan, setPermBan] = useState(false);
   const [permDelete, setPermDelete] = useState(false);
+  const [permPrefix, setPermPrefix] = useState(false);
 
   // Editing Form states
   const [editingSub, setEditingSub] = useState<SubReseller | null>(null);
@@ -44,6 +45,7 @@ export default function SubResellersPage() {
   const [editPermResetHwid, setEditPermResetHwid] = useState(false);
   const [editPermBan, setEditPermBan] = useState(false);
   const [editPermDelete, setEditPermDelete] = useState(false);
+  const [editPermPrefix, setEditPermPrefix] = useState(false);
   
   // Apps state
   const [apps, setApps] = useState<{ id: string; name: string }[]>([]);
@@ -118,6 +120,7 @@ export default function SubResellersPage() {
     if (permResetHwid) permissions.push("hwid");
     if (permBan) permissions.push("ban");
     if (permDelete) permissions.push("delete");
+    if (permPrefix) permissions.push("prefix");
 
     try {
       const res = await fetch("/api/admin/sub-resellers", {
@@ -151,6 +154,7 @@ export default function SubResellersPage() {
       setPermResetHwid(false);
       setPermBan(false);
       setPermDelete(false);
+      setPermPrefix(false);
       
       fetchSubResellers();
     } catch (err) {
@@ -169,6 +173,7 @@ export default function SubResellersPage() {
     setEditPermResetHwid(sub.permissions.includes("hwid"));
     setEditPermBan(sub.permissions.includes("ban"));
     setEditPermDelete(sub.permissions.includes("delete"));
+    setEditPermPrefix(sub.permissions.includes("prefix"));
     setFormError(null);
     setEditModalOpen(true);
   }
@@ -184,6 +189,7 @@ export default function SubResellersPage() {
     if (editPermResetHwid) permissions.push("hwid");
     if (editPermBan) permissions.push("ban");
     if (editPermDelete) permissions.push("delete");
+    if (editPermPrefix) permissions.push("prefix");
 
     try {
       const res = await fetch("/api/admin/sub-resellers", {
@@ -533,6 +539,15 @@ export default function SubResellersPage() {
                     />
                     <span>Eliminar licencias</span>
                   </label>
+                  <label className="flex items-center gap-2 cursor-pointer hover:text-zinc-200">
+                    <input
+                      type="checkbox"
+                      checked={permPrefix}
+                      onChange={(e) => setPermPrefix(e.target.checked)}
+                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                    />
+                    <span>Modificar prefijo</span>
+                  </label>
                 </div>
               </div>
 
@@ -707,6 +722,15 @@ export default function SubResellersPage() {
                       className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Eliminar licencias</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer hover:text-zinc-200">
+                    <input
+                      type="checkbox"
+                      checked={editPermPrefix}
+                      onChange={(e) => setEditPermPrefix(e.target.checked)}
+                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                    />
+                    <span>Modificar prefijo</span>
                   </label>
                 </div>
               </div>

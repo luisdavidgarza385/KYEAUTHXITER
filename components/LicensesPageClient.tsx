@@ -80,6 +80,7 @@ export function LicensesPageClient({
   adminsById,
   role,
   subscriptionEnd,
+  hasPrefixPerm = false,
 }: {
   initialLicenses: License[];
   apps: App[];
@@ -87,6 +88,7 @@ export function LicensesPageClient({
   adminsById: Record<string, string>;
   role: string;
   subscriptionEnd: string | null;
+  hasPrefixPerm?: boolean;
 }) {
   const [licenses, setLicenses] = useState<License[]>(initialLicenses);
   const [searchTerm, setSearchTerm] = useState("");
@@ -258,6 +260,7 @@ export function LicensesPageClient({
             filteredAppId={selectedAppId !== "all" ? selectedAppId : undefined}
             role={role}
             subscriptionEnd={subscriptionEnd}
+            hasPrefixPerm={hasPrefixPerm}
           />
         </div>
       </div>

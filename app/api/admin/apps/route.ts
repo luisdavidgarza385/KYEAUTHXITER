@@ -9,6 +9,9 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   return safeRoute(async () => {
     const admin = await requireAdmin();
+    if (admin.role === "seller") {
+      return { status: 403, data: { success: false, message: "Acción no permitida para revendedores" } };
+    }
     const body = await req.json().catch(() => ({}));
     const name = String(body?.name || "").trim();
     const version = String(body?.version || "1.0").trim() || "1.0";

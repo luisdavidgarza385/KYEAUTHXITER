@@ -7,7 +7,7 @@ import {
 
 type App = { id: string; name: string; level?: number };
 
-export function CreateMenu({ apps }: { apps: App[] }) {
+export function CreateMenu({ apps, role }: { apps: App[]; role?: string }) {
   const [open, setOpen] = useState(false);
   const [modal, setModal] = useState<"user" | "license" | "app" | null>(null);
   const router = useRouter();
@@ -40,9 +40,11 @@ export function CreateMenu({ apps }: { apps: App[] }) {
           <button onClick={() => pick("license")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
             <Key className="w-4 h-4 text-accent-glow" /> Create License
           </button>
-          <button onClick={() => pick("app")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
-            <AppWindow className="w-4 h-4 text-accent-glow" /> Create Application
-          </button>
+          {role !== "seller" && (
+            <button onClick={() => pick("app")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
+              <AppWindow className="w-4 h-4 text-accent-glow" /> Create Application
+            </button>
+          )}
         </div>
       )}
       {modal === "user" && <CreateUserModal apps={apps} onClose={() => setModal(null)} />}
@@ -281,7 +283,7 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
   const [appId, setAppId] = useState(defaultAppId || apps[0]?.id || "");
   const [packageName, setPackageName] = useState("");
   const [count, setCount] = useState(1);
-  const [prefix, setPrefix] = useState("Guate Xiter");
+  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
   const [suffix, setSuffix] = useState("****-****-****-****");
   const [level, setLevel] = useState(1);
   const [note, setNote] = useState("");
@@ -294,12 +296,12 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
   useEffect(() => {
     if (level === 1) {
       setPackageName("basic");
-      setPrefix("Guate Xiter");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
     } else if (level === 2) {
       setPackageName("VIP");
-      setPrefix("Guate Xiter");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
     }
-  }, [level]);
+  }, [level, forcePrefix]);
   const [hwidLock, setHwidLock] = useState(false);
   const [ipLock, setIpLock] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -459,7 +461,7 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
               <Info className="w-3.5 h-3.5 text-emerald-500" /> Vista previa
             </div>
             <code className="font-mono text-zinc-300 text-[12px]">
-              {prefix || "Guate Xiter"}-{suffix || "****-****-****-****"}
+              {prefix || "Dark Hacks"}-{suffix || "****-****-****-****"}
             </code>
           </div>
 

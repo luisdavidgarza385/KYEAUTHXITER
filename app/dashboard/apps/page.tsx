@@ -58,7 +58,7 @@ export default async function AppsPage({
           <div className="card text-center py-16">
             <AppWindow className="w-10 h-10 text-text-dim mx-auto mb-3" />
             <p className="text-text-muted mb-4">No applications yet</p>
-            <CreateAppInlineButton className="btn-primary text-sm mx-auto" />
+            {me.role !== "seller" && <CreateAppInlineButton className="btn-primary text-sm mx-auto" />}
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-4">
@@ -92,9 +92,11 @@ export default async function AppsPage({
                   </div>
                 </div>
 
-                <CreateAppInlineButton
-                  className="w-full mb-3 flex items-center justify-center gap-2 rounded-md bg-accent text-white py-2 text-sm font-medium hover:bg-accent/90 transition"
-                />
+                {me.role !== "seller" && (
+                  <CreateAppInlineButton
+                    className="w-full mb-3 flex items-center justify-center gap-2 rounded-md bg-accent text-white py-2 text-sm font-medium hover:bg-accent/90 transition"
+                  />
+                )}
 
                 <div className="space-y-2">
                   {filtered.map((a) => (

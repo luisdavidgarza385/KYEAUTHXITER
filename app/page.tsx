@@ -17,9 +17,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-accent/30 group-hover:ring-accent/60 transition shadow-lg shadow-accent/20">
-              <Image src="/logo.png" alt="Guate Xiter" width={36} height={36} className="w-full h-full object-cover" priority />
+              <Image src="/logo.png" alt="Dark Hacks" width={36} height={36} className="w-full h-full object-cover" priority />
             </div>
-            <span className="font-bold tracking-tight text-[15px]">Guate Xiter</span>
+            <span className="font-bold tracking-tight text-[15px]">Dark Hacks</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-text-muted">
             <a href="#features" className="hover:text-text transition">Features</a>
@@ -295,9 +295,9 @@ curl -X POST https://guate-xiter.cc/api/1.0/login \\
         <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-text-dim">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-md overflow-hidden ring-1 ring-accent/30">
-              <Image src="/logo.png" alt="Guate Xiter" width={28} height={28} className="w-full h-full object-cover" />
+              <Image src="/logo.png" alt="Dark Hacks" width={28} height={28} className="w-full h-full object-cover" />
             </div>
-            <span>© 2026 Guate Xiter — Self-hosted license auth</span>
+            <span>© 2026 Dark Hacks — Self-hosted license auth</span>
           </div>
           <div className="flex items-center gap-5">
             <Link href="/docs" className="hover:text-text transition">Docs</Link>

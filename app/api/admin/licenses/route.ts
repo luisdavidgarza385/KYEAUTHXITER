@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const maxUses = Math.max(parseInt(String(body?.maxUses || 1)) || 1, 1);
     const hwidLock = !!body?.hwidLock;
     const ipLock = !!body?.ipLock;
-    const prefix = String(body?.prefix || "Guate Xiter").trim() || "Guate Xiter";
+    const prefix = String(body?.prefix || "Dark Hacks").trim() || "Dark Hacks";
     const suffix = String(body?.suffix || "****-****-****-****").trim() || "****-****-****-****";
     
     let packageName = String(body?.packageName || "").trim();

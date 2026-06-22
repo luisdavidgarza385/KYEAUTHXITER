@@ -34,13 +34,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Reseller Verification Flow
-    if (appId && admin) {
-      if (admin.role !== "seller") {
-        return json({ success: false, message: "El usuario no es un revendedor" }, 401);
+    if (admin && admin.role === "seller") {
+      if (!appId) {
+        return json({ success: false, message: "ID de Aplicación es requerido para revendedores" }, 401);
       }
       const cleanId = admin.id.slice(0, 15).replace("-", "");
       if (appId !== admin.id && appId !== cleanId) {
         return json({ success: false, message: "ID de Aplicación inválido para este revendedor" }, 401);
+      }
+    } else if (appId && admin) {
+      if (admin.role !== "seller") {
+        return json({ success: false, message: "El usuario no es un revendedor" }, 401);
       }
     }
 

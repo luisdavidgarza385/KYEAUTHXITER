@@ -4,6 +4,7 @@ import { Settings as SettingsIcon, Key, Palette } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 import { VariablesManager } from "@/components/VariablesManager";
 import { ThemeCustomizer } from "@/components/ThemeCustomizer";
+import { BroadcastNotificationManager } from "@/components/BroadcastNotificationManager";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,13 @@ export default async function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Broadcast Notifications for Admin/Developer */}
+      {(admin.role === "admin" || admin.role === "developer") && (
+        <div className="card">
+          <BroadcastNotificationManager />
+        </div>
+      )}
 
       <div className="card">
         <ThemeCustomizer />

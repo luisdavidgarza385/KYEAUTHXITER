@@ -12,7 +12,8 @@ export default async function LicenseGeneratorPage() {
   const fullAdmin = await store.getAdminById(me.id);
   const isSeller = me.role === "seller";
   const hasSub = fullAdmin?.subscription_end ? new Date(fullAdmin.subscription_end).getTime() > Date.now() : false;
-  const forcePrefix = isSeller && !hasSub;
+  const hasPrefixPerm = fullAdmin?.permissions?.includes("prefix") || false;
+  const forcePrefix = isSeller && !hasSub && !hasPrefixPerm;
 
   return (
     <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">

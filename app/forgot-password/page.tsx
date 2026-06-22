@@ -34,9 +34,9 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
           <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-accent/30">
-            <img src="/logo.png" alt="Guate Xiter" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="Dark Hacks" className="w-full h-full object-cover" />
           </div>
-          <span className="text-2xl font-bold tracking-tight">Guate Xiter</span>
+          <span className="text-2xl font-bold tracking-tight">Dark Hacks</span>
         </div>
 
         <div className="card !p-6">
@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
             <h1 className="text-xl font-semibold">Reset your password</h1>
           </div>
           <p className="text-sm text-text-muted mb-5">
-            Enter your account email and a new password. This works for self-hosted Guate Xiter instances where the admin doesn&apos;t have email delivery set up.
+            Enter your account email and a new password. This works for self-hosted Dark Hacks instances where the admin doesn&apos;t have email delivery set up.
           </p>
 
           {done ? (

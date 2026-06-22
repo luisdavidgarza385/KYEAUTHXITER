@@ -4,14 +4,26 @@ import { useRouter } from "next/navigation";
 import { Key, Trash2, Plus } from "lucide-react";
 import { CreateMenu, BulkDeleteLicensesModal } from "./CreateMenu";
 
-export function LicensesPageActions({ apps, filteredAppId, role, subscriptionEnd }: { apps: { id: string; name: string }[]; filteredAppId?: string; role: string; subscriptionEnd: string | null }) {
+export function LicensesPageActions({
+  apps,
+  filteredAppId,
+  role,
+  subscriptionEnd,
+  hasPrefixPerm = false,
+}: {
+  apps: { id: string; name: string }[];
+  filteredAppId?: string;
+  role: string;
+  subscriptionEnd: string | null;
+  hasPrefixPerm?: boolean;
+}) {
   const [createOpen, setCreateOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const router = useRouter();
 
   const isSeller = role === "seller";
   const hasSub = subscriptionEnd ? new Date(subscriptionEnd).getTime() > Date.now() : false;
-  const forcePrefix = isSeller && !hasSub;
+  const forcePrefix = isSeller && !hasSub && !hasPrefixPerm;
 
   return (
     <>
@@ -42,7 +54,7 @@ export function LicensesPageActions({ apps, filteredAppId, role, subscriptionEnd
 function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { apps: { id: string; name: string }[]; defaultAppId?: string; onClose: () => void; forcePrefix?: boolean }) {
   const [appId, setAppId] = useState(defaultAppId || apps[0]?.id || "");
   const [count, setCount] = useState(1);
-  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Guate Xiter");
+  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
   const [mask, setMask] = useState("******_******_******_******_******_******");
   const [lower, setLower] = useState(true);
   const [upper, setUpper] = useState(true);

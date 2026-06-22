@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import styles from "./auth.module.css";
 
-export const metadata = { title: "Iniciar Sesión — Guate Xiter" };
+export const metadata = { title: "Iniciar Sesión — Dark Hacks" };
 
 const ERR_MESSAGES: Record<string, string> = {
   discord_not_configured: "Discord login is not configured.",

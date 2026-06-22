@@ -10,16 +10,16 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
   const [appId, setAppId] = useState(apps[0]?.id || "");
   const [packageName, setPackageName] = useState("");
   const [count, setCount] = useState(1);
-  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Guate Xiter");
+  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
   const [suffix, setSuffix] = useState("****-****-****-****");
   const [level, setLevel] = useState(1);
   useEffect(() => {
     if (level === 1) {
       setPackageName("basic");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Guate Xiter");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
     } else if (level === 2) {
       setPackageName("VIP");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Guate Xiter");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
     }
   }, [level, forcePrefix]);
   const [note, setNote] = useState("");
@@ -191,7 +191,7 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
                 className="input rounded-r-none border-r-0 flex-1 disabled:opacity-60 disabled:cursor-not-allowed"
                 value={prefix}
                 onChange={(e) => setPrefix(e.target.value)}
-                placeholder="Guate Xiter"
+                placeholder="Dark Hacks"
                 disabled={forcePrefix}
               />
               <span className="flex items-center justify-center px-2 bg-bg-secondary border border-border text-text-dim font-mono">-</span>

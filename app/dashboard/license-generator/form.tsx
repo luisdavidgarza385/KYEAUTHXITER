@@ -16,12 +16,18 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
   useEffect(() => {
     if (level === 1) {
       setPackageName("basic");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
     } else if (level === 2) {
       setPackageName("VIP");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
     }
-  }, [level, forcePrefix]);
+  }, [level]);
+
+  useEffect(() => {
+    setPrefix((prev) => {
+      if (forcePrefix) return "KEYAUTHPRO";
+      if (prev === "KEYAUTHPRO" || !prev) return "Dark Hacks";
+      return prev;
+    });
+  }, [forcePrefix]);
   const [note, setNote] = useState("");
   const [durationDisplay, setDurationDisplay] = useState("1|days");
   const [hwidLock, setHwidLock] = useState(false);

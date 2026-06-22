@@ -141,11 +141,22 @@ function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { app
                 <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">Importe de la licencia *</label>
                 <input type="number" min={1} max={500} className="input" value={count} onChange={(e) => setCount(parseInt(e.target.value) || 1)} />
               </div>
-              {forcePrefix && (
+              {forcePrefix ? (
                 <div>
                   <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">Prefijo (fijo para sellers)</label>
                   <input className="input font-mono bg-bg-secondary/50" value="KEYAUTHPRO" disabled />
                   <p className="text-[10px] text-text-dim mt-1">Compra una suscripción para cambiar el prefijo.</p>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-[11px] font-medium uppercase tracking-wider text-text-muted mb-1.5 block">Prefijo de la licencia</label>
+                  <input 
+                    type="text" 
+                    className="input font-mono" 
+                    value={prefix} 
+                    onChange={(e) => setPrefix(e.target.value)} 
+                    placeholder="Ej: Dark Hacks" 
+                  />
                 </div>
               )}
               <div>

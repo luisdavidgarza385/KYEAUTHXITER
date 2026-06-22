@@ -19,6 +19,17 @@ export function ParticlesBackground() {
     const count = 60;
     const mouse = { x: -1000, y: -1000, radius: 120 };
 
+    let accentRgb = "139, 92, 246";
+    const updateAccent = () => {
+      const style = getComputedStyle(document.documentElement);
+      const val = style.getPropertyValue("--accent-rgb").trim();
+      if (val) {
+        accentRgb = val.replace(/\s+/g, ",");
+      }
+    };
+    updateAccent();
+    window.addEventListener("gx-accent-change", updateAccent);
+
     class Particle {
       x: number;
       y: number;
@@ -41,7 +52,7 @@ export function ParticlesBackground() {
       draw(c: CanvasRenderingContext2D) {
         c.beginPath();
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        c.fillStyle = `rgba(167, 139, 250, ${this.alpha})`;
+        c.fillStyle = `rgba(${accentRgb}, ${this.alpha})`;
         c.fill();
       }
 
@@ -86,7 +97,7 @@ export function ParticlesBackground() {
             ctx!.beginPath();
             ctx!.moveTo(p1.x, p1.y);
             ctx!.lineTo(p2.x, p2.y);
-            ctx!.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+            ctx!.strokeStyle = `rgba(${accentRgb}, ${alpha})`;
             ctx!.lineWidth = 0.5;
             ctx!.stroke();
           }
@@ -127,6 +138,7 @@ export function ParticlesBackground() {
       window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("gx-accent-change", updateAccent);
     };
   }, []);
 

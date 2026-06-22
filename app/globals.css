@@ -40,13 +40,6 @@
 }
 
 .theme-vyper {
-  --accent-h: 271;
-  --accent-s: 76%;
-  --accent-l: 53%;
-  --accent-rgb: 139 92 246; /* Purple-500 */
-  --accent-hover-rgb: 124 58 237; /* Violet-600 */
-  --accent-glow-rgb: 167 139 250; /* Purple-400 */
-  
   --bg-rgb: 9 9 11; /* Zinc 950 */
   --bg-secondary-rgb: 15 15 18; /* Zinc 900 */
   --bg-card-rgb: 24 24 27; /* Zinc 800ish */
@@ -102,8 +95,8 @@ html.light {
   body {
     @apply bg-bg text-text antialiased;
     background-image:
-      radial-gradient(at 20% 0%, color-mix(in srgb, var(--accent-color) 12%, transparent) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, color-mix(in srgb, var(--accent-color) 8%, transparent) 0px, transparent 50%);
+      radial-gradient(at 20% 0%, color-mix(in srgb, rgb(var(--accent-rgb)) 12%, transparent) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, color-mix(in srgb, rgb(var(--accent-rgb)) 8%, transparent) 0px, transparent 50%);
     background-attachment: fixed;
   }
   * {
@@ -146,7 +139,7 @@ html.light {
 }
 
 .glow {
-  box-shadow: 0 0 40px -10px color-mix(in srgb, var(--accent-color) 40%, transparent);
+  box-shadow: 0 0 40px -10px color-mix(in srgb, rgb(var(--accent-rgb)) 40%, transparent);
 }
 
 ::-webkit-scrollbar {
@@ -186,8 +179,8 @@ html.light {
 
 .premium-card-3d:hover {
   transform: translateY(-6px) scale(1.01) rotateX(2deg) rotateY(2deg);
-  box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15), 0 0 30px -5px rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 20px 40px -15px rgb(var(--accent-rgb) / 0.15), 0 0 30px -5px rgb(var(--accent-rgb) / 0.1);
+  border-color: rgb(var(--accent-rgb) / 0.3);
 }
 
 .glassmorphism {
@@ -198,7 +191,8 @@ html.light {
 }
 
 .glassmorphism:hover {
-  border-color: rgba(16, 185, 129, 0.2) !important;
+  border-color: rgb(var(--accent-rgb) / 0.25) !important;
+  box-shadow: 0 10px 35px -10px rgb(var(--accent-rgb) / 0.2), 0 5px 15px -5px rgb(var(--accent-rgb) / 0.1) !important;
 }
 
 @keyframes bgPan {

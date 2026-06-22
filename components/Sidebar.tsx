@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { TypewriterBrand } from "@/components/TypewriterBrand";
 import {
   LayoutDashboard,
   Key,
@@ -16,6 +17,7 @@ import {
   Layers,
   Terminal,
   Settings,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +38,7 @@ const SECTIONS = [
       { href: "/dashboard/sub-users", label: "Sub-usuarios", icon: Layers, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
       { href: "/dashboard/shop", label: "Comprar VIP / PayPal", icon: Coins, adminOnly: false, hideForSubReseller: true },
+      { href: "/dashboard/chat", label: "Chat Global", icon: MessageSquare, adminOnly: false },
     ],
   },
   {
@@ -141,10 +144,8 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
 
   return (
     <aside className="w-60 border-r border-zinc-800 bg-[#09090b] flex flex-col h-screen sticky top-0 text-zinc-300">
-      <div className="p-5 flex items-center justify-center border-b border-zinc-800/60">
-        <span className="font-extrabold text-lg tracking-wider bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">
-          DARK HACKS
-        </span>
+      <div className="p-5 flex items-center justify-center border-b border-zinc-800/60 min-h-[77px]">
+        <TypewriterBrand />
       </div>
 
       <nav className="flex-1 overflow-y-auto py-5 px-3">

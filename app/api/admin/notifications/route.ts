@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     await store.createLog({
       app_id: null,
       user_id: null,
-      message: `[Broadcast] ${message}`,
+      message: `[Broadcast] [by:${admin.email}] ${message}`,
       level: level as any,
     });
 

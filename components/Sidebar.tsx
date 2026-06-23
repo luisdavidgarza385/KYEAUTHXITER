@@ -171,11 +171,11 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
                       className={cn(
                         "flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-150",
                         active
-                          ? "bg-purple-950/20 text-purple-400 border-l-2 border-purple-500 pl-2.5"
+                          ? "bg-emerald-950/30 text-emerald-400 border-l-2 border-emerald-500 pl-2.5"
                           : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 border-l-2 border-transparent"
                       )}
                     >
-                      <n.icon className={cn("w-4 h-4 shrink-0", active ? "text-purple-400" : "text-zinc-500")} />
+                      <n.icon className={cn("w-4 h-4 shrink-0", active ? "text-emerald-400" : "text-zinc-500")} />
                       <span className="truncate">{n.label}</span>
                     </Link>
                   );

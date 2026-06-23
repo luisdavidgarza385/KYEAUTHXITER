@@ -179,7 +179,7 @@ export function ApplicationRow({ app, userCount, isSelected }: { app: any; userC
           </Link>
           <button
             onClick={() => setRenaming(true)}
-            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs border bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/25 transition"
+            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs border bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25 transition"
           >
             <Pencil className="w-3.5 h-3.5" />
             Rename

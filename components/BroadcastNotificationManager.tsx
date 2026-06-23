@@ -38,7 +38,7 @@ export function BroadcastNotificationManager() {
   return (
     <div className="space-y-4">
       <h2 className="font-semibold mb-1 flex items-center gap-2 text-zinc-100">
-        <Send className="w-4 h-4 text-purple-400" />
+        <Send className="w-4 h-4 text-emerald-400" />
         Enviar Notificación Global (Broadcast)
       </h2>
       <p className="text-xs text-zinc-500 mb-4">
@@ -55,7 +55,7 @@ export function BroadcastNotificationManager() {
               placeholder="e.g. Mantenimiento del servidor hoy a las 10 PM CEST."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3.5 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition"
+              className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3.5 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition"
             />
           </div>
           <div>
@@ -63,7 +63,7 @@ export function BroadcastNotificationManager() {
             <select
               value={level}
               onChange={(e) => setLevel(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3.5 py-2.5 rounded-lg text-sm outline-none focus:border-purple-500/50 transition"
+              className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3.5 py-2.5 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition"
             >
               <option value="info" className="bg-zinc-950">Info (Verde)</option>
               <option value="warn" className="bg-zinc-950">Advertencia (Naranja)</option>
@@ -91,7 +91,7 @@ export function BroadcastNotificationManager() {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg bg-purple-650 hover:bg-purple-550 text-white transition-all shadow-md shadow-purple-500/10 disabled:opacity-60"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg bg-emerald-650 hover:bg-emerald-550 text-white transition-all shadow-md shadow-emerald-500/10 disabled:opacity-60"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Send className="w-3.5 h-3.5" /> Enviar anuncio</>}
           </button>

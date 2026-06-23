@@ -233,7 +233,7 @@ export default function SubResellersPage() {
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-zinc-800/60 pb-5">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 text-zinc-100">
-            <Users className="w-5 h-5 text-purple-400" />
+            <Users className="w-5 h-5 text-emerald-400" />
             Sub-resellers ({filtered.length})
           </h1>
           <p className="text-xs text-zinc-550 mt-1 font-medium">Administra a tus vendedores afiliados, sus permisos y claves API.</p>
@@ -241,7 +241,7 @@ export default function SubResellersPage() {
         
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg bg-purple-650 hover:bg-purple-550 text-white transition-all shadow-md shadow-purple-500/10"
+          className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg bg-emerald-650 hover:bg-emerald-550 text-white transition-all shadow-md shadow-emerald-500/10"
         >
           <Plus className="w-4 h-4" /> Crear sub-reseller
         </button>
@@ -255,14 +255,14 @@ export default function SubResellersPage() {
           placeholder="Buscar sub-resellers..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-zinc-950 border border-zinc-850 rounded-lg pl-10 pr-4 py-2 text-sm text-zinc-250 placeholder:text-zinc-650 outline-none focus:border-purple-500/50 transition"
+          className="w-full bg-zinc-950 border border-zinc-850 rounded-lg pl-10 pr-4 py-2 text-sm text-zinc-250 placeholder:text-zinc-650 outline-none focus:border-emerald-500/50 transition"
         />
       </div>
 
       {/* Main List */}
       {loading ? (
         <div className="py-20 flex items-center justify-center gap-2 text-zinc-500 text-sm">
-          <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+          <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
           <span>Cargando vendedores...</span>
         </div>
       ) : filtered.length === 0 ? (
@@ -302,13 +302,13 @@ export default function SubResellersPage() {
                             className="text-zinc-650 hover:text-zinc-300 transition"
                             title="Copiar ID de aplicación"
                           >
-                            {copiedId === sub.id ? <Check className="w-3 h-3 text-purple-400" /> : <Copy className="w-3 h-3" />}
+                            {copiedId === sub.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                           </button>
                         </div>
                       </td>
                       <td className="px-5 py-4">
                         {sub.credits === 0 ? (
-                          <span className="inline-flex items-center gap-1 rounded bg-purple-950/20 border border-purple-900/30 px-2 py-0.5 text-[10px] font-bold text-purple-400 uppercase">
+                          <span className="inline-flex items-center gap-1 rounded bg-emerald-950/20 border border-emerald-900/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400 uppercase">
                             Ilimitado
                           </span>
                         ) : (
@@ -348,7 +348,7 @@ export default function SubResellersPage() {
                         )}
                       </td>
                       <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1 rounded bg-purple-950/20 border border-purple-900/30 px-2.5 py-0.5 text-[10px] font-bold text-purple-400 uppercase">
+                        <span className="inline-flex items-center gap-1 rounded bg-emerald-950/20 border border-emerald-900/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 uppercase">
                           Activo
                         </span>
                       </td>
@@ -359,7 +359,7 @@ export default function SubResellersPage() {
                         <div className="flex justify-end gap-1.5">
                           <button
                             onClick={() => startEdit(sub)}
-                            className="p-1.5 rounded hover:bg-purple-950/20 border border-transparent hover:border-purple-900/30 text-purple-400 transition"
+                            className="p-1.5 rounded hover:bg-emerald-950/20 border border-transparent hover:border-emerald-900/30 text-emerald-400 transition"
                             title="Editar Sub-reseller"
                           >
                             <Edit className="w-4 h-4" />
@@ -405,7 +405,7 @@ export default function SubResellersPage() {
                   <input
                     type="text"
                     required
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition"
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     placeholder="e.g. VENDEDORESGUATEXITER"
@@ -416,7 +416,7 @@ export default function SubResellersPage() {
                   <input
                     type="password"
                     required
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition font-mono"
+                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
@@ -433,7 +433,7 @@ export default function SubResellersPage() {
                     onClick={() => setNewPlan("ilimitado")}
                     className={`px-4 py-2.5 rounded-lg border text-xs font-bold uppercase tracking-wider transition ${
                       newPlan === "ilimitado"
-                        ? "bg-purple-950/20 border-purple-500/50 text-purple-400"
+                        ? "bg-emerald-950/20 border-emerald-500/50 text-emerald-400"
                         : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850"
                     }`}
                   >
@@ -461,7 +461,7 @@ export default function SubResellersPage() {
                     type="number"
                     min={1}
                     required
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition font-mono"
+                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
                     value={newCredits}
                     onChange={(e) => setNewCredits(parseInt(e.target.value) || 1)}
                   />
@@ -489,7 +489,7 @@ export default function SubResellersPage() {
                                 setSelectedApps(selectedApps.filter((id) => id !== app.id));
                               }
                             }}
-                            className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                            className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                           />
                           <span>{app.name}</span>
                         </label>
@@ -508,7 +508,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={permGenerar}
                       onChange={(e) => setPermGenerar(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Generar licencias</span>
                   </label>
@@ -517,7 +517,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={permResetHwid}
                       onChange={(e) => setPermResetHwid(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Reset HWID</span>
                   </label>
@@ -526,7 +526,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={permBan}
                       onChange={(e) => setPermBan(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Banear licencias</span>
                   </label>
@@ -535,7 +535,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={permDelete}
                       onChange={(e) => setPermDelete(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Eliminar licencias</span>
                   </label>
@@ -544,7 +544,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={permPrefix}
                       onChange={(e) => setPermPrefix(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Modificar prefijo</span>
                   </label>
@@ -570,7 +570,7 @@ export default function SubResellersPage() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-650 hover:bg-purple-550 text-white shadow-lg shadow-purple-500/20 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-650 hover:bg-emerald-550 text-white shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {formLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Crear sub-reseller"}
                 </button>
@@ -601,7 +601,7 @@ export default function SubResellersPage() {
                 <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Nueva Contraseña (vacío para no cambiar)</label>
                 <input
                   type="password"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition font-mono"
+                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
                   value={editPassword}
                   onChange={(e) => setEditPassword(e.target.value)}
                   placeholder="••••••••"
@@ -617,7 +617,7 @@ export default function SubResellersPage() {
                     onClick={() => setEditPlan("ilimitado")}
                     className={`px-4 py-2.5 rounded-lg border text-xs font-bold uppercase tracking-wider transition ${
                       editPlan === "ilimitado"
-                        ? "bg-purple-950/20 border-purple-500/50 text-purple-400"
+                        ? "bg-emerald-950/20 border-emerald-500/50 text-emerald-400"
                         : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850"
                     }`}
                   >
@@ -645,7 +645,7 @@ export default function SubResellersPage() {
                     type="number"
                     min={0}
                     required
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition font-mono"
+                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
                     value={editCredits}
                     onChange={(e) => setEditCredits(parseInt(e.target.value) || 0)}
                   />
@@ -673,7 +673,7 @@ export default function SubResellersPage() {
                                 setEditSelectedApps(editSelectedApps.filter((id) => id !== app.id));
                               }
                             }}
-                            className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                            className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                           />
                           <span>{app.name}</span>
                         </label>
@@ -692,7 +692,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={editPermGenerar}
                       onChange={(e) => setEditPermGenerar(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Generar licencias</span>
                   </label>
@@ -701,7 +701,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={editPermResetHwid}
                       onChange={(e) => setEditPermResetHwid(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Reset HWID</span>
                   </label>
@@ -710,7 +710,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={editPermBan}
                       onChange={(e) => setEditPermBan(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Banear licencias</span>
                   </label>
@@ -719,7 +719,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={editPermDelete}
                       onChange={(e) => setEditPermDelete(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Eliminar licencias</span>
                   </label>
@@ -728,7 +728,7 @@ export default function SubResellersPage() {
                       type="checkbox"
                       checked={editPermPrefix}
                       onChange={(e) => setEditPermPrefix(e.target.checked)}
-                      className="accent-purple-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-emerald-500 w-4 h-4 rounded cursor-pointer"
                     />
                     <span>Modificar prefijo</span>
                   </label>
@@ -754,7 +754,7 @@ export default function SubResellersPage() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-purple-650 hover:bg-purple-550 text-white shadow-lg shadow-purple-500/20 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-650 hover:bg-emerald-550 text-white shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {formLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Guardar Cambios"}
                 </button>

@@ -66,11 +66,11 @@ export function TypewriterBrand() {
   return (
     <div className="flex flex-col items-center justify-center text-center select-none py-1 h-[48px]">
       <div className="flex items-center">
-        <span className="font-extrabold text-xl tracking-widest bg-gradient-to-r from-purple-400 via-violet-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]">
+        <span className="font-extrabold text-xl tracking-widest bg-gradient-to-r from-emerald-400 via-teal-500 to-green-500 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
           {titleText || "\u00A0"}
         </span>
         {!showSubCursor && titleText.length < titleWord.length && (
-          <span className={`w-[3px] h-5 ml-1 bg-purple-500 ${cursorVisible ? "opacity-100" : "opacity-0"} transition-opacity duration-100`} />
+          <span className={`w-[3px] h-5 ml-1 bg-emerald-500 ${cursorVisible ? "opacity-100" : "opacity-0"} transition-opacity duration-100`} />
         )}
       </div>
       <div className="flex items-center mt-1.5 h-[14px]">

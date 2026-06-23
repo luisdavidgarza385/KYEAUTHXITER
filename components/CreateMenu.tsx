@@ -415,7 +415,7 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
                 type="number" 
                 min={1} 
                 max={500} 
-                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition font-mono" 
+                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono" 
                 value={count} 
                 onChange={(e) => setCount(parseInt(e.target.value) || 1)} 
               />
@@ -426,7 +426,7 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
             <div>
               <FieldLabel required>Unidad de vencimiento</FieldLabel>
               <select 
-                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition" 
+                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition" 
                 value={unit} 
                 onChange={(e) => {
                   setUnit(e.target.value as any);
@@ -449,7 +449,7 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
                 type="number" 
                 min={1} 
                 disabled={unit === "lifetime"}
-                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-purple-500/50 transition font-mono disabled:opacity-55"
+                className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono disabled:opacity-55"
                 value={duration} 
                 onChange={(e) => setDuration(parseInt(e.target.value) || 1)} 
               />

@@ -143,7 +143,7 @@ export function AppRowActions({ app, isSelected }: { app: { id: string; name: st
 
   return (
     <>
-      <ActionButton color="purple" icon={Pencil} title="Rename" onClick={() => setRenaming(true)} />
+      <ActionButton color="emerald" icon={Pencil} title="Rename" onClick={() => setRenaming(true)} />
       <ActionButton color="blue" icon={FileText} title="Edit Description" onClick={() => setEditing(true)} />
       <ActionButton color="orange" icon={app.status === "paused" ? Play : Pause} title={app.status === "paused" ? "Resume" : "Pause"} onClick={togglePause} />
       <ActionButton color="red" icon={Trash2} title="Delete" onClick={() => setDeleting(true)} />
@@ -154,7 +154,7 @@ export function AppRowActions({ app, isSelected }: { app: { id: string; name: st
 function ActionButton({ color, icon: Icon, title, onClick }: { color: string; icon: any; title: string; onClick?: () => void }) {
   const colors: Record<string, string> = {
     blue: "bg-blue-500/15 text-blue-300 border-blue-500/30 hover:bg-blue-500/25",
-    purple: "bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/25",
+    emerald: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25",
     orange: "bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/25",
     red: "bg-danger/15 text-danger border-danger/30 hover:bg-danger/25",
   };

@@ -78,7 +78,7 @@ export default async function LogsPage({
                   <span
                     className={
                       isBroadcast
-                        ? "bg-purple-950/40 border border-purple-900/40 text-purple-400 px-2 py-0.5 rounded text-[10px] uppercase font-bold"
+                        ? "bg-emerald-950/40 border border-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded text-[10px] uppercase font-bold"
                         : l.level === "error"
                         ? "badge-danger"
                         : l.level === "warn"

@@ -128,7 +128,7 @@ export function UsersPageClient({
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2 text-zinc-100">
-          <Users className="w-6 h-6 text-purple-400" />
+          <Users className="w-6 h-6 text-emerald-400" />
           Usuarios
         </h1>
         <p className="text-sm text-zinc-500 mt-1">
@@ -148,7 +148,7 @@ export function UsersPageClient({
               setSearchTerm(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg bg-zinc-950 border border-zinc-850 pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:border-purple-500/50 transition-all"
+            className="w-full rounded-lg bg-zinc-950 border border-zinc-850 pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:border-emerald-500/50 transition-all"
           />
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -161,7 +161,7 @@ export function UsersPageClient({
             title="Filter Status"
             className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
               bannedFilter !== "all"
-                ? "border-purple-500/40 bg-purple-950/20 text-purple-400"
+                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
                 : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
             }`}
           >
@@ -174,7 +174,7 @@ export function UsersPageClient({
             title="Toggle View Mode"
             className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
               viewMode === "grid"
-                ? "border-purple-500/40 bg-purple-950/20 text-purple-400"
+                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
                 : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
             }`}
           >
@@ -185,7 +185,7 @@ export function UsersPageClient({
           <CreateUserInlineButton
             apps={apps}
             defaultAppId={selectedAppId !== "all" ? selectedAppId : undefined}
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-purple-500/40 bg-purple-950/20 text-purple-400 hover:bg-purple-900/30 transition"
+            className="w-9 h-9 rounded-md flex items-center justify-center border border-emerald-500/40 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-900/30 transition"
           />
 
           {/* Toggle Sort by Date */}
@@ -227,7 +227,7 @@ export function UsersPageClient({
             }}
             className={`rounded-lg px-3.5 py-1.5 border transition ${
               selectedAppId === "all"
-                ? "bg-purple-950/20 border-purple-500/40 text-purple-400"
+                ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
                 : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
             }`}
           >
@@ -242,7 +242,7 @@ export function UsersPageClient({
               }}
               className={`rounded-lg px-3.5 py-1.5 border transition ${
                 selectedAppId === a.id
-                  ? "bg-purple-950/20 border-purple-500/40 text-purple-400"
+                  ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
                   : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
               }`}
             >
@@ -264,7 +264,7 @@ export function UsersPageClient({
             }}
             className={`px-2 py-1 rounded border transition ${
               perPage === n
-                ? "bg-purple-950/20 border-purple-500/40 text-purple-400"
+                ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
                 : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
             }`}
           >
@@ -287,7 +287,7 @@ export function UsersPageClient({
           {pagedUsers.map((u) => {
             const isPaused = u.hwid === "PAUSED";
             return (
-              <div key={u.id} className="relative rounded-xl border border-zinc-800 bg-zinc-950/30 p-5 hover:border-purple-500/20 transition-all flex flex-col space-y-3">
+              <div key={u.id} className="relative rounded-xl border border-zinc-800 bg-zinc-950/30 p-5 hover:border-emerald-500/20 transition-all flex flex-col space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-zinc-150 text-sm">{u.username}</span>
                   <UserCardMenu
@@ -317,7 +317,7 @@ export function UsersPageClient({
               <thead className="bg-zinc-950 text-zinc-550 text-[10px] font-bold uppercase tracking-wider border-b border-zinc-850">
                 <tr>
                   <th className="px-5 py-3.5 w-8">
-                    <input type="checkbox" className="accent-purple-500" />
+                    <input type="checkbox" className="accent-emerald-500" />
                   </th>
                   <th className="px-5 py-3.5">Usuario</th>
                   <th className="px-5 py-3.5">Suscripción</th>
@@ -337,7 +337,7 @@ export function UsersPageClient({
                   return (
                     <tr key={u.id} className="hover:bg-zinc-900/30 transition">
                       <td className="px-5 py-4">
-                        <input type="checkbox" className="accent-purple-500" />
+                        <input type="checkbox" className="accent-emerald-500" />
                       </td>
                       <td className="px-5 py-4 font-bold text-zinc-200">{u.username}</td>
                       <td className="px-5 py-4">
@@ -367,7 +367,7 @@ export function UsersPageClient({
                             Pausado
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded bg-purple-950/20 border border-purple-900/30 px-2 py-0.5 text-[10px] font-bold text-purple-400 uppercase">
+                          <span className="inline-flex items-center gap-1 rounded bg-emerald-950/20 border border-emerald-900/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400 uppercase">
                             Activo
                           </span>
                         )}

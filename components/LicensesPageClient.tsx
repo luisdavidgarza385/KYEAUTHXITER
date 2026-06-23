@@ -21,7 +21,7 @@ export function SubscriptionBadge({ level, packageName }: { level: number; packa
 
   if (subName === "vip" || subName === "vip (supreme)" || subName === "vip (panel supreme)") {
     label = "VIP";
-    cls = "bg-purple-950/20 text-purple-400 border-purple-900/30";
+    cls = "bg-emerald-950/20 text-emerald-400 border-emerald-900/30";
     isVip = true;
   } else if (subName === "combo" || subName === "ultra vip") {
     label = "Ultra VIP";
@@ -32,7 +32,7 @@ export function SubscriptionBadge({ level, packageName }: { level: number; packa
 
   return (
     <span className={`inline-flex items-center gap-1 rounded px-2.5 py-0.5 text-[9px] font-bold border uppercase whitespace-nowrap ${cls}`}>
-      {isVip && <Star className="w-2.5 h-2.5 fill-purple-400" />}
+      {isVip && <Star className="w-2.5 h-2.5 fill-emerald-400" />}
       {label}
     </span>
   );
@@ -156,7 +156,7 @@ export function LicensesPageClient({
       status === "used" ? "Used" : status === "banned" ? "Banned" : status === "paused" ? "Paused" : "Not Used";
     const cls =
       status === "used"
-        ? "bg-purple-950/20 text-purple-400 border-purple-900/30"
+        ? "bg-emerald-950/20 text-emerald-400 border-emerald-900/30"
         : status === "banned"
         ? "bg-red-950/20 text-red-400 border-red-900/30"
         : status === "paused"
@@ -174,7 +174,7 @@ export function LicensesPageClient({
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2 text-zinc-100">
-          <Key className="w-6 h-6 text-purple-400" />
+          <Key className="w-6 h-6 text-emerald-400" />
           Licencias
         </h1>
         <p className="text-sm text-zinc-500 mt-1">
@@ -194,7 +194,7 @@ export function LicensesPageClient({
               setSearchTerm(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg bg-zinc-950 border border-zinc-850 pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:border-purple-500/50 transition-all"
+            className="w-full rounded-lg bg-zinc-950 border border-zinc-850 pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:border-emerald-500/50 transition-all"
           />
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -207,7 +207,7 @@ export function LicensesPageClient({
             title="Filter Status"
             className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
               statusFilter !== "all"
-                ? "border-purple-500/40 bg-purple-950/20 text-purple-400"
+                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
                 : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
             }`}
           >
@@ -220,7 +220,7 @@ export function LicensesPageClient({
             title="Toggle View Mode"
             className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
               viewMode === "grid"
-                ? "border-purple-500/40 bg-purple-950/20 text-purple-400"
+                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
                 : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
             }`}
           >
@@ -274,7 +274,7 @@ export function LicensesPageClient({
           }}
           className={`rounded-lg px-3.5 py-1.5 border transition ${
             selectedAppId === "all"
-              ? "bg-purple-950/20 border-purple-500/40 text-purple-400"
+              ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
               : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
           }`}
         >
@@ -289,7 +289,7 @@ export function LicensesPageClient({
             }}
             className={`rounded-lg px-3.5 py-1.5 border transition ${
               selectedAppId === a.id
-                ? "bg-purple-950/20 border-purple-500/40 text-purple-400"
+                ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
                 : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
             }`}
           >
@@ -310,7 +310,7 @@ export function LicensesPageClient({
             }}
             className={`px-2 py-1 rounded border transition ${
               perPage === n
-                ? "bg-purple-950/20 border-purple-500/40 text-purple-400"
+                ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
                 : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
             }`}
           >
@@ -331,7 +331,7 @@ export function LicensesPageClient({
         // Grid view cards
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {paged.map((l) => (
-            <div key={l.id} className="relative rounded-xl border border-zinc-800 bg-zinc-950/30 p-5 hover:border-purple-500/20 transition-all flex flex-col space-y-3">
+            <div key={l.id} className="relative rounded-xl border border-zinc-800 bg-zinc-950/30 p-5 hover:border-emerald-500/20 transition-all flex flex-col space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs font-bold text-zinc-250 truncate max-w-[80%]">{l.key}</span>
                 <LicenseCardMenu 
@@ -363,7 +363,7 @@ export function LicensesPageClient({
               <thead className="bg-zinc-950 text-zinc-550 text-[10px] font-bold uppercase tracking-wider border-b border-zinc-850">
                 <tr>
                   <th className="px-5 py-3.5 w-8">
-                    <input type="checkbox" className="accent-purple-500" />
+                    <input type="checkbox" className="accent-emerald-500" />
                   </th>
                   <th className="px-5 py-3.5">Key</th>
                   <th className="px-5 py-3.5">Suscripción</th>
@@ -379,7 +379,7 @@ export function LicensesPageClient({
                 {paged.map((l) => (
                   <tr key={l.id} className="hover:bg-zinc-900/30 transition">
                     <td className="px-5 py-4">
-                      <input type="checkbox" className="accent-purple-500" />
+                      <input type="checkbox" className="accent-emerald-500" />
                     </td>
                     <td className="px-5 py-4 font-mono font-bold text-zinc-200">
                       <div className="flex items-center gap-2">

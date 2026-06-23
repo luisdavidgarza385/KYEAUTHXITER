@@ -114,7 +114,7 @@ export function DashboardHeader({ email, role, apps }: { email: string; role: st
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
                           isBroadcast
-                            ? "bg-purple-950/40 border border-purple-900/40 text-purple-400 shadow-sm"
+                            ? "bg-emerald-950/40 border border-emerald-900/40 text-emerald-400 shadow-sm"
                             : log.level === "error" ? "badge-danger" :
                               log.level === "warn" ? "badge-warning" :
                               log.level === "debug" ? "badge-accent" : "badge-success"

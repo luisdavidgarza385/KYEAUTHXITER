@@ -8,6 +8,10 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 export const metadata: Metadata = {
   title: "Spectral X — License Auth Platform",
   description: "License authentication & user management platform",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

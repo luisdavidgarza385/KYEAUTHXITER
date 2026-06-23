@@ -20,8 +20,8 @@ export default function RegisterPage() {
         {/* Glow backdrop behind the register container */}
         <div className="absolute -inset-8 bg-gradient-to-tr from-emerald-500/20 via-teal-500/15 to-transparent blur-3xl rounded-full -z-10 animate-pulse pointer-events-none" style={{ animationDuration: '6s' }} />
         
-        <div className={styles.brandIcon}>
-          <ShieldCheck strokeWidth={1.5} />
+        <div className={styles.brandIcon + " overflow-hidden"}>
+          <img src="/logo.png" alt="Spectral X" className="w-full h-full object-cover" />
         </div>
         <h1 className={styles.title}>Create Account</h1>
         <p className={styles.subtitle}>Create your account to get started</p>

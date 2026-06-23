@@ -143,8 +143,8 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
   const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
 
   return (
-    <aside className="w-60 border-r border-zinc-800 bg-[#09090b] flex flex-col h-screen sticky top-0 text-zinc-300">
-      <div className="p-5 flex items-center justify-center border-b border-zinc-800/60 min-h-[77px]">
+    <aside className="w-60 border-r border-emerald-900/10 bg-[#030604] flex flex-col h-screen sticky top-0 text-zinc-300">
+      <div className="p-5 flex items-center justify-center border-b border-emerald-500/10 min-h-[77px] bg-[#040e07]/10">
         <TypewriterBrand />
       </div>
 
@@ -187,8 +187,8 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
       </nav>
 
       {/* Bottom Profile Details */}
-      <div className="p-4 border-t border-zinc-800/80 bg-zinc-950/40">
-        <div className="rounded-lg bg-zinc-900/60 border border-zinc-800/60 p-3 space-y-3">
+      <div className="p-4 border-t border-emerald-900/10 bg-[#030604]/60">
+        <div className="rounded-xl bg-[#040c06]/60 border border-emerald-500/15 p-3.5 space-y-3 shadow-inner">
           <div className="min-w-0">
             <div className="font-semibold text-sm text-zinc-100 truncate">{capitalizedUsername}</div>
             <div className="text-[11px] text-zinc-500 truncate font-mono">MyCheat</div>

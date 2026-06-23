@@ -47,7 +47,7 @@ export function LoginForm() {
   return (
     <div className="space-y-6">
       {/* Role Toggle Selector */}
-      <div className="flex bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/80">
+      <div className="flex bg-[#040c06] p-1.5 rounded-xl border border-emerald-500/10">
         <button
           type="button"
           onClick={() => {
@@ -56,7 +56,7 @@ export function LoginForm() {
           }}
           className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${
             roleMode === "admin"
-              ? "bg-purple-950/30 text-purple-400 border border-purple-900/40 shadow-sm"
+              ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/40 shadow-sm"
               : "text-zinc-500 hover:text-zinc-350"
           }`}
         >
@@ -71,7 +71,7 @@ export function LoginForm() {
           }}
           className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${
             roleMode === "reseller"
-              ? "bg-purple-950/30 text-purple-400 border border-purple-900/40 shadow-sm"
+              ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/40 shadow-sm"
               : "text-zinc-500 hover:text-zinc-350"
           }`}
         >
@@ -143,7 +143,7 @@ export function LoginForm() {
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
-              className="w-4 h-4 rounded accent-purple-600 cursor-pointer border border-zinc-800"
+              className="w-4 h-4 rounded accent-emerald-500 cursor-pointer border border-zinc-850"
             />
             <span>Recordar en este navegador</span>
           </label>

@@ -14,11 +14,11 @@ export default function RegisterPage() {
       <ThemeToggle />
       
       {/* Sci-Fi Grid overlay specific to register page */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(124,58,237,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(124,58,237,0.02)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none -z-0 opacity-60" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(16,185,129,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,185,129,0.02)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none -z-0 opacity-60" />
       
       <div className={`${styles.box} premium-card-3d relative z-10`}>
         {/* Glow backdrop behind the register container */}
-        <div className="absolute -inset-8 bg-gradient-to-tr from-purple-650/20 via-indigo-650/15 to-transparent blur-3xl rounded-full -z-10 animate-pulse pointer-events-none" style={{ animationDuration: '6s' }} />
+        <div className="absolute -inset-8 bg-gradient-to-tr from-emerald-500/20 via-teal-500/15 to-transparent blur-3xl rounded-full -z-10 animate-pulse pointer-events-none" style={{ animationDuration: '6s' }} />
         
         <div className={styles.brandIcon}>
           <ShieldCheck strokeWidth={1.5} />

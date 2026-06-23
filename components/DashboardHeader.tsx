@@ -58,9 +58,9 @@ export function DashboardHeader({ email, role, apps }: { email: string; role: st
     <header className="h-14 border-b border-border bg-bg-secondary/40 backdrop-blur-md flex items-center px-6 gap-4 sticky top-0 z-20">
       <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
         <div className="w-8 h-8 rounded-md overflow-hidden ring-1 ring-accent/30">
-          <img src="/logo.png" alt="Dark Hacks" className="w-full h-full object-cover" />
+          <img src="/logo.png" alt="Spectral X" className="w-full h-full object-cover" />
         </div>
-        <span className="font-bold text-sm tracking-wide bg-gradient-to-r from-text to-text-muted bg-clip-text">Dark Hacks</span>
+        <span className="font-bold text-sm tracking-wide bg-gradient-to-r from-text to-text-muted bg-clip-text">Spectral X</span>
       </Link>
 
       <div className="flex-1 max-w-md mx-auto relative">

@@ -6,7 +6,7 @@ export function TypewriterBrand() {
   const [subText, setSubText] = useState("");
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  const titleWord = "DARK HACKS";
+  const titleWord = "SPECTRAL X";
   const subWord = "developer. X David";
 
   useEffect(() => {

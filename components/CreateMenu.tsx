@@ -283,7 +283,7 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
   const [appId, setAppId] = useState(defaultAppId || apps[0]?.id || "");
   const [packageName, setPackageName] = useState("");
   const [count, setCount] = useState(1);
-  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
+  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Spectral X");
   const [suffix, setSuffix] = useState("****-****-****-****");
   const [level, setLevel] = useState(1);
   const [note, setNote] = useState("");
@@ -296,10 +296,10 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
   useEffect(() => {
     if (level === 1) {
       setPackageName("basic");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Spectral X");
     } else if (level === 2) {
       setPackageName("VIP");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Dark Hacks");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Spectral X");
     }
   }, [level, forcePrefix]);
   const [hwidLock, setHwidLock] = useState(false);
@@ -461,7 +461,7 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
               <Info className="w-3.5 h-3.5 text-emerald-500" /> Vista previa
             </div>
             <code className="font-mono text-zinc-300 text-[12px]">
-              {prefix || "Dark Hacks"}-{suffix || "****-****-****-****"}
+              {prefix || "Spectral X"}-{suffix || "****-****-****-****"}
             </code>
           </div>
 

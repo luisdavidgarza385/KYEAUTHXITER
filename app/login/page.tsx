@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import styles from "./auth.module.css";
 
-export const metadata = { title: "Iniciar Sesión — Dark Hacks" };
+export const metadata = { title: "Iniciar Sesión — Spectral X" };
 
 const ERR_MESSAGES: Record<string, string> = {
   discord_not_configured: "Discord login is not configured.",
@@ -26,7 +26,14 @@ export default function LoginPage({ searchParams }: { searchParams: { err?: stri
     <div className={styles.page}>
       <ParticlesBackground />
       <ThemeToggle />
+      
+      {/* Sci-Fi Grid overlay specific to login page */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(124,58,237,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(124,58,237,0.02)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none -z-0 opacity-60" />
+      
       <div className={`${styles.box} premium-card-3d relative z-10`}>
+        {/* Glow backdrop behind the login container */}
+        <div className="absolute -inset-8 bg-gradient-to-tr from-purple-650/20 via-indigo-650/15 to-transparent blur-3xl rounded-full -z-10 animate-pulse pointer-events-none" style={{ animationDuration: '6s' }} />
+        
         <div className={styles.brandIcon}>
           <ShieldCheck strokeWidth={1.5} />
         </div>

@@ -29,12 +29,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  border-radius: 18px;
   box-shadow: 
-    0 0 30px rgba(139, 92, 246, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    0 0 40px rgba(139, 92, 246, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  transition: all 0.3s ease;
+}
+
+.brandIcon:hover {
+  transform: scale(1.05) rotate(5deg);
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow: 
+    0 0 50px rgba(139, 92, 246, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
 }
 
 .brandIcon svg {
@@ -62,15 +71,24 @@
 }
 
 .card {
-  background: rgba(10, 8, 16, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 20px;
-  padding: 36px;
+  background: linear-gradient(145deg, rgba(12, 10, 24, 0.92) 0%, rgba(6, 4, 12, 0.97) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  border-radius: 24px;
+  padding: 40px;
   box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+    0 35px 80px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 
+    0 35px 80px rgba(0, 0, 0, 0.85),
+    0 0 30px rgba(139, 92, 246, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
 }
 
 .inputLabel {
@@ -91,21 +109,21 @@
 .premiumInput {
   width: 100%;
   background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  padding: 12px 16px;
+  padding: 13px 18px;
   padding-right: 44px; /* Space for eye button if needed */
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
 }
 
 .premiumInput:focus {
-  border-color: rgba(139, 92, 246, 0.5);
-  background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  border-color: rgba(167, 139, 250, 0.7);
+  background: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.22);
 }
 
 .premiumInput::placeholder {
@@ -193,24 +211,25 @@
 
 .premiumBtn {
   width: 100%;
-  background: #7c3aed;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 12px 24px;
-  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 13px 24px;
+  border-radius: 12px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
 }
 
 .premiumBtn:hover:not(:disabled) {
-  background: #6d28d9;
-  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.45);
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  box-shadow: 0 6px 28px rgba(139, 92, 246, 0.55);
+  transform: scale(1.01) translateY(-1px);
 }
 
 .premiumBtn:active:not(:disabled) {

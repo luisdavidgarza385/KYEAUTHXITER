@@ -210,3 +210,18 @@ html.light {
   100% { background-position: 0% 50%; }
 }
 
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+

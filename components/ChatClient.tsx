@@ -30,6 +30,15 @@ export function ChatClient({ role, email }: { role: string; email: string }) {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("spectral_x_sound_enabled");
+      if (stored !== null) {
+        setSoundEnabled(stored !== "false");
+      }
+    }
+  }, []);
+
   const isFirstLoad = useRef(true);
   const lastMessageId = useRef<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -40,7 +49,7 @@ export function ChatClient({ role, email }: { role: string; email: string }) {
   function playFuturisticChime() {
     if (!soundEnabled) return;
     try {
-      const audio = new Audio("https://www.myinstants.com/media/sounds/ps-app-notificacion.mp3");
+      const audio = new Audio("/universfield-new-notification-051-494246.mp3");
       audio.volume = 0.35;
       audio.play().catch((e) => console.warn("Audio play blocked by browser:", e));
     } catch (e) {
@@ -88,15 +97,7 @@ export function ChatClient({ role, email }: { role: string; email: string }) {
         if (sorted.length > 0) {
           const latestId = sorted[sorted.length - 1].id;
 
-          // If not first load and the latest message ID is different, play chime
-          if (!isFirstLoad.current && lastMessageId.current !== null && latestId !== lastMessageId.current) {
-            // Only chime if the new message is NOT from ourselves
-            const newMsgs = sorted.filter((m) => m.id > (lastMessageId.current || 0));
-            const hasIncoming = newMsgs.some((m) => !m.isSelf);
-            if (hasIncoming) {
-              playFuturisticChime();
-            }
-          }
+          // Note: Global audio notification chime is handled by GlobalBroadcastNotifier
 
           lastMessageId.current = latestId;
         }
@@ -201,8 +202,10 @@ export function ChatClient({ role, email }: { role: string; email: string }) {
             </label>
             <button
               onClick={() => {
-                setSoundEnabled(!soundEnabled);
-                if (!soundEnabled) {
+                const nextVal = !soundEnabled;
+                setSoundEnabled(nextVal);
+                localStorage.setItem("spectral_x_sound_enabled", String(nextVal));
+                if (nextVal) {
                   // Play a test chime to show it's active
                   setTimeout(() => playFuturisticChime(), 100);
                 }

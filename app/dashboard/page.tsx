@@ -107,8 +107,9 @@ export default async function DashboardPage() {
         packagesCount={packagesCount}
       />
 
-      {/* Account Info Box */}
-      <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 p-6 space-y-6">
+      {/* Account Info Box (High-fidelity Green Glassmorphism) */}
+      <div className="rounded-2xl border border-emerald-500/15 bg-gradient-to-br from-[#0a150c]/90 to-[#030604]/95 p-6 space-y-6 shadow-2xl relative overflow-hidden premium-card-3d hover:border-emerald-500/35 transition-all duration-300">
+        <div className="absolute top-0 right-0 w-[120px] h-[120px] bg-gradient-radial from-emerald-500/5 to-transparent blur-xl pointer-events-none" />
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
@@ -154,9 +155,9 @@ export default async function DashboardPage() {
 
         {/* User limit progress bar */}
         <div className="space-y-2 pt-2">
-          <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/40">
+          <div className="h-2 w-full bg-[#020503] rounded-full overflow-hidden border border-emerald-500/10">
             <div 
-              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-500 shadow-sm shadow-emerald-500/50"
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-green-450 transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
               style={{ width: `${usePercentage}%` }}
             />
           </div>
@@ -166,9 +167,9 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Access panel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/20 p-5 space-y-4">
+      {/* Quick Access & Info Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-2xl border border-emerald-500/15 bg-[#040c06]/30 backdrop-blur-md p-6 space-y-4 shadow-xl premium-card-3d hover:border-emerald-500/35 transition-all duration-300">
           <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             Acciones Rápidas
@@ -186,7 +187,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/20 p-5 space-y-4">
+        <div className="rounded-2xl border border-emerald-500/15 bg-[#040c06]/30 backdrop-blur-md p-6 space-y-4 shadow-xl premium-card-3d hover:border-emerald-500/35 transition-all duration-300">
           <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
             <Calendar className="w-4 h-4 text-emerald-400" />
             Información del Desarrollador

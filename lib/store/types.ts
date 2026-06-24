@@ -1,6 +1,7 @@
 export interface Admin {
   id: string;
   email: string;
+  username?: string;
   password_hash: string;
   role: string;
   created_at: string;
@@ -9,6 +10,13 @@ export interface Admin {
   seller_label: string | null;
   created_by?: string | null;
   credits?: number;
+  max_apps?: number;
+  can_create_apps?: boolean;
+  can_generate_licenses?: boolean;
+  can_delete_licenses?: boolean;
+  can_reset_hwid?: boolean;
+  can_ban_users?: boolean;
+  can_modify_profile?: boolean;
   status?: string;
   permissions?: string[];
   subscriptions?: string[];

@@ -1,62 +1,64 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/api-helpers";
 import { store } from "@/lib/store";
 
-export const dynamic = "force-dynamic";
-
-// PATCH - Actualizar seller
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin();
+    const adminSession = req.cookies.get("admin_session")?.value;
+    if (!adminSession) {
+      return NextResponse.json({ success: false, message: "No autorizado" }, { status: 401 });
+    }
+
+    const admin = await store.getAdminById(adminSession);
+    if (!admin) {
+      return NextResponse.json({ success: false, message: "Sesión inválida" }, { status: 401 });
+    }
 
     const body = await req.json();
-    const sellerId = params.id;
-
-    const updated = await store.updateSeller(sellerId, body);
+    const updated = await store.updateSeller(params.id, body);
 
     if (!updated) {
-      return NextResponse.json(
-        { success: false, message: "Seller not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: "Seller no encontrado" }, { status: 404 });
     }
+
+    // Remove password_hash from response
+    const { password_hash, ...sanitized } = updated;
 
     return NextResponse.json({
       success: true,
-      message: "Seller updated successfully",
-      data: updated,
+      data: sanitized,
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    console.error("Error updating seller:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
-// DELETE - Eliminar seller
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin();
+    const adminSession = req.cookies.get("admin_session")?.value;
+    if (!adminSession) {
+      return NextResponse.json({ success: false, message: "No autorizado" }, { status: 401 });
+    }
 
-    const sellerId = params.id;
+    const admin = await store.getAdminById(adminSession);
+    if (!admin) {
+      return NextResponse.json({ success: false, message: "Sesión inválida" }, { status: 401 });
+    }
 
-    await store.deleteSeller(sellerId);
+    await store.deleteSeller(params.id);
 
     return NextResponse.json({
       success: true,
-      message: "Seller deleted successfully",
+      message: "Seller eliminado",
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    console.error("Error deleting seller:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }

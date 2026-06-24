@@ -526,6 +526,15 @@ export const supabaseStore: Store = {
     return data as any | null;
   },
 
+  async getSellerByUsername(username) {
+    const { data } = await db()
+      .from("sellers")
+      .select("*")
+      .eq("username", username)
+      .maybeSingle();
+    return data as any | null;
+  },
+
   async listSellers() {
     const { data } = await db()
       .from("sellers")

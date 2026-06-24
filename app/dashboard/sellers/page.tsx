@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Copy, Key, RefreshCw, Trash2, Check, X } from "lucide-react";
+import { Plus, Trash2, Copy, Check, RefreshCw, Eye, EyeOff } from "lucide-react";
 
 interface Seller {
   id: string;
   username: string;
+  password_hash?: string;
   seller_key: string;
   credits: number;
+  unlimited_credits: boolean;
+  can_use_api: boolean;
   status: string;
   created_at: string;
 }
@@ -15,407 +18,351 @@ interface Seller {
 export default function SellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     username: "",
-    credits: "-1",
-    status: "active",
+    password: "",
+    unlimited_credits: true,
+    credits: 100,
+    can_use_api: true,
   });
-  const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
     loadSellers();
   }, []);
 
-  const loadSellers = async () => {
-    setLoading(true);
+  async function loadSellers() {
     try {
-      const response = await fetch("/api/admin/sellers");
-      const data = await response.json();
+      const res = await fetch("/api/admin/sellers");
+      const data = await res.json();
       if (data.success) {
-        setSellers(data.data || []);
+        setSellers(data.data);
       }
     } catch (error) {
-      console.error("Error loading sellers:", error);
+      console.error("Error cargando sellers:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleCreate = async (e: React.FormEvent) => {
+  async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-
     try {
-      const response = await fetch("/api/admin/sellers", {
+      const res = await fetch("/api/admin/sellers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          credits: parseInt(formData.credits),
-          status: formData.status,
-        }),
+        body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.success) {
-        alert("Seller creado exitosamente");
-        setShowCreateModal(false);
+        setShowModal(false);
         setFormData({
           username: "",
-          credits: "-1",
-          status: "active",
+          password: "",
+          unlimited_credits: true,
+          credits: 100,
+          can_use_api: true,
         });
         loadSellers();
       } else {
         alert(data.message || "Error al crear seller");
       }
     } catch (error) {
-      console.error("Error creating seller:", error);
-      alert("Error al crear seller");
+      alert("Error de conexión");
     }
-  };
+  }
 
-  const handleDelete = async (id: string) => {
+  async function handleDelete(id: string) {
     if (!confirm("¿Estás seguro de eliminar este seller?")) return;
-
     try {
-      const response = await fetch(`/api/admin/sellers/${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert("Seller eliminado");
+      const res = await fetch(`/api/admin/sellers/${id}`, { method: "DELETE" });
+      if (res.ok) {
         loadSellers();
-      } else {
-        alert(data.message || "Error al eliminar");
       }
     } catch (error) {
-      console.error("Error deleting seller:", error);
-      alert("Error al eliminar seller");
+      console.error("Error eliminando seller:", error);
     }
-  };
+  }
 
-  const handleRegenerateKey = async (id: string) => {
-    if (!confirm("¿Regenerar seller key? La key anterior dejará de funcionar.")) return;
-
+  async function handleToggleStatus(seller: Seller) {
     try {
-      const response = await fetch(`/api/admin/sellers/${id}/regenerate`, {
-        method: "POST",
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert("Seller key regenerado");
-        loadSellers();
-      } else {
-        alert(data.message || "Error al regenerar");
-      }
-    } catch (error) {
-      console.error("Error regenerating key:", error);
-      alert("Error al regenerar key");
-    }
-  };
-
-  const toggleStatus = async (id: string, currentStatus: string) => {
-    try {
-      const newStatus = currentStatus === "active" ? "inactive" : "active";
-
-      const response = await fetch(`/api/admin/sellers/${id}`, {
+      const newStatus = seller.status === "active" ? "inactive" : "active";
+      const res = await fetch(`/api/admin/sellers/${seller.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (res.ok) {
         loadSellers();
-      } else {
-        alert(data.message || "Error al actualizar");
       }
     } catch (error) {
-      console.error("Error updating seller:", error);
-      alert("Error al actualizar seller");
+      console.error("Error actualizando status:", error);
     }
-  };
+  }
 
-  const copyToClipboard = (text: string, id: string) => {
+  async function handleRegenerateKey(id: string) {
+    if (!confirm("¿Regenerar la API key de este seller? La anterior dejará de funcionar.")) return;
+    try {
+      const res = await fetch(`/api/admin/sellers/${id}/regenerate`, { method: "POST" });
+      if (res.ok) {
+        loadSellers();
+      }
+    } catch (error) {
+      console.error("Error regenerando key:", error);
+    }
+  }
+
+  function copyToClipboard(text: string, sellerId: string) {
     navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
+    setCopiedKey(sellerId);
+    setTimeout(() => setCopiedKey(null), 2000);
+  }
 
-  const generateApiUrl = (sellerKey: string, appId: string = "APP_ID") => {
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/api/seller/?sellerkey=${sellerKey}&type=add&app_id=${appId}&expiry=30&amount=1&level=1&format=json`;
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-gray-400">Cargando...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Seller API</h1>
-          <p className="text-text-muted mt-1">
-            Crea sellers y genera API keys para vender licencias
+          <h1 className="text-2xl font-bold text-white">Gestión de Sellers</h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Crea y administra sellers con acceso a API para generar licencias
           </p>
         </div>
         <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition"
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
         >
           <Plus className="w-4 h-4" />
           Crear Seller
         </button>
       </div>
 
-      {/* Info Box */}
-      <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-lg p-4">
-        <h3 className="text-emerald-300 font-semibold mb-2">💡 ¿Cómo funciona?</h3>
-        <p className="text-gray-300 text-sm mb-2">
-          Los sellers pueden generar licencias mediante una URL simple, sin acceso al panel completo.
-        </p>
-        <code className="block bg-gray-800 p-2 rounded text-xs text-emerald-400 overflow-x-auto">
-          /api/seller/?sellerkey=XXX&type=add&app_id=APP_ID&expiry=30&amount=10&level=1
-        </code>
-      </div>
-
-      {/* Sellers List */}
-      {loading ? (
-        <div className="text-center py-12 text-text-muted">Cargando...</div>
-      ) : sellers.length === 0 ? (
-        <div className="text-center py-12 bg-bg-card rounded-lg border border-border">
-          <Key className="w-12 h-12 text-text-dim mx-auto mb-4" />
-          <p className="text-text-muted">No hay sellers creados</p>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="mt-4 text-emerald-400 hover:text-emerald-300"
+      {/* Sellers Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sellers.map((seller) => (
+          <div
+            key={seller.id}
+            className="bg-gray-800 border border-gray-700 rounded-lg p-5 hover:border-emerald-500/50 transition"
           >
-            Crear el primer seller
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {sellers.map((seller) => (
-            <div
-              key={seller.id}
-              className={`bg-bg-card rounded-lg border-2 p-6 transition ${
-                seller.status === "active"
-                  ? "border-emerald-500/30"
-                  : "border-border opacity-60"
-              }`}
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-1">
-                    {seller.username}
-                  </h3>
-                  <p className="text-sm text-text-muted">
-                    Créditos: {seller.credits === -1 ? "Ilimitado" : seller.credits}
-                  </p>
-                </div>
-                <button
-                  onClick={() => toggleStatus(seller.id, seller.status)}
-                  className={`px-3 py-1 rounded text-xs font-semibold flex items-center gap-1 ${
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white">{seller.username}</h3>
+                <span
+                  className={`inline-block px-2 py-0.5 text-xs font-medium rounded mt-1 ${
                     seller.status === "active"
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-red-500/20 text-red-400"
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "bg-gray-500/20 text-gray-400"
                   }`}
                 >
-                  {seller.status === "active" ? (
-                    <><Check className="w-3 h-3" /> Activo</>
-                  ) : (
-                    <><X className="w-3 h-3" /> Inactivo</>
-                  )}
-                </button>
+                  {seller.status === "active" ? "Activo" : "Inactivo"}
+                </span>
               </div>
+              <button
+                onClick={() => handleDelete(seller.id)}
+                className="text-red-400 hover:text-red-300 p-1"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
 
-              {/* Seller Key */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-text-muted mb-2">
-                  Seller Key
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={seller.seller_key}
-                    readOnly
-                    className="flex-1 px-4 py-2 bg-gray-700/50 border border-gray-600 rounded text-white text-sm font-mono"
-                  />
-                  <button
-                    onClick={() => copyToClipboard(seller.seller_key, seller.id + "_key")}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
-                  >
-                    {copied === seller.id + "_key" ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => handleRegenerateKey(seller.id)}
-                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition"
-                    title="Regenerar key"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* API URL Example */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-text-muted mb-2">
-                  Ejemplo de URL
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={generateApiUrl(seller.seller_key)}
-                    readOnly
-                    className="flex-1 px-4 py-2 bg-gray-700/50 border border-gray-600 rounded text-emerald-400 text-xs font-mono overflow-x-auto"
-                  />
-                  <button
-                    onClick={() => copyToClipboard(generateApiUrl(seller.seller_key), seller.id + "_url")}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition"
-                  >
-                    {copied === seller.id + "_url" ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Parameters Guide */}
-              <div className="mb-4 p-3 bg-gray-700/30 rounded text-xs">
-                <p className="text-gray-400 font-semibold mb-2">Parámetros disponibles:</p>
-                <ul className="text-gray-400 space-y-1">
-                  <li>• <span className="text-white">type</span>: add, info, balance</li>
-                  <li>• <span className="text-white">app_id</span>: ID de la aplicación (requerido para &apos;add&apos;)</li>
-                  <li>• <span className="text-white">expiry</span>: Días de duración (default: 30)</li>
-                  <li>• <span className="text-white">amount</span>: Cantidad (default: 1, máx: 1000)</li>
-                  <li>• <span className="text-white">level</span>: Nivel de acceso (default: 1)</li>
-                  <li>• <span className="text-white">format</span>: json o text (default: json)</li>
-                </ul>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDelete(seller.id)}
-                  className="flex-1 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded transition"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Eliminar
-                </button>
+            {/* Credits */}
+            <div className="mb-4">
+              <div className="text-xs text-gray-400 mb-1">Créditos</div>
+              <div className="text-xl font-bold text-white">
+                {seller.unlimited_credits ? "∞ Ilimitado" : seller.credits}
               </div>
             </div>
-          ))}
+
+            {/* API Key */}
+            {seller.can_use_api && (
+              <div className="mb-4">
+                <div className="text-xs text-gray-400 mb-1">API Key</div>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-gray-900 text-emerald-400 text-xs px-2 py-1 rounded font-mono truncate">
+                    {seller.seller_key}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(seller.seller_key, seller.id)}
+                    className="p-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                    title="Copiar"
+                  >
+                    {copiedKey === seller.id ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-3 border-t border-gray-700">
+              <button
+                onClick={() => handleToggleStatus(seller)}
+                className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded transition"
+              >
+                {seller.status === "active" ? <EyeOff className="w-3 h-3 inline mr-1" /> : <Eye className="w-3 h-3 inline mr-1" />}
+                {seller.status === "active" ? "Desactivar" : "Activar"}
+              </button>
+              {seller.can_use_api && (
+                <button
+                  onClick={() => handleRegenerateKey(seller.id)}
+                  className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded transition"
+                  title="Regenerar API Key"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            {/* Created Date */}
+            <div className="text-[10px] text-gray-500 mt-3 text-center">
+              Creado: {new Date(seller.created_at).toLocaleDateString()}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {sellers.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-400">No hay sellers creados</p>
+          <p className="text-gray-500 text-sm mt-1">Crea tu primer seller para comenzar</p>
         </div>
       )}
 
-      {/* Create Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-bg-card rounded-lg border border-border max-w-md w-full">
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-6">Crear Seller</h2>
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
+            <h2 className="text-xl font-bold text-white mb-4">Crear Seller</h2>
 
-              <form onSubmit={handleCreate} className="space-y-4">
-                {/* Username */}
-                <div>
-                  <label className="block text-sm font-medium text-text-muted mb-2">
-                    Nombre de Usuario *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.username}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
-                    placeholder="seller123"
-                    className="w-full px-4 py-2 bg-bg border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
+            <form onSubmit={handleCreate} className="space-y-4">
+              {/* Username */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Usuario
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  placeholder="seller_username"
+                />
+              </div>
 
-                {/* Credits */}
-                <div>
-                  <label className="block text-sm font-medium text-text-muted mb-2">
-                    Créditos *
-                  </label>
-                  <select
-                    value={formData.credits}
-                    onChange={(e) =>
-                      setFormData({ ...formData, credits: e.target.value })
-                    }
-                    className="w-full px-4 py-2 bg-bg border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="-1">Ilimitado</option>
-                    <option value="100">100 créditos</option>
-                    <option value="500">500 créditos</option>
-                    <option value="1000">1,000 créditos</option>
-                    <option value="5000">5,000 créditos</option>
-                    <option value="10000">10,000 créditos</option>
-                  </select>
-                  <p className="text-xs text-gray-400 mt-1">
-                    1 crédito = 1 licencia generada
-                  </p>
-                </div>
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  placeholder="••••••••"
+                />
+              </div>
 
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium text-text-muted mb-2">
-                    Estado
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
-                    }
-                    className="w-full px-4 py-2 bg-bg border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="active">Activo</option>
-                    <option value="inactive">Inactivo</option>
-                  </select>
-                </div>
+              {/* API Access */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="api_access"
+                  checked={formData.can_use_api}
+                  onChange={(e) =>
+                    setFormData({ ...formData, can_use_api: e.target.checked })
+                  }
+                  className="w-4 h-4"
+                />
+                <label htmlFor="api_access" className="text-sm text-gray-300">
+                  Dar acceso a API de Seller
+                </label>
+              </div>
 
-                {/* Info */}
-                <div className="bg-emerald-900/20 border border-emerald-500/30 rounded p-3 text-xs text-gray-300">
-                  <p className="font-semibold text-emerald-300 mb-1">
-                    📌 Información:
-                  </p>
-                  <ul className="space-y-1">
-                    <li>• El seller key se genera automáticamente</li>
-                    <li>• Puede generar licencias vía URL</li>
-                    <li>• No tiene acceso al dashboard</li>
-                  </ul>
-                </div>
-
-                {/* Buttons */}
-                <div className="flex gap-3 pt-4">
+              {/* Credits Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Tipo de Créditos
+                </label>
+                <div className="flex gap-3">
                   <button
                     type="button"
-                    onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-2 bg-bg border border-border text-white rounded-lg hover:bg-bg-card transition"
+                    onClick={() => setFormData({ ...formData, unlimited_credits: true })}
+                    className={`flex-1 px-4 py-2 rounded border transition ${
+                      formData.unlimited_credits
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-gray-700 border-gray-600 text-gray-300"
+                    }`}
                   >
-                    Cancelar
+                    Ilimitado
                   </button>
                   <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                    type="button"
+                    onClick={() => setFormData({ ...formData, unlimited_credits: false })}
+                    className={`flex-1 px-4 py-2 rounded border transition ${
+                      !formData.unlimited_credits
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-gray-700 border-gray-600 text-gray-300"
+                    }`}
                   >
-                    Crear Seller
+                    Limitado
                   </button>
                 </div>
-              </form>
-            </div>
+              </div>
+
+              {/* Credits Amount (if limited) */}
+              {!formData.unlimited_credits && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Créditos Iniciales
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    value={formData.credits}
+                    onChange={(e) =>
+                      setFormData({ ...formData, credits: parseInt(e.target.value) })
+                    }
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  />
+                </div>
+              )}
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition"
+                >
+                  Crear Seller
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

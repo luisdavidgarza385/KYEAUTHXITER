@@ -141,8 +141,11 @@ export interface Subscriber {
 export interface Seller {
   id: string;
   username: string;
+  password_hash: string;
   seller_key: string;
   credits: number;
+  unlimited_credits: boolean;
+  can_use_api: boolean;
   status: string;
   created_at: string;
 }
@@ -223,6 +226,7 @@ export interface Store {
   // Sellers
   getSellerById(id: string): Promise<Seller | null>;
   getSellerByKey(key: string): Promise<Seller | null>;
+  getSellerByUsername(username: string): Promise<Seller | null>;
   listSellers(): Promise<Seller[]>;
   createSeller(data: Omit<Seller, "id" | "created_at">): Promise<Seller>;
   updateSeller(id: string, data: Partial<Seller>): Promise<Seller | null>;

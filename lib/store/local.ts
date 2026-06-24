@@ -498,6 +498,9 @@ export const localStore: Store = {
   async getSellerByKey() {
     throw new Error("Sellers require Supabase");
   },
+  async getSellerByUsername() {
+    throw new Error("Sellers require Supabase");
+  },
   async listSellers() {
     throw new Error("Sellers require Supabase");
   },

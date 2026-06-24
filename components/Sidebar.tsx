@@ -191,7 +191,9 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
         <div className="rounded-xl bg-[#040c06]/60 border border-emerald-500/15 p-3.5 space-y-3 shadow-inner">
           <div className="min-w-0">
             <div className="font-semibold text-sm text-zinc-100 truncate">{capitalizedUsername}</div>
-            <div className="text-[11px] text-zinc-500 truncate font-mono">MyCheat</div>
+            <div className="text-[11px] text-zinc-500 truncate font-mono uppercase tracking-wider">
+              {role === "admin" ? "Administrador" : role === "developer" ? "Desarrollador" : "Revendedor"}
+            </div>
           </div>
           <div className="flex items-center justify-between pt-2 border-t border-zinc-850">
             <button

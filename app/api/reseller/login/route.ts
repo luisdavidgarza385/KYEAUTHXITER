@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar contraseña
-    const validPassword = await bcrypt.compare(password, admin.password);
+    const validPassword = await bcrypt.compare(password, admin.password_hash);
     
     if (!validPassword) {
       return NextResponse.json(

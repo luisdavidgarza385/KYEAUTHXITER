@@ -130,6 +130,15 @@ export interface Subscriber {
   created_at: string;
 }
 
+export interface Seller {
+  id: string;
+  username: string;
+  seller_key: string;
+  credits: number;
+  status: string;
+  created_at: string;
+}
+
 export interface Store {
   getAdminByEmail(email: string): Promise<Admin | null>;
   getAdminById(id: string): Promise<Admin | null>;
@@ -202,4 +211,12 @@ export interface Store {
   createSubscriber(data: Omit<Subscriber, "id" | "created_at">): Promise<Subscriber>;
   updateSubscriber(id: string, data: Partial<Subscriber>): Promise<Subscriber | null>;
   deleteSubscriber(id: string): Promise<void>;
+
+  // Sellers
+  getSellerById(id: string): Promise<Seller | null>;
+  getSellerByKey(key: string): Promise<Seller | null>;
+  listSellers(): Promise<Seller[]>;
+  createSeller(data: Omit<Seller, "id" | "created_at">): Promise<Seller>;
+  updateSeller(id: string, data: Partial<Seller>): Promise<Seller | null>;
+  deleteSeller(id: string): Promise<void>;
 }

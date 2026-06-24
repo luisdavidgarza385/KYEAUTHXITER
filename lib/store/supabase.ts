@@ -506,5 +506,61 @@ export const supabaseStore: Store = {
       .eq("id", id);
     if (error) throw error;
   },
+
+  // Sellers
+  async getSellerById(id) {
+    const { data } = await db()
+      .from("sellers")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    return data as any | null;
+  },
+
+  async getSellerByKey(key) {
+    const { data } = await db()
+      .from("sellers")
+      .select("*")
+      .eq("seller_key", key)
+      .maybeSingle();
+    return data as any | null;
+  },
+
+  async listSellers() {
+    const { data } = await db()
+      .from("sellers")
+      .select("*")
+      .order("created_at", { ascending: false });
+    return (data || []) as any[];
+  },
+
+  async createSeller(data) {
+    const { data: row, error } = await db()
+      .from("sellers")
+      .insert(data)
+      .select()
+      .single();
+    if (error) throw error;
+    return row as any;
+  },
+
+  async updateSeller(id, data) {
+    const { data: row, error } = await db()
+      .from("sellers")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    if (error) throw error;
+    return row as any | null;
+  },
+
+  async deleteSeller(id) {
+    const { error } = await db()
+      .from("sellers")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+  },
 };
 

@@ -402,5 +402,53 @@ export const supabaseStore: Store = {
   async deleteOAuthLink(id) {
     await db().from("oauth_links").delete().eq("id", id);
   },
+
+  // Subscription Plans
+  async getSubscriptionPlanById(id) {
+    const { data } = await db()
+      .from("subscription_plans")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    return data as any | null;
+  },
+
+  async getSubscriptionPlansByAppId(appId) {
+    const { data } = await db()
+      .from("subscription_plans")
+      .select("*")
+      .eq("app_id", appId)
+      .order("price", { ascending: true });
+    return (data || []) as any[];
+  },
+
+  async createSubscriptionPlan(data) {
+    const { data: row, error } = await db()
+      .from("subscription_plans")
+      .insert(data)
+      .select()
+      .single();
+    if (error) throw error;
+    return row as any;
+  },
+
+  async updateSubscriptionPlan(id, data) {
+    const { data: row, error } = await db()
+      .from("subscription_plans")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    if (error) throw error;
+    return row as any | null;
+  },
+
+  async deleteSubscriptionPlan(id) {
+    const { error } = await db()
+      .from("subscription_plans")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+  },
 };
 

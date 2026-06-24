@@ -33,6 +33,7 @@ const SECTIONS = [
     label: "GESTION",
     items: [
       { href: "/dashboard/licenses", label: "Licencias", icon: Key, adminOnly: false },
+      { href: "/dashboard/subscriptions", label: "Suscripciones", icon: Coins, adminOnly: false },
       { href: "/dashboard/users", label: "Usuarios", icon: Users, adminOnly: false },
       { href: "/dashboard/sub-resellers", label: "Sub resellers", icon: Users, adminOnly: false },
       { href: "/dashboard/sub-users", label: "Sub-usuarios", icon: Layers, adminOnly: false },

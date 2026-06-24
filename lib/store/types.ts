@@ -107,6 +107,19 @@ export interface OAuthLink {
   created_at: string;
 }
 
+export interface SubscriptionPlan {
+  id: string;
+  app_id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration_days: number;
+  level: number;
+  features: string[];
+  status: string;
+  created_at: string;
+}
+
 export interface Store {
   getAdminByEmail(email: string): Promise<Admin | null>;
   getAdminById(id: string): Promise<Admin | null>;
@@ -164,4 +177,11 @@ export interface Store {
   listOAuthLinksForAdmin(adminId: string): Promise<OAuthLink[]>;
   createOAuthLink(data: Omit<OAuthLink, "id" | "created_at">): Promise<OAuthLink>;
   deleteOAuthLink(id: string): Promise<void>;
+
+  // Subscription Plans
+  getSubscriptionPlanById(id: string): Promise<SubscriptionPlan | null>;
+  getSubscriptionPlansByAppId(appId: string): Promise<SubscriptionPlan[]>;
+  createSubscriptionPlan(data: Omit<SubscriptionPlan, "id" | "created_at">): Promise<SubscriptionPlan>;
+  updateSubscriptionPlan(id: string, data: Partial<SubscriptionPlan>): Promise<SubscriptionPlan | null>;
+  deleteSubscriptionPlan(id: string): Promise<void>;
 }

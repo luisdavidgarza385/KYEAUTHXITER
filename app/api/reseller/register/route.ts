@@ -37,17 +37,10 @@ export async function POST(req: NextRequest) {
     // Crear el revendedor con permisos completos
     const reseller = await store.createAdmin({
       email,
-      password: hashedPassword,
-      username,
+      password_hash: hashedPassword,
       role: "reseller", // Rol de revendedor
       credits: 1000, // Créditos iniciales
-      max_apps: 10, // Máximo 10 aplicaciones
-      can_create_apps: true,
-      can_generate_licenses: true,
-      can_delete_licenses: true,
-      can_reset_hwid: true,
-      can_ban_users: true,
-      can_modify_profile: true,
+      status: "active",
     });
 
     return NextResponse.json({

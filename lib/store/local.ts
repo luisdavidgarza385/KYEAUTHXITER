@@ -11,6 +11,9 @@ import type {
   Session,
   Store,
   Variable,
+  SubscriptionPlan,
+  Subscriber,
+  Seller,
 } from "./types";
 
 interface LocalDb {
@@ -449,5 +452,62 @@ export const localStore: Store = {
       const idx = db.oauth_links.findIndex((l) => l.id === id);
       if (idx !== -1) db.oauth_links.splice(idx, 1);
     });
+  },
+
+  // Subscription Plans - Not supported in local store
+  async getSubscriptionPlanById() {
+    throw new Error("Subscription plans require Supabase");
+  },
+  async getSubscriptionPlansByAppId() {
+    throw new Error("Subscription plans require Supabase");
+  },
+  async createSubscriptionPlan() {
+    throw new Error("Subscription plans require Supabase");
+  },
+  async updateSubscriptionPlan() {
+    throw new Error("Subscription plans require Supabase");
+  },
+  async deleteSubscriptionPlan() {
+    throw new Error("Subscription plans require Supabase");
+  },
+
+  // Subscribers - Not supported in local store
+  async getSubscriberById() {
+    throw new Error("Subscribers require Supabase");
+  },
+  async getSubscriberByUsername() {
+    throw new Error("Subscribers require Supabase");
+  },
+  async listSubscribers() {
+    throw new Error("Subscribers require Supabase");
+  },
+  async createSubscriber() {
+    throw new Error("Subscribers require Supabase");
+  },
+  async updateSubscriber() {
+    throw new Error("Subscribers require Supabase");
+  },
+  async deleteSubscriber() {
+    throw new Error("Subscribers require Supabase");
+  },
+
+  // Sellers - Not supported in local store
+  async getSellerById() {
+    throw new Error("Sellers require Supabase");
+  },
+  async getSellerByKey() {
+    throw new Error("Sellers require Supabase");
+  },
+  async listSellers() {
+    throw new Error("Sellers require Supabase");
+  },
+  async createSeller() {
+    throw new Error("Sellers require Supabase");
+  },
+  async updateSeller() {
+    throw new Error("Sellers require Supabase");
+  },
+  async deleteSeller() {
+    throw new Error("Sellers require Supabase");
   },
 };

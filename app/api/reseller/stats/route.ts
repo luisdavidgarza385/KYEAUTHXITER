@@ -22,15 +22,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Obtener estadísticas del revendedor
-    const apps = await store.getAppsByAdminId(admin.id);
-    const appIds = apps.map((app: any) => app.id);
+    const apps = await store.listApps({ ownerId: admin.id });
+    const appIds = apps.map((app) => app.id);
 
     let totalLicenses = 0;
     let totalUsers = 0;
 
     for (const appId of appIds) {
-      const licenses = await store.getLicensesByAppId(appId);
-      const users = await store.getUsersByAppId(appId);
+      const licenses = await store.listLicenses({ appId });
+      const users = await store.listAppUsers({ appId });
       totalLicenses += licenses.length;
       totalUsers += users.length;
     }

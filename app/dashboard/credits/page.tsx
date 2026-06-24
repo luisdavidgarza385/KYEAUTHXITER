@@ -9,7 +9,7 @@ export default async function CreditsPage() {
   const fullAdmin = await store.getAdminById(me.id);
 
   const credits = typeof fullAdmin?.credits === "number" ? fullAdmin.credits : 0;
-  const isUnlimited = fullAdmin?.role === "developer" || fullAdmin?.role === "admin" || fullAdmin?.email === "admin@example.com";
+  const isUnlimited = fullAdmin?.role === "developer" || fullAdmin?.role === "admin" || fullAdmin?.email === "spectralx@gmail.com";
 
   return (
     <div className="p-6 lg:p-8 max-w-[1200px] mx-auto space-y-8 text-zinc-350">

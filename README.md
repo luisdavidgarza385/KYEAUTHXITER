@@ -44,8 +44,8 @@ Edita `.env.local`:
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...
 SUPABASE_SERVICE_ROLE_KEY=eyJh...
-ADMIN_BOOTSTRAP_EMAIL=admin@tu-dominio.com
-ADMIN_BOOTSTRAP_PASSWORD=una-clave-fuerte-123
+ADMIN_BOOTSTRAP_EMAIL=spectralx@gmail.com
+ADMIN_BOOTSTRAP_PASSWORD=SpectralX
 ```
 
 ### 3. Instalar y correr

@@ -450,5 +450,61 @@ export const supabaseStore: Store = {
       .eq("id", id);
     if (error) throw error;
   },
+
+  // Subscribers
+  async getSubscriberById(id) {
+    const { data } = await db()
+      .from("subscribers")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    return data as any | null;
+  },
+
+  async getSubscriberByUsername(username) {
+    const { data } = await db()
+      .from("subscribers")
+      .select("*")
+      .eq("username", username)
+      .maybeSingle();
+    return data as any | null;
+  },
+
+  async listSubscribers() {
+    const { data } = await db()
+      .from("subscribers")
+      .select("*")
+      .order("created_at", { ascending: false });
+    return (data || []) as any[];
+  },
+
+  async createSubscriber(data) {
+    const { data: row, error } = await db()
+      .from("subscribers")
+      .insert(data)
+      .select()
+      .single();
+    if (error) throw error;
+    return row as any;
+  },
+
+  async updateSubscriber(id, data) {
+    const { data: row, error } = await db()
+      .from("subscribers")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    if (error) throw error;
+    return row as any | null;
+  },
+
+  async deleteSubscriber(id) {
+    const { error } = await db()
+      .from("subscribers")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+  },
 };
 

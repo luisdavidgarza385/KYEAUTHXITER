@@ -120,6 +120,16 @@ export interface SubscriptionPlan {
   created_at: string;
 }
 
+export interface Subscriber {
+  id: string;
+  username: string;
+  password_hash: string;
+  subscription_type: string;
+  credits: number;
+  status: string;
+  created_at: string;
+}
+
 export interface Store {
   getAdminByEmail(email: string): Promise<Admin | null>;
   getAdminById(id: string): Promise<Admin | null>;
@@ -184,4 +194,12 @@ export interface Store {
   createSubscriptionPlan(data: Omit<SubscriptionPlan, "id" | "created_at">): Promise<SubscriptionPlan>;
   updateSubscriptionPlan(id: string, data: Partial<SubscriptionPlan>): Promise<SubscriptionPlan | null>;
   deleteSubscriptionPlan(id: string): Promise<void>;
+
+  // Subscribers
+  getSubscriberById(id: string): Promise<Subscriber | null>;
+  getSubscriberByUsername(username: string): Promise<Subscriber | null>;
+  listSubscribers(): Promise<Subscriber[]>;
+  createSubscriber(data: Omit<Subscriber, "id" | "created_at">): Promise<Subscriber>;
+  updateSubscriber(id: string, data: Partial<Subscriber>): Promise<Subscriber | null>;
+  deleteSubscriber(id: string): Promise<void>;
 }

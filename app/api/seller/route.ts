@@ -66,8 +66,8 @@ export async function GET(req: NextRequest) {
       
       case "balance":
         return sendResponse(format, true, "Balance retrieved", {
-          credits: seller.credits,
-          unlimited: seller.credits === -1,
+          credits: seller.unlimited_credits ? "∞" : seller.credits,
+          unlimited: seller.unlimited_credits,
         });
       
       default:
@@ -101,7 +101,7 @@ async function handleAddLicenses(
   }
 
   // Verificar créditos (si no es ilimitado)
-  if (seller.credits !== -1) {
+  if (!seller.unlimited_credits) {
     const costPerLicense = 1; // 1 crédito por licencia
     const totalCost = amount * costPerLicense;
     
@@ -149,7 +149,7 @@ async function handleAddLicenses(
   const created = await store.createLicenses(licenses);
 
   // Descontar créditos (si no es ilimitado)
-  if (seller.credits !== -1) {
+  if (!seller.unlimited_credits) {
     const newCredits = seller.credits - amount;
     await store.updateSeller(seller.id, { credits: newCredits });
   }

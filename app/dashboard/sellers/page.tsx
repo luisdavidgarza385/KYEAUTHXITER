@@ -38,9 +38,14 @@ export default function SellersPage() {
       const data = await res.json();
       if (data.success) {
         setSellers(data.data);
+      } else {
+        // Mostrar error en consola pero no bloquear la UI
+        console.error("Error del servidor:", data.message);
+        alert(`Error: ${data.message}\n\n¿Has ejecutado el SQL en Supabase?\nVe a: supabase/sellers.sql`);
       }
     } catch (error) {
       console.error("Error cargando sellers:", error);
+      alert("Error de conexión. Verifica que Supabase esté configurado correctamente.");
     } finally {
       setLoading(false);
     }

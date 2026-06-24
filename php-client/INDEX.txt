@@ -1,0 +1,196 @@
+═══════════════════════════════════════════════════════════════
+KEYAUTH PHP CLIENT - ÍNDICE DE ARCHIVOS
+═══════════════════════════════════════════════════════════════
+
+📦 ARCHIVOS PRINCIPALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KeyAuth.php
+  → Clase principal del cliente PHP
+  → Este es el único archivo que NECESITAS en tu proyecto
+  → Todas las demás archivos son ejemplos y documentación
+
+═══════════════════════════════════════════════════════════════
+
+📚 DOCUMENTACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+README.md
+  → Documentación completa en inglés
+  → Referencia de API
+  → Guías de seguridad
+  → Preguntas frecuentes
+
+LEEME.md
+  → Guía rápida en español
+  → Inicio rápido
+  → Casos de uso comunes
+  → Solución de problemas
+
+INDEX.txt
+  → Este archivo
+  → Índice de todos los archivos incluidos
+
+═══════════════════════════════════════════════════════════════
+
+🎯 EJEMPLOS BÁSICOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+example-login.php
+  → Ejemplo simple de login de usuario
+  → Muestra cómo autenticar usuarios
+  → Obtener datos del usuario
+  → Enviar logs
+
+example-register.php
+  → Ejemplo de registro de nuevo usuario
+  → Uso de claves de licencia
+  → Validación de registro
+
+example-license.php
+  → Ejemplo de validación de licencia
+  → Sin necesidad de usuario/contraseña
+  → Ideal para scripts y aplicaciones standalone
+
+example-complete.php
+  → Ejemplo completo con TODAS las funcionalidades
+  → Login, registro, licencias, variables, logs
+  → Código bien comentado
+  → Perfecto para aprender
+
+═══════════════════════════════════════════════════════════════
+
+🚀 EJEMPLOS AVANZADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+example-wordpress-plugin.php
+  → Plugin completo de WordPress
+  → Panel de administración
+  → Validación automática de licencias
+  → Funciones helper para uso en temas/plugins
+
+example-rest-api.php
+  → API REST protegida con KeyAuth
+  → Middleware de validación de licencias
+  → Ejemplos de endpoints
+  → Control de acceso por niveles
+  → CORS habilitado
+
+═══════════════════════════════════════════════════════════════
+
+🔧 CONFIGURACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+config.example.php
+  → Plantilla de configuración
+  → Cópialo a config.php y edita con tus credenciales
+  → Define constantes para APP_ID, SECRET, y URL
+
+.gitignore
+  → Protege tus credenciales
+  → Previene que config.php se suba a Git
+  → Ignora archivos temporales y logs
+
+═══════════════════════════════════════════════════════════════
+
+🧪 TESTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+test.php
+  → Script interactivo de pruebas
+  → Verifica requisitos del sistema (cURL, JSON)
+  → Prueba tu conexión con KeyAuth
+  → Diagnóstico de problemas
+  → Ejecutar: php test.php
+
+═══════════════════════════════════════════════════════════════
+
+📝 CÓMO EMPEZAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. LEE PRIMERO:
+   - LEEME.md (español) o README.md (inglés)
+
+2. COPIA LA CONFIGURACIÓN:
+   copy config.example.php config.php
+   
+3. EDITA config.php:
+   - Agrega tu APP_ID
+   - Agrega tu APP_SECRET
+   - Agrega tu API_URL
+
+4. PRUEBA LA CONEXIÓN:
+   php test.php
+
+5. REVISA LOS EJEMPLOS:
+   - example-login.php (más simple)
+   - example-complete.php (más completo)
+
+6. INTEGRA EN TU PROYECTO:
+   - Copia KeyAuth.php a tu proyecto
+   - require_once 'KeyAuth.php';
+   - ¡Listo!
+
+═══════════════════════════════════════════════════════════════
+
+💡 ARCHIVOS QUE NECESITAS EN PRODUCCIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mínimo absoluto:
+  → KeyAuth.php
+
+Recomendado:
+  → KeyAuth.php
+  → config.php (tus credenciales)
+  → .gitignore (protección)
+
+═══════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE - SEGURIDAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ SIEMPRE usa HTTPS en producción
+✓ NUNCA expongas tu APP_SECRET en código del cliente
+✓ NUNCA subas config.php a repositorios públicos
+✓ SIEMPRE valida las fechas de expiración
+✓ USA variables de entorno cuando sea posible
+
+═══════════════════════════════════════════════════════════════
+
+📞 SOPORTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si tienes problemas:
+
+1. Ejecuta test.php para diagnosticar
+2. Lee README.md sección "Preguntas Frecuentes"
+3. Verifica que tu app esté activa en el dashboard
+4. Revisa que tus credenciales sean correctas
+
+═══════════════════════════════════════════════════════════════
+
+🎓 RECURSOS DE APRENDIZAJE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Principiante:
+  1. LEEME.md
+  2. example-login.php
+  3. test.php
+
+Intermedio:
+  1. README.md
+  2. example-complete.php
+  3. example-license.php
+
+Avanzado:
+  1. example-wordpress-plugin.php
+  2. example-rest-api.php
+  3. KeyAuth.php (código fuente)
+
+═══════════════════════════════════════════════════════════════
+
+Versión: 1.0.0
+Última actualización: 2024
+Licencia: MIT
+
+═══════════════════════════════════════════════════════════════

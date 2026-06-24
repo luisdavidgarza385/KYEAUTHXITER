@@ -297,7 +297,7 @@ export default function SellersPage() {
                 <p className="text-gray-400 font-semibold mb-2">Parámetros disponibles:</p>
                 <ul className="text-gray-400 space-y-1">
                   <li>• <span className="text-white">type</span>: add, info, balance</li>
-                  <li>• <span className="text-white">app_id</span>: ID de la aplicación (requerido para 'add')</li>
+                  <li>• <span className="text-white">app_id</span>: ID de la aplicación (requerido para &apos;add&apos;)</li>
                   <li>• <span className="text-white">expiry</span>: Días de duración (default: 30)</li>
                   <li>• <span className="text-white">amount</span>: Cantidad (default: 1, máx: 1000)</li>
                   <li>• <span className="text-white">level</span>: Nivel de acceso (default: 1)</li>

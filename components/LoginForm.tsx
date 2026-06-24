@@ -163,6 +163,15 @@ export function LoginForm() {
             "Iniciar Sesión"
           )}
         </button>
+
+        <div className="text-center pt-2">
+          <Link
+            href="/asistente/login"
+            className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors hover:underline decoration-dotted underline-offset-4"
+          >
+            Resetear keys con nuestro asistente
+          </Link>
+        </div>
       </form>
     </div>
   );

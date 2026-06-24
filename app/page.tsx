@@ -127,6 +127,9 @@ export default function Home() {
             <Link href="/docs" className="hover:text-emerald-400 transition-all hover:translate-y-[-1px]">Support</Link>
           </nav>
           <div className="flex items-center gap-3">
+            <Link href="/reseller" className="text-sm font-semibold relative group overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg shadow-lg shadow-purple-900/30 hover:shadow-purple-500/35 transition-all duration-300 hover:scale-[1.03]">
+              <span className="relative z-10">🚀 Revendedor</span>
+            </Link>
             <Link href="/login" className="text-sm font-semibold text-text-muted hover:text-white px-4 py-2 transition-all">Log in</Link>
             <Link
               href="/register"

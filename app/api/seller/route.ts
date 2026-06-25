@@ -56,6 +56,12 @@ export async function GET(req: NextRequest) {
       case "add":
         return await handleAddLicenses(seller, appId, expiry, amount, level, mask, format);
       
+      case "adduser":
+        const username = url.searchParams.get("username");
+        const password = url.searchParams.get("password");
+        const subscription = url.searchParams.get("subscription") || "Basic";
+        return await handleAddUser(seller, appId, username, password, expiry, subscription, format);
+      
       case "info":
         return sendResponse(format, true, "Seller info", {
           seller_id: seller.id,
@@ -71,7 +77,7 @@ export async function GET(req: NextRequest) {
         });
       
       default:
-        return sendResponse(format, false, "Tipo inválido. Use: add, info, balance");
+        return sendResponse(format, false, "Tipo inválido. Use: add, adduser, info, balance");
     }
 
   } catch (error: any) {
@@ -163,6 +169,98 @@ async function handleAddLicenses(
     expiry_days: expiry,
     level,
     expires_at: expiresAt.toISOString(),
+  });
+}
+
+async function handleAddUser(
+  seller: any,
+  appId: string | null,
+  username: string | null,
+  password: string | null,
+  expiry: number,
+  subscription: string,
+  format: string
+) {
+  // Validar parámetros
+  if (!appId) {
+    return sendResponse(format, false, "app_id es requerido");
+  }
+
+  if (!username) {
+    return sendResponse(format, false, "username es requerido");
+  }
+
+  if (!password) {
+    return sendResponse(format, false, "password es requerido");
+  }
+
+  // Validar que la app existe y pertenece al seller
+  const app = await store.getAppById(appId);
+  if (!app) {
+    return sendResponse(format, false, "App no encontrada");
+  }
+
+  if (app.seller_id !== seller.id) {
+    return sendResponse(format, false, "No tienes permiso para crear usuarios en esta app");
+  }
+
+  // Verificar créditos (si no es ilimitado) - 1 crédito por usuario
+  if (!seller.unlimited_credits) {
+    if (seller.credits < 1) {
+      return sendResponse(format, false, `Créditos insuficientes. Necesitas 1 crédito, tienes ${seller.credits}`);
+    }
+  }
+
+  // Validar expiry
+  if (expiry < 1 || expiry > 3650) {
+    return sendResponse(format, false, "Expiry debe estar entre 1 y 3650 días");
+  }
+
+  // Verificar si el usuario ya existe
+  const existingUsers = await store.listAppUsers({ appId });
+  const userExists = existingUsers.some((u: any) => u.username.toLowerCase() === username.toLowerCase());
+  
+  if (userExists) {
+    return sendResponse(format, false, `El usuario '${username}' ya existe`);
+  }
+
+  // Calcular fecha de expiración
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + expiry * 86400000);
+
+  // Crear usuario
+  const newUser = {
+    app_id: appId,
+    username,
+    password_hash: password, // En producción debería hashearse
+    email: `${username}@generated.local`,
+    subscription_level: subscription,
+    subscription_expires_at: expiresAt.toISOString(),
+    hwid: null,
+    ip: null,
+    last_login: null,
+    created_by: seller.id,
+  };
+
+  const createdUser = await store.createAppUser(newUser);
+
+  // Descontar créditos (si no es ilimitado)
+  if (!seller.unlimited_credits) {
+    const newCredits = seller.credits - 1;
+    await store.updateSeller(seller.id, { credits: newCredits });
+  }
+
+  // Respuesta
+  return sendResponse(format, true, "Usuario creado exitosamente", {
+    user: {
+      id: createdUser.id,
+      username: createdUser.username,
+      password,
+      subscription: subscription,
+      expiry_days: expiry,
+      expires_at: expiresAt.toISOString(),
+      app_id: appId,
+    },
   });
 }
 

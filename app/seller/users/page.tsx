@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Ban, Shield, Search, RefreshCw } from "lucide-react";
+import { Trash2, Ban, Shield, Search, RefreshCw, Plus } from "lucide-react";
 
 interface AppUser {
   id: string;
@@ -28,6 +28,12 @@ export default function SellerUsersPage() {
   const [selectedAppId, setSelectedAppId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
   useEffect(() => {
     loadApps();
@@ -113,6 +119,38 @@ export default function SellerUsersPage() {
     }
   }
 
+  async function handleCreateUser(e: React.FormEvent) {
+    e.preventDefault();
+    
+    if (!selectedAppId) {
+      alert("Selecciona una aplicación");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/seller/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          app_id: selectedAppId,
+          ...createForm,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setShowCreateModal(false);
+        setCreateForm({ username: "", email: "", password: "" });
+        loadUsers();
+        alert("Usuario creado exitosamente");
+      } else {
+        alert(data.message || "Error al crear usuario");
+      }
+    } catch (error) {
+      alert("Error de conexión al crear usuario");
+    }
+  }
+
   const filteredUsers = users.filter((user) =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -123,13 +161,23 @@ export default function SellerUsersPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">
-          Usuarios de Aplicación
-        </h1>
-        <p className="text-gray-400 text-sm">
-          Gestiona los usuarios registrados en tus aplicaciones
-        </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">
+            Usuarios de Aplicación
+          </h1>
+          <p className="text-gray-400 text-sm">
+            Gestiona los usuarios registrados en tus aplicaciones
+          </p>
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          disabled={apps.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 text-white rounded-lg transition"
+        >
+          <Plus className="w-4 h-4" />
+          Crear Usuario
+        </button>
       </div>
 
       {/* App Selector & Search */}
@@ -305,6 +353,82 @@ export default function SellerUsersPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+      
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
+            <h2 className="text-xl font-bold text-white mb-4">Crear Usuario</h2>
+
+            <form onSubmit={handleCreateUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Nombre de Usuario *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={createForm.username}
+                  onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  placeholder="usuario123"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  placeholder="usuario@ejemplo.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Contraseña *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  placeholder="••••••••"
+                  minLength={6}
+                />
+              </div>
+
+              <div className="bg-gray-700/50 border border-gray-600 rounded p-3 text-xs text-gray-400">
+                Se creará el usuario para la aplicación: <span className="text-white font-medium">{selectedApp?.name}</span>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreateForm({ username: "", email: "", password: "" });
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition"
+                >
+                  Crear Usuario
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

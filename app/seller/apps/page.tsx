@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Shield, Trash2, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { Plus, Shield, Trash2, Eye, EyeOff, Copy, Check, Edit2, Save, X, ExternalLink } from "lucide-react";
 
 interface App {
   id: string;
@@ -10,6 +10,8 @@ interface App {
   status: string;
   version: string;
   created_at: string;
+  download_link?: string;
+  webhook_url?: string;
 }
 
 export default function SellerAppsPage() {
@@ -17,6 +19,8 @@ export default function SellerAppsPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [editingApp, setEditingApp] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<App>>({});
   const [formData, setFormData] = useState({
     name: "",
   });
@@ -67,6 +71,61 @@ export default function SellerAppsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   }
 
+  function startEditing(app: App) {
+    setEditingApp(app.id);
+    setEditForm({
+      name: app.name,
+      version: app.version,
+      status: app.status,
+      download_link: app.download_link || "",
+      webhook_url: app.webhook_url || "",
+    });
+  }
+
+  function cancelEditing() {
+    setEditingApp(null);
+    setEditForm({});
+  }
+
+  async function saveEditing(appId: string) {
+    try {
+      const res = await fetch(`/api/seller/apps/${appId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setEditingApp(null);
+        setEditForm({});
+        loadApps();
+      } else {
+        alert(data.message || "Error al actualizar aplicación");
+      }
+    } catch (error) {
+      alert("Error de conexión");
+    }
+  }
+
+  async function handleDelete(app: App) {
+    if (!confirm(`¿Eliminar la aplicación "${app.name}"? Esto eliminará todas sus licencias y usuarios.`)) return;
+
+    try {
+      const res = await fetch(`/api/seller/apps/${app.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        loadApps();
+      } else {
+        alert("Error al eliminar aplicación");
+      }
+    } catch (error) {
+      alert("Error de conexión");
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -115,65 +174,192 @@ export default function SellerAppsPage() {
       </div>
 
       {/* Apps Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {apps.map((app) => (
-          <div
-            key={app.id}
-            className="bg-gray-800 border border-gray-700 rounded-lg p-5 hover:border-emerald-500/50 transition"
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-emerald-400" />
+      <div className="space-y-4">
+        {apps.map((app) => {
+          const isEditing = editingApp === app.id;
+          
+          return (
+            <div
+              key={app.id}
+              className="bg-gray-800 border border-gray-700 rounded-lg p-5 hover:border-emerald-500/30 transition"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                    <Shield className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm.name || ""}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        className="text-lg font-semibold bg-gray-700 text-white px-2 py-1 rounded border border-gray-600 w-full"
+                      />
+                    ) : (
+                      <h3 className="text-lg font-semibold text-white truncate">{app.name}</h3>
+                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      {isEditing ? (
+                        <select
+                          value={editForm.status || "active"}
+                          onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                          className="px-2 py-0.5 text-xs font-medium rounded bg-gray-700 border border-gray-600 text-white"
+                        >
+                          <option value="active">Activa</option>
+                          <option value="paused">Pausada</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${
+                            app.status === "active"
+                              ? "bg-emerald-500/20 text-emerald-400"
+                              : "bg-yellow-500/20 text-yellow-400"
+                          }`}
+                        >
+                          {app.status === "active" ? "Activa" : "Pausada"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">{app.name}</h3>
-                  <span
-                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded mt-1 ${
-                      app.status === "active"
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-yellow-500/20 text-yellow-400"
-                    }`}
-                  >
-                    {app.status === "active" ? "Activa" : "Pausada"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* App ID */}
-            <div className="mb-4">
-              <div className="text-xs text-gray-400 mb-1">App ID</div>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 bg-gray-900 text-emerald-400 text-xs px-2 py-1 rounded font-mono truncate">
-                  {app.app_id}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(app.app_id, app.id)}
-                  className="p-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
-                  title="Copiar"
-                >
-                  {copiedId === app.id ? (
-                    <Check className="w-3 h-3" />
+                
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 ml-3">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={() => saveEditing(app.id)}
+                        className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition"
+                        title="Guardar"
+                      >
+                        <Save className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                        title="Cancelar"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
                   ) : (
-                    <Copy className="w-3 h-3" />
+                    <>
+                      <button
+                        onClick={() => startEditing(app)}
+                        className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded transition"
+                        title="Editar"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(app)}
+                        className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
                   )}
-                </button>
+                </div>
+              </div>
+
+              {/* App ID */}
+              <div className="mb-3">
+                <div className="text-xs text-gray-400 mb-1">App ID</div>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-gray-900 text-emerald-400 text-xs px-2 py-1.5 rounded font-mono truncate">
+                    {app.app_id}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(app.app_id, app.id)}
+                    className="p-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded transition shrink-0"
+                    title="Copiar"
+                  >
+                    {copiedId === app.id ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                {/* Version */}
+                <div>
+                  <div className="text-xs text-gray-400 mb-1">Versión</div>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editForm.version || ""}
+                      onChange={(e) => setEditForm({ ...editForm, version: e.target.value })}
+                      className="w-full bg-gray-700 text-white text-sm px-2 py-1 rounded border border-gray-600"
+                    />
+                  ) : (
+                    <div className="text-sm text-white">{app.version}</div>
+                  )}
+                </div>
+
+                {/* Created Date */}
+                <div>
+                  <div className="text-xs text-gray-400 mb-1">Creada</div>
+                  <div className="text-sm text-white">
+                    {new Date(app.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Download Link */}
+              <div className="mb-3">
+                <div className="text-xs text-gray-400 mb-1">Enlace de Descarga</div>
+                {isEditing ? (
+                  <input
+                    type="url"
+                    value={editForm.download_link || ""}
+                    onChange={(e) => setEditForm({ ...editForm, download_link: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full bg-gray-700 text-white text-sm px-2 py-1 rounded border border-gray-600"
+                  />
+                ) : app.download_link ? (
+                  <a
+                    href={app.download_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 truncate"
+                  >
+                    {app.download_link}
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                  </a>
+                ) : (
+                  <div className="text-sm text-gray-500">-</div>
+                )}
+              </div>
+
+              {/* Webhook URL */}
+              <div>
+                <div className="text-xs text-gray-400 mb-1">Webhook URL</div>
+                {isEditing ? (
+                  <input
+                    type="url"
+                    value={editForm.webhook_url || ""}
+                    onChange={(e) => setEditForm({ ...editForm, webhook_url: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full bg-gray-700 text-white text-sm px-2 py-1 rounded border border-gray-600"
+                  />
+                ) : app.webhook_url ? (
+                  <code className="text-xs text-gray-300 font-mono truncate block">
+                    {app.webhook_url}
+                  </code>
+                ) : (
+                  <div className="text-sm text-gray-500">-</div>
+                )}
               </div>
             </div>
-
-            {/* Version */}
-            <div className="text-xs text-gray-400 mb-3">
-              Versión: <span className="text-white">{app.version}</span>
-            </div>
-
-            {/* Created Date */}
-            <div className="text-[10px] text-gray-500 mt-3 pt-3 border-t border-gray-700 text-center">
-              Creada: {new Date(app.created_at).toLocaleDateString()}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {apps.length === 0 && (

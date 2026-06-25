@@ -32,13 +32,20 @@ const SECTIONS = [
       { href: "/seller/licenses", label: "Licencias", icon: Key },
       { href: "/seller/users", label: "Usuarios", icon: Users },
       { href: "/seller/sub-sellers", label: "Sub-sellers", icon: Users },
-      { href: "/seller/credits", label: "Créditos", icon: Coins },
+    ],
+  },
+  {
+    label: "BOT & AUTOMATIZACIÓN",
+    items: [
+      { href: "/seller/bot-licenses", label: "Licencias de Bot", icon: Key },
+      { href: "/seller/bot-users", label: "Usuarios de Bot", icon: Users },
     ],
   },
   {
     label: "CUENTA",
     items: [
       { href: "/seller/api", label: "API & Discord Bot", icon: Code },
+      { href: "/seller/credits", label: "Créditos", icon: Coins },
       { href: "/seller/security", label: "Seguridad", icon: Lock },
       { href: "/seller/settings", label: "Configuración", icon: Settings },
     ],

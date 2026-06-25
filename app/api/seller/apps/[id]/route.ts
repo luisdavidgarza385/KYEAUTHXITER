@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
-import { hashPassword } from "@/lib/auth";
 
-// GET - List users for seller's apps
-export async function GET(req: NextRequest) {
+// PATCH - Update app
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const sellerSession = req.cookies.get("seller_session")?.value;
+
     if (!sellerSession) {
       return NextResponse.json(
         { success: false, message: "No autorizado" },
@@ -14,6 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     const seller = await store.getSellerById(sellerSession);
+
     if (!seller) {
       return NextResponse.json(
         { success: false, message: "Sesión inválida" },
@@ -21,15 +25,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const url = new URL(req.url);
-    const appId = url.searchParams.get("app_id");
-
-    if (!appId) {
-      return NextResponse.json(
-        { success: false, message: "app_id es requerido" },
-        { status: 400 }
-      );
-    }
+    const appId = params.id;
 
     // Verify the app belongs to this seller
     const app = await store.getAppById(appId);
@@ -40,14 +36,24 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const users = await store.listAppUsers({ appId, limit: 500 });
+    const body = await req.json();
+    const { name, version, status, download_link, webhook_url } = body;
+
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (version !== undefined) updates.version = version;
+    if (status !== undefined) updates.status = status;
+    if (download_link !== undefined) updates.download_link = download_link || null;
+    if (webhook_url !== undefined) updates.webhook_url = webhook_url || null;
+
+    const updatedApp = await store.updateApp(appId, updates);
 
     return NextResponse.json({
       success: true,
-      data: users,
+      data: updatedApp,
     });
   } catch (error: any) {
-    console.error("Error listing users:", error);
+    console.error("Error updating app:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -55,10 +61,14 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST - Create a new user
-export async function POST(req: NextRequest) {
+// DELETE - Delete app
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const sellerSession = req.cookies.get("seller_session")?.value;
+
     if (!sellerSession) {
       return NextResponse.json(
         { success: false, message: "No autorizado" },
@@ -67,6 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     const seller = await store.getSellerById(sellerSession);
+
     if (!seller) {
       return NextResponse.json(
         { success: false, message: "Sesión inválida" },
@@ -74,18 +85,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const { app_id, username, email, password } = body;
-
-    if (!app_id || !username || !password) {
-      return NextResponse.json(
-        { success: false, message: "app_id, username y password son requeridos" },
-        { status: 400 }
-      );
-    }
+    const appId = params.id;
 
     // Verify the app belongs to this seller
-    const app = await store.getAppById(app_id);
+    const app = await store.getAppById(appId);
     if (!app || app.seller_id !== seller.id) {
       return NextResponse.json(
         { success: false, message: "App no autorizada" },
@@ -93,40 +96,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if username already exists for this app
-    const existingUsers = await store.listAppUsers({ appId: app_id, limit: 10000 });
-    const userExists = existingUsers.some((u) => u.username.toLowerCase() === username.toLowerCase());
-    
-    if (userExists) {
-      return NextResponse.json(
-        { success: false, message: "El usuario ya existe en esta aplicación" },
-        { status: 400 }
-      );
-    }
-
-    // Hash password
-    const passwordHash = await hashPassword(password);
-
-    // Create user
-    const newUser = await store.createAppUser({
-      app_id,
-      username,
-      email: email || null,
-      password_hash: passwordHash,
-      hwid: null,
-      ip: null,
-      last_login: null,
-      banned: false,
-      ban_reason: null,
-    });
+    await store.deleteApp(appId);
 
     return NextResponse.json({
       success: true,
-      data: newUser,
-      message: "Usuario creado exitosamente",
+      message: "Aplicación eliminada",
     });
   } catch (error: any) {
-    console.error("Error creating user:", error);
+    console.error("Error deleting app:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }

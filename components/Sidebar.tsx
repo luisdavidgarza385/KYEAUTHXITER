@@ -18,6 +18,7 @@ import {
   Terminal,
   Settings,
   MessageSquare,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +47,7 @@ const SECTIONS = [
     items: [
       { href: "/dashboard/security", label: "Seguridad (2FA)", icon: Lock, adminOnly: false },
       { href: "/dashboard/api", label: "API", icon: Code, adminOnly: false },
+      { href: "/dashboard/bot", label: "Bot Discord", icon: Bot, adminOnly: false },
       { href: "/dashboard/settings", label: "Configuración", icon: Settings, adminOnly: false },
     ],
   },

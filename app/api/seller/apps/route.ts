@@ -87,9 +87,9 @@ export async function POST(req: NextRequest) {
     const ownerSecret = randomBytes(32).toString("hex");
     const appSecret = randomBytes(32).toString("hex");
 
-    // Create app
+    // Create app with seller_id (not owner_id, since seller is not in admin_users table)
     const app = await store.createApp({
-      owner_id: seller.id,
+      owner_id: null, // Sellers don't have owner_id since they're not admins
       name,
       app_id: appId,
       owner_secret: ownerSecret,

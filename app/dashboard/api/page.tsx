@@ -6,6 +6,7 @@ import { Copy, Check, Code, Bot } from "lucide-react";
 interface App {
   id: string;
   name: string;
+  seller_id?: string | null;
 }
 
 export default function AdminAPIPage() {
@@ -30,9 +31,11 @@ export default function AdminAPIPage() {
       const res = await fetch("/api/admin/apps");
       if (res.ok) {
         const data = await res.json();
-        setApps(data);
-        if (data.length > 0) {
-          setSelectedApp(data[0].id);
+        // Filter only admin apps (seller_id is null)
+        const adminApps = data.filter((app: App) => !app.seller_id);
+        setApps(adminApps);
+        if (adminApps.length > 0) {
+          setSelectedApp(adminApps[0].id);
         }
       }
     } catch (error) {
@@ -93,11 +96,11 @@ export default function AdminAPIPage() {
     }
   };
 
-  const apiUrl = typeof window !== "undefined" ? window.location.origin : "https://www.keyauthpro.xyz";
-  const exampleUrl = `${apiUrl}/api/1.0/?type=init&sessionid=${adminKey}&name=${selectedApp || "APP_NAME"}&ver=1.0&hwid=HWID`;
+  const apiUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const exampleUrl = apiUrl ? `${apiUrl}/api/1.0/?type=init&sessionid=${adminKey}&name=${selectedApp || "APP_NAME"}&ver=1.0&hwid=HWID` : "";
 
   const codeExamples: Record<string, string> = {
-    csharp: `using System;
+    csharp: apiUrl ? `using System;
 using System.Net.Http;
 
 class Program
@@ -116,8 +119,8 @@ class Program
         string result = await response.Content.ReadAsStringAsync();
         Console.WriteLine(result);
     }
-}`,
-    python: `import requests
+}` : "Cargando...",
+    python: apiUrl ? `import requests
 
 app_name = "${selectedApp}"
 api_secret = "${adminKey}"
@@ -132,8 +135,8 @@ params = {
 }
 
 response = requests.get(api_url, params=params)
-print(response.json())`,
-    js: `const axios = require('axios');
+print(response.json())` : "Cargando...",
+    js: apiUrl ? `const axios = require('axios');
 
 const appName = "${selectedApp}";
 const apiSecret = "${adminKey}";
@@ -149,8 +152,8 @@ const params = {
 
 axios.get(apiUrl, { params })
     .then(response => console.log(response.data))
-    .catch(error => console.error(error));`,
-    cpp: `#include <iostream>
+    .catch(error => console.error(error));` : "Cargando...",
+    cpp: apiUrl ? `#include <iostream>
 #include <curl/curl.h>
 
 int main() {
@@ -168,7 +171,7 @@ int main() {
         curl_easy_cleanup(curl);
     }
     return 0;
-}`,
+}` : "Cargando...",
   };
 
   return (

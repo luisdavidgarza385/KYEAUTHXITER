@@ -23,6 +23,7 @@ export default function SellerAppsPage() {
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState("C++");
+  const [showCodeSnippet, setShowCodeSnippet] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
   });
@@ -494,54 +495,131 @@ export default function SellerAppsPage() {
       {/* Application Credentials Modal */}
       {showCredentialsModal && selectedApp && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full border border-gray-700 my-8">
-            <h2 className="text-xl font-bold text-white mb-4">Application Credentials</h2>
-            <p className="text-sm text-gray-400 mb-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-4xl w-full border border-gray-700 my-8">
+            <h2 className="text-xl font-bold text-white mb-2">Application Credentials</h2>
+            <p className="text-sm text-gray-400 mb-6">
               Simply replace the placeholder code in the example with these:
             </p>
 
-            {/* Language Selector */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Select Language:
-              </label>
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+            {/* Toggle Display Code Snippet */}
+            <div className="flex items-center justify-between mb-4 p-3 bg-gray-900/50 rounded border border-gray-700">
+              <span className="text-sm text-gray-300">Display Code Snippet</span>
+              <button
+                type="button"
+                onClick={() => setShowCodeSnippet(!showCodeSnippet)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                  showCodeSnippet ? "bg-emerald-600" : "bg-gray-600"
+                }`}
               >
-                {languages.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang}
-                  </option>
-                ))}
-              </select>
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                    showCodeSnippet ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
             </div>
 
-            {/* Credentials Display */}
-            <div className="space-y-3 mb-4">
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">Application Name</label>
-                <code className="block bg-gray-900 text-emerald-400 px-3 py-2 rounded font-mono text-sm">
-                  {selectedApp.name}
-                </code>
+            {/* Application Credentials Section */}
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-white mb-3">Application Credentials</h3>
+              <p className="text-xs text-gray-400 mb-3">
+                Simply replace the placeholder code in the example with these
+              </p>
+              
+              {/* Toggle Display Code Snippet */}
+              <div className="flex items-center justify-between mb-4 p-3 bg-gray-900/50 rounded border border-gray-700">
+                <span className="text-sm text-gray-300">Display Code Snippet</span>
+                <button
+                  type="button"
+                  onClick={() => setShowCodeSnippet(!showCodeSnippet)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                    showCodeSnippet ? "bg-emerald-600" : "bg-gray-600"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                      showCodeSnippet ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
               </div>
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">App ID</label>
-                <code className="block bg-gray-900 text-emerald-400 px-3 py-2 rounded font-mono text-sm break-all">
-                  {selectedApp.app_id}
-                </code>
-              </div>
-            </div>
 
-            {/* Code Example (mock) */}
-            <div className="bg-gray-900 rounded p-4 mb-4">
-              <pre className="text-xs text-gray-300 font-mono overflow-x-auto">
-{`// ${selectedLanguage} Example
-app_id = "${selectedApp.app_id}"
-app_name = "${selectedApp.name}"
-version = "${selectedApp.version}"`}
-              </pre>
+              {/* Language Selector */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Select Language:
+                </label>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {lang}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Code Example */}
+              {showCodeSnippet && (
+                <div className="bg-gray-900 rounded p-4 mb-4 relative">
+                  <pre className="text-sm text-gray-300 font-mono overflow-x-auto whitespace-pre-wrap">
+{`#include <iostream>
+#include <string>
+#include "skCrypt.h"
+
+std::string name = skCrypt("${selectedApp.name}").decrypt();
+std::string ownerid = skCrypt("${selectedApp.app_id.split('.')[0]}").decrypt();
+std::string version = skCrypt("${selectedApp.version}").decrypt();
+std::string url = skCrypt("https://www.keyauthpro.xyz/api/1.0/").decrypt();
+std::string path = skCrypt("").decrypt();
+std::string secret = skCrypt("ta1r1K38h3dMara711f4f411f0461b17a7").decrypt();`}
+                  </pre>
+                  
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const code = `#include <iostream>\n#include <string>\n#include "skCrypt.h"\n\nstd::string name = skCrypt("${selectedApp.name}").decrypt();\nstd::string ownerid = skCrypt("${selectedApp.app_id.split('.')[0]}").decrypt();\nstd::string version = skCrypt("${selectedApp.version}").decrypt();\nstd::string url = skCrypt("https://www.keyauthpro.xyz/api/1.0/").decrypt();\nstd::string path = skCrypt("").decrypt();\nstd::string secret = skCrypt("ta1r1K38h3dMara711f4f411f0461b17a7").decrypt();`;
+                        navigator.clipboard.writeText(code);
+                        alert("Código copiado");
+                      }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition"
+                    >
+                      📋 Copy Code
+                    </button>
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium transition"
+                    >
+                      📖 View Example
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tutorial Link */}
+              <button
+                type="button"
+                className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2 mb-4"
+              >
+                <span>👁️</span> View Tutorial
+              </button>
+
+              {/* Application Name */}
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-400 mb-1 uppercase">
+                  Application Name
+                </label>
+                <input
+                  type="text"
+                  value={selectedApp.name}
+                  readOnly
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white font-mono text-sm"
+                />
+              </div>
             </div>
 
             <div className="flex gap-3">

@@ -19,7 +19,12 @@ export default async function DashboardPage() {
   ]);
 
   // Filter apps, licenses and users belonging to this reseller
-  const apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+  let apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+  
+  // IMPORTANT: Admin should NOT see seller apps (seller_id must be null for admin apps)
+  if (me.role === "admin" || me.role === "developer") {
+    apps = apps.filter((a) => a.seller_id === null || a.seller_id === undefined);
+  }
   
   // Find sub-resellers created by this admin
   const subResellers = allAdmins.filter((a) => a.created_by === me.id);

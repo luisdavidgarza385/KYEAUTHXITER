@@ -320,6 +320,18 @@ export const localStore: Store = {
     });
   },
 
+  async resetLicenseHwid(id) {
+    return withWrite(async (db) => {
+      const lic = db.licenses.find((l) => l.id === id);
+      if (lic) {
+        lic.used_by = null;
+        lic.hwid_lock = false;
+        return lic;
+      }
+      return null;
+    });
+  },
+
   async getSession(sessionId) {
     const s = (await read()).sessions.find((s) => s.session_id === sessionId);
     if (!s) return null;

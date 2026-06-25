@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, ExternalLink, Check, Code, Bot, Store } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Copy, Check, Code, Bot } from "lucide-react";
 
 interface App {
   id: string;
@@ -20,13 +13,9 @@ export default function AdminAPIPage() {
   const [selectedApp, setSelectedApp] = useState<string>("");
   const [adminKey, setAdminKey] = useState<string>("");
   const [copied, setCopied] = useState<string>("");
-  const { toast } = useToast();
-
-  // Estados para el probador
+  const [activeTab, setActiveTab] = useState<string>("examples");
+  const [activeCodeTab, setActiveCodeTab] = useState<string>("csharp");
   const [testType, setTestType] = useState<string>("init");
-  const [testExpiry, setTestExpiry] = useState<string>("30");
-  const [testAmount, setTestAmount] = useState<string>("1");
-  const [testLevel, setTestLevel] = useState<string>("1");
   const [testHwid, setTestHwid] = useState<string>("TEST-HWID-001");
   const [testResponse, setTestResponse] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,13 +41,11 @@ export default function AdminAPIPage() {
   };
 
   const fetchAdminKey = async () => {
-    // Generar una key de admin (en producción esto debería venir de la base de datos)
     const key = generateAdminKey();
     setAdminKey(key);
   };
 
   const generateAdminKey = () => {
-    // Genera una key aleatoria de 32 caracteres
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     let key = "";
     for (let i = 0; i < 32; i++) {
@@ -71,19 +58,11 @@ export default function AdminAPIPage() {
     navigator.clipboard.writeText(text);
     setCopied(label);
     setTimeout(() => setCopied(""), 2000);
-    toast({
-      title: "Copiado",
-      description: `${label} copiado al portapapeles`,
-    });
   };
 
   const testEndpoint = async () => {
     if (!selectedApp) {
-      toast({
-        title: "Error",
-        description: "Selecciona una aplicación",
-        variant: "destructive",
-      });
+      alert("Selecciona una aplicación");
       return;
     }
 
@@ -117,162 +96,8 @@ export default function AdminAPIPage() {
   const apiUrl = typeof window !== "undefined" ? window.location.origin : "https://www.keyauthpro.xyz";
   const exampleUrl = `${apiUrl}/api/1.0/?type=init&sessionid=${adminKey}&name=${selectedApp || "APP_NAME"}&ver=1.0&hwid=HWID`;
 
-  return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">Integración de API</h1>
-        <p className="text-muted-foreground mt-2">
-          Conecta tu client/loader a nuestra API KeyAuth 1.0 compatible
-        </p>
-      </div>
-
-      <Tabs defaultValue="examples" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="examples">
-            <Code className="w-4 h-4 mr-2" />
-            Ejemplos de Código
-          </TabsTrigger>
-          <TabsTrigger value="tester">
-            <Bot className="w-4 h-4 mr-2" />
-            Probador de Endpoints (Tester)
-          </TabsTrigger>
-        </TabsList>
-
-        {/* TAB 1: EJEMPLOS DE CÓDIGO */}
-        <TabsContent value="examples" className="space-y-6">
-          {/* Configuración */}
-          <Card>
-            <CardHeader>
-              <CardTitle>🔑 Credenciales de API</CardTitle>
-              <CardDescription>
-                Usa estas credenciales para conectar tu aplicación
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>APP NAME / ID</Label>
-                  <div className="flex gap-2">
-                    <Input value={selectedApp} readOnly />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => copyToClipboard(selectedApp, "App ID")}
-                    >
-                      {copied === "App ID" ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>API SECRET</Label>
-                  <div className="flex gap-2">
-                    <Input type="password" value={adminKey} readOnly />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => copyToClipboard(adminKey, "API Secret")}
-                    >
-                      {copied === "API Secret" ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Seleccionar Aplicación</Label>
-                <Select value={selectedApp} onValueChange={setSelectedApp}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una app" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {apps.map((app) => (
-                      <SelectItem key={app.id} value={app.id}>
-                        {app.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ejemplo de URL */}
-          <Card>
-            <CardHeader>
-              <CardTitle>📝 Ejemplo de URL</CardTitle>
-              <CardDescription>URL Completa para inicializar sesión</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>URL Completa:</Label>
-                <div className="flex gap-2">
-                  <Input value={exampleUrl} readOnly className="font-mono text-xs" />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(exampleUrl, "URL")}
-                  >
-                    {copied === "URL" ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Parámetros:</Label>
-                <div className="bg-muted p-4 rounded-lg space-y-1 text-sm font-mono">
-                  <div><span className="text-primary">type</span> - init, login, register, license, var, log, logout</div>
-                  <div><span className="text-primary">sessionid</span> - Tu API Secret</div>
-                  <div><span className="text-primary">name</span> - ID de tu aplicación</div>
-                  <div><span className="text-primary">ver</span> - Versión de la app (ej: 1.0)</div>
-                  <div><span className="text-primary">hwid</span> - Hardware ID del usuario</div>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">
-                  <Code className="w-4 h-4 mr-2" />
-                  Ver Documentación
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Ver Tutorial
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ejemplos de Código */}
-          <Card>
-            <CardHeader>
-              <CardTitle>💻 Ejemplos de Código</CardTitle>
-              <CardDescription>Implementaciones en diferentes lenguajes</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Tabs defaultValue="csharp">
-                <TabsList>
-                  <TabsTrigger value="csharp">C#</TabsTrigger>
-                  <TabsTrigger value="cpp">C++</TabsTrigger>
-                  <TabsTrigger value="python">Python</TabsTrigger>
-                  <TabsTrigger value="js">JavaScript</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="csharp">
-                  <div className="relative">
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
-{`using System;
+  const codeExamples: Record<string, string> = {
+    csharp: `using System;
 using System.Net.Http;
 
 class Program
@@ -291,23 +116,8 @@ class Program
         string result = await response.Content.ReadAsStringAsync();
         Console.WriteLine(result);
     }
-}`}
-                    </pre>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código C#")}
-                    >
-                      {copied === "Código C#" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="python">
-                  <div className="relative">
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
-{`import requests
+}`,
+    python: `import requests
 
 app_name = "${selectedApp}"
 api_secret = "${adminKey}"
@@ -322,23 +132,8 @@ params = {
 }
 
 response = requests.get(api_url, params=params)
-print(response.json())`}
-                    </pre>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código Python")}
-                    >
-                      {copied === "Código Python" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="js">
-                  <div className="relative">
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
-{`const axios = require('axios');
+print(response.json())`,
+    js: `const axios = require('axios');
 
 const appName = "${selectedApp}";
 const apiSecret = "${adminKey}";
@@ -354,23 +149,8 @@ const params = {
 
 axios.get(apiUrl, { params })
     .then(response => console.log(response.data))
-    .catch(error => console.error(error));`}
-                    </pre>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código JS")}
-                    >
-                      {copied === "Código JS" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="cpp">
-                  <div className="relative">
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
-{`#include <iostream>
+    .catch(error => console.error(error));`,
+    cpp: `#include <iostream>
 #include <curl/curl.h>
 
 int main() {
@@ -388,124 +168,242 @@ int main() {
         curl_easy_cleanup(curl);
     }
     return 0;
-}`}
-                    </pre>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código C++")}
-                    >
-                      {copied === "Código C++" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </Button>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </TabsContent>
+}`,
+  };
 
-        {/* TAB 2: PROBADOR DE ENDPOINTS */}
-        <TabsContent value="tester" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>🧪 Probador de Endpoints (Tester)</CardTitle>
-              <CardDescription>
-                Prueba los endpoints de la API directamente desde aquí
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Acción (TYPE)</Label>
-                  <Select value={testType} onValueChange={setTestType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="init">init (Iniciar Sesión)</SelectItem>
-                      <SelectItem value="login">login (Login)</SelectItem>
-                      <SelectItem value="register">register (Registro)</SelectItem>
-                      <SelectItem value="license">license (Validar License)</SelectItem>
-                      <SelectItem value="var">var (Variables)</SelectItem>
-                      <SelectItem value="log">log (Logs)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+  return (
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white">Integración de API</h1>
+        <p className="text-gray-400 mt-2">
+          Conecta tu client/loader a nuestra API KeyAuth 1.0 compatible
+        </p>
+      </div>
 
-                <div className="space-y-2">
-                  <Label>HWID</Label>
-                  <Input
-                    value={testHwid}
-                    onChange={(e) => setTestHwid(e.target.value)}
-                    placeholder="TEST-HWID-001"
+      {/* Tabs */}
+      <div className="border-b border-gray-700">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab("examples")}
+            className={`px-4 py-2 flex items-center gap-2 border-b-2 transition ${
+              activeTab === "examples"
+                ? "border-emerald-500 text-white"
+                : "border-transparent text-gray-400 hover:text-white"
+            }`}
+          >
+            <Code className="w-4 h-4" />
+            Ejemplos de Código
+          </button>
+          <button
+            onClick={() => setActiveTab("tester")}
+            className={`px-4 py-2 flex items-center gap-2 border-b-2 transition ${
+              activeTab === "tester"
+                ? "border-emerald-500 text-white"
+                : "border-transparent text-gray-400 hover:text-white"
+            }`}
+          >
+            <Bot className="w-4 h-4" />
+            Probador de Endpoints
+          </button>
+        </div>
+      </div>
+
+      {activeTab === "examples" && (
+        <div className="space-y-6">
+          {/* Credenciales */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-white mb-4">🔑 Credenciales de API</h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Usa estas credenciales para conectar tu aplicación
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">APP NAME / ID</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={selectedApp}
+                    readOnly
+                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
                   />
+                  <button
+                    onClick={() => copyToClipboard(selectedApp, "App ID")}
+                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded text-white transition"
+                  >
+                    {copied === "App ID" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">API SECRET</label>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={adminKey}
+                    readOnly
+                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  />
+                  <button
+                    onClick={() => copyToClipboard(adminKey, "API Secret")}
+                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded text-white transition"
+                  >
+                    {copied === "API Secret" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">Seleccionar Aplicación</label>
+              <select
+                value={selectedApp}
+                onChange={(e) => setSelectedApp(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+              >
+                {apps.map((app) => (
+                  <option key={app.id} value={app.id}>
+                    {app.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Ejemplo de URL */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-white mb-4">📝 Ejemplo de URL</h2>
+            <p className="text-gray-400 text-sm mb-4">URL Completa para inicializar sesión</p>
+
+            <div className="space-y-2 mb-4">
+              <label className="block text-sm font-medium text-gray-300">URL Completa:</label>
               <div className="flex gap-2">
-                <Button onClick={testEndpoint} disabled={isLoading} className="flex-1">
-                  {isLoading ? "Enviando..." : "✉️ ENVIAR SOLICITUD"}
-                </Button>
+                <input
+                  type="text"
+                  value={exampleUrl}
+                  readOnly
+                  className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white font-mono text-xs"
+                />
+                <button
+                  onClick={() => copyToClipboard(exampleUrl, "URL")}
+                  className="px-3 py-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded text-white transition"
+                >
+                  {copied === "URL" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-gray-900/50 p-4 rounded-lg space-y-1 text-sm font-mono text-gray-300">
+              <div><span className="text-emerald-400">type</span> - init, login, register, license, var, log, logout</div>
+              <div><span className="text-emerald-400">sessionid</span> - Tu API Secret</div>
+              <div><span className="text-emerald-400">name</span> - ID de tu aplicación</div>
+              <div><span className="text-emerald-400">ver</span> - Versión de la app (ej: 1.0)</div>
+              <div><span className="text-emerald-400">hwid</span> - Hardware ID del usuario</div>
+            </div>
+          </div>
+
+          {/* Ejemplos de Código */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-white mb-4">💻 Ejemplos de Código</h2>
+
+            <div className="border-b border-gray-700 mb-4">
+              <div className="flex gap-2">
+                {["csharp", "cpp", "python", "js"].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setActiveCodeTab(lang)}
+                    className={`px-4 py-2 border-b-2 transition ${
+                      activeCodeTab === lang
+                        ? "border-emerald-500 text-white"
+                        : "border-transparent text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    {lang === "csharp" ? "C#" : lang === "cpp" ? "C++" : lang === "python" ? "Python" : "JavaScript"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <pre className="bg-gray-900/50 p-4 rounded-lg overflow-x-auto text-xs text-gray-300">
+                {codeExamples[activeCodeTab]}
+              </pre>
+              <button
+                onClick={() => copyToClipboard(codeExamples[activeCodeTab], `Código ${activeCodeTab}`)}
+                className="absolute top-2 right-2 px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white transition"
+              >
+                {copied === `Código ${activeCodeTab}` ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "tester" && (
+        <div className="space-y-6">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-white mb-4">🧪 Probador de Endpoints</h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Prueba los endpoints de la API directamente desde aquí
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">Acción (TYPE)</label>
+                <select
+                  value={testType}
+                  onChange={(e) => setTestType(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                >
+                  <option value="init">init (Iniciar Sesión)</option>
+                  <option value="login">login (Login)</option>
+                  <option value="register">register (Registro)</option>
+                  <option value="license">license (Validar License)</option>
+                  <option value="var">var (Variables)</option>
+                  <option value="log">log (Logs)</option>
+                </select>
               </div>
 
-              {testResponse && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label>Respuesta:</Label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(testResponse, "Respuesta")}
-                    >
-                      {copied === "Respuesta" ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs max-h-96">
-                    {testResponse}
-                  </pre>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">HWID</label>
+                <input
+                  type="text"
+                  value={testHwid}
+                  onChange={(e) => setTestHwid(e.target.value)}
+                  placeholder="TEST-HWID-001"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={testEndpoint}
+              disabled={isLoading}
+              className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 text-white rounded transition"
+            >
+              {isLoading ? "Enviando..." : "✉️ ENVIAR SOLICITUD"}
+            </button>
+
+            {testResponse && (
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="block text-sm font-medium text-gray-300">Respuesta:</label>
+                  <button
+                    onClick={() => copyToClipboard(testResponse, "Respuesta")}
+                    className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white transition text-sm"
+                  >
+                    {copied === "Respuesta" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-green-500/20 bg-green-500/5">
-            <CardHeader>
-              <CardTitle className="text-green-500">✅ Ejemplos de Respuesta</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label className="text-green-500">✅ Éxito (init):</Label>
-                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs mt-2">
-{`{
-  "success": true,
-  "message": "Initialized",
-  "sessionid": "abc123...",
-  "app": {
-    "name": "MyApp",
-    "version": "1.0"
-  }
-}`}
+                <pre className="bg-gray-900/50 p-4 rounded-lg overflow-x-auto text-xs text-gray-300 max-h-96">
+                  {testResponse}
                 </pre>
               </div>
-
-              <div>
-                <Label className="text-red-500">❌ Error:</Label>
-                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs mt-2">
-{`{
-  "success": false,
-  "message": "Invalid credentials"
-}`}
-                </pre>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

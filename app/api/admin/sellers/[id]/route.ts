@@ -6,12 +6,20 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const adminSession = req.cookies.get("admin_session")?.value;
+    const adminSession = req.cookies.get("ka_admin_session")?.value;
     if (!adminSession) {
       return NextResponse.json({ success: false, message: "No autorizado" }, { status: 401 });
     }
 
-    const admin = await store.getAdminById(adminSession);
+    // Decode the base64 cookie
+    let adminData;
+    try {
+      adminData = JSON.parse(Buffer.from(adminSession, "base64").toString());
+    } catch (e) {
+      return NextResponse.json({ success: false, message: "Sesión inválida" }, { status: 401 });
+    }
+
+    const admin = await store.getAdminById(adminData.id);
     if (!admin) {
       return NextResponse.json({ success: false, message: "Sesión inválida" }, { status: 401 });
     }
@@ -41,12 +49,20 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const adminSession = req.cookies.get("admin_session")?.value;
+    const adminSession = req.cookies.get("ka_admin_session")?.value;
     if (!adminSession) {
       return NextResponse.json({ success: false, message: "No autorizado" }, { status: 401 });
     }
 
-    const admin = await store.getAdminById(adminSession);
+    // Decode the base64 cookie
+    let adminData;
+    try {
+      adminData = JSON.parse(Buffer.from(adminSession, "base64").toString());
+    } catch (e) {
+      return NextResponse.json({ success: false, message: "Sesión inválida" }, { status: 401 });
+    }
+
+    const admin = await store.getAdminById(adminData.id);
     if (!admin) {
       return NextResponse.json({ success: false, message: "Sesión inválida" }, { status: 401 });
     }

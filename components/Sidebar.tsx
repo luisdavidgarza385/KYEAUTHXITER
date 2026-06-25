@@ -149,7 +149,6 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
         {SECTIONS.map((section) => {
           const items = section.items.filter((i) => {
             if (i.adminOnly && !isAdmin) return false;
-            if (i.hideForSubReseller && isSubReseller) return false;
             return true;
           });
           if (items.length === 0) return null;

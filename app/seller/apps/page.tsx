@@ -37,6 +37,120 @@ export default function SellerAppsPage() {
 
   const languages = ["C++", "C#", "Python", "JavaScript", "TypeScript", "PHP", "Java", "VB.Net", "Rust", "Go", "Lua", "Ruby", "Perl"];
 
+  // Function to generate code based on language
+  function getCodeForLanguage(lang: string, app: App) {
+    const appId = app.app_id.split('.')[0];
+    const secret = "ta1r1K38h3dMara711f4f411f0461b17a7";
+    
+    switch (lang) {
+      case "C++":
+        return `#include <iostream>
+#include <string>
+#include "skCrypt.h"
+
+std::string name = skCrypt("${app.name}").decrypt();
+std::string ownerid = skCrypt("${appId}").decrypt();
+std::string version = skCrypt("${app.version}").decrypt();
+std::string url = skCrypt("https://www.keyauthpro.xyz/api/1.0/").decrypt();
+std::string path = skCrypt("").decrypt();
+std::string secret = skCrypt("${secret}").decrypt();`;
+      
+      case "C#":
+        return `string name = "${app.name}";
+string ownerid = "${appId}";
+string version = "${app.version}";
+string url = "https://www.keyauthpro.xyz/api/1.0/";
+string path = "";
+string secret = "${secret}";`;
+      
+      case "Python":
+        return `name = "${app.name}"
+ownerid = "${appId}"
+version = "${app.version}"
+url = "https://www.keyauthpro.xyz/api/1.0/"
+path = ""
+secret = "${secret}"`;
+      
+      case "JavaScript":
+      case "TypeScript":
+        return `const name = "${app.name}";
+const ownerid = "${appId}";
+const version = "${app.version}";
+const url = "https://www.keyauthpro.xyz/api/1.0/";
+const path = "";
+const secret = "${secret}";`;
+      
+      case "PHP":
+        return `<?php
+$name = "${app.name}";
+$ownerid = "${appId}";
+$version = "${app.version}";
+$url = "https://www.keyauthpro.xyz/api/1.0/";
+$path = "";
+$secret = "${secret}";
+?>`;
+      
+      case "Java":
+        return `String name = "${app.name}";
+String ownerid = "${appId}";
+String version = "${app.version}";
+String url = "https://www.keyauthpro.xyz/api/1.0/";
+String path = "";
+String secret = "${secret}";`;
+      
+      case "VB.Net":
+        return `Dim name As String = "${app.name}"
+Dim ownerid As String = "${appId}"
+Dim version As String = "${app.version}"
+Dim url As String = "https://www.keyauthpro.xyz/api/1.0/"
+Dim path As String = ""
+Dim secret As String = "${secret}"`;
+      
+      case "Rust":
+        return `let name = "${app.name}";
+let ownerid = "${appId}";
+let version = "${app.version}";
+let url = "https://www.keyauthpro.xyz/api/1.0/";
+let path = "";
+let secret = "${secret}";`;
+      
+      case "Go":
+        return `name := "${app.name}"
+ownerid := "${appId}"
+version := "${app.version}"
+url := "https://www.keyauthpro.xyz/api/1.0/"
+path := ""
+secret := "${secret}"`;
+      
+      case "Lua":
+        return `local name = "${app.name}"
+local ownerid = "${appId}"
+local version = "${app.version}"
+local url = "https://www.keyauthpro.xyz/api/1.0/"
+local path = ""
+local secret = "${secret}"`;
+      
+      case "Ruby":
+        return `name = "${app.name}"
+ownerid = "${appId}"
+version = "${app.version}"
+url = "https://www.keyauthpro.xyz/api/1.0/"
+path = ""
+secret = "${secret}"`;
+      
+      case "Perl":
+        return `my $name = "${app.name}";
+my $ownerid = "${appId}";
+my $version = "${app.version}";
+my $url = "https://www.keyauthpro.xyz/api/1.0/";
+my $path = "";
+my $secret = "${secret}";`;
+      
+      default:
+        return `// Code for ${lang}`;
+    }
+  }
+
   useEffect(() => {
     loadApps();
   }, []);
@@ -566,23 +680,14 @@ export default function SellerAppsPage() {
               {showCodeSnippet && (
                 <div className="bg-gray-900 rounded p-4 mb-4 relative">
                   <pre className="text-sm text-gray-300 font-mono overflow-x-auto whitespace-pre-wrap">
-{`#include <iostream>
-#include <string>
-#include "skCrypt.h"
-
-std::string name = skCrypt("${selectedApp.name}").decrypt();
-std::string ownerid = skCrypt("${selectedApp.app_id.split('.')[0]}").decrypt();
-std::string version = skCrypt("${selectedApp.version}").decrypt();
-std::string url = skCrypt("https://www.keyauthpro.xyz/api/1.0/").decrypt();
-std::string path = skCrypt("").decrypt();
-std::string secret = skCrypt("ta1r1K38h3dMara711f4f411f0461b17a7").decrypt();`}
+{getCodeForLanguage(selectedLanguage, selectedApp)}
                   </pre>
                   
                   <div className="flex gap-2 mt-4">
                     <button
                       type="button"
                       onClick={() => {
-                        const code = `#include <iostream>\n#include <string>\n#include "skCrypt.h"\n\nstd::string name = skCrypt("${selectedApp.name}").decrypt();\nstd::string ownerid = skCrypt("${selectedApp.app_id.split('.')[0]}").decrypt();\nstd::string version = skCrypt("${selectedApp.version}").decrypt();\nstd::string url = skCrypt("https://www.keyauthpro.xyz/api/1.0/").decrypt();\nstd::string path = skCrypt("").decrypt();\nstd::string secret = skCrypt("ta1r1K38h3dMara711f4f411f0461b17a7").decrypt();`;
+                        const code = getCodeForLanguage(selectedLanguage, selectedApp);
                         navigator.clipboard.writeText(code);
                         alert("Código copiado");
                       }}

@@ -1,383 +1,511 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { Code, Terminal, Play, Send, Loader2, Info, CheckCircle2, Copy } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Copy, ExternalLink, Check, Code, Bot, Store } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-export default function ApiPage() {
-  const [activeTab, setActiveTab] = useState<"cpp" | "python" | "csharp">("cpp");
-  const [appId, setAppId] = useState("GUATEXITER");
-  const [appSecret, setAppSecret] = useState("naUbJr6FWdx5nII2JQU6GVOFuqYqHzOVdPrvoVVPFtV2KAfJ");
-  const [action, setAction] = useState<"init" | "login" | "register" | "license">("init");
-  
-  // Input fields for tester
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [licenseKey, setLicenseKey] = useState("");
-  const [sessionId, setSessionId] = useState("");
-  const [hwid, setHwid] = useState("WEB-TESTER-0001");
+interface App {
+  id: string;
+  name: string;
+}
 
-  const [loading, setLoading] = useState(false);
-  const [rawResponse, setRawResponse] = useState<any>(null);
-  const [copiedCode, setCopiedCode] = useState(false);
+export default function AdminAPIPage() {
+  const [apps, setApps] = useState<App[]>([]);
+  const [selectedApp, setSelectedApp] = useState<string>("");
+  const [adminKey, setAdminKey] = useState<string>("");
+  const [copied, setCopied] = useState<string>("");
+  const { toast } = useToast();
+
+  // Estados para el probador
+  const [testType, setTestType] = useState<string>("init");
+  const [testExpiry, setTestExpiry] = useState<string>("30");
+  const [testAmount, setTestAmount] = useState<string>("1");
+  const [testLevel, setTestLevel] = useState<string>("1");
+  const [testHwid, setTestHwid] = useState<string>("TEST-HWID-001");
+  const [testResponse, setTestResponse] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Generate a random HWID on client mount
-    setHwid("WEB-" + Math.random().toString(36).slice(2, 10).toUpperCase());
+    fetchApps();
+    fetchAdminKey();
   }, []);
 
-  async function handleTestRequest() {
-    setLoading(true);
-    setRawResponse(null);
+  const fetchApps = async () => {
+    try {
+      const res = await fetch("/api/admin/apps");
+      if (res.ok) {
+        const data = await res.json();
+        setApps(data);
+        if (data.length > 0) {
+          setSelectedApp(data[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching apps:", error);
+    }
+  };
 
-    const body: Record<string, any> = {
-      type: action,
-      appid: appId,
-      secret: appSecret,
-      hwid: hwid,
-    };
+  const fetchAdminKey = async () => {
+    // Generar una key de admin (en producción esto debería venir de la base de datos)
+    const key = generateAdminKey();
+    setAdminKey(key);
+  };
 
-    if (action === "init") {
-      body.name = appId;
-    } else {
-      body.sessionid = sessionId;
+  const generateAdminKey = () => {
+    // Genera una key aleatoria de 32 caracteres
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let key = "";
+    for (let i = 0; i < 32; i++) {
+      key += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return key;
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(label);
+    setTimeout(() => setCopied(""), 2000);
+    toast({
+      title: "Copiado",
+      description: `${label} copiado al portapapeles`,
+    });
+  };
+
+  const testEndpoint = async () => {
+    if (!selectedApp) {
+      toast({
+        title: "Error",
+        description: "Selecciona una aplicación",
+        variant: "destructive",
+      });
+      return;
     }
 
-    if (action === "login" || action === "register") {
-      body.username = username;
-      body.pass = password;
-    }
-
-    if (action === "register" || action === "license") {
-      body.key = licenseKey;
-    }
+    setIsLoading(true);
+    setTestResponse("");
 
     try {
-      const res = await fetch("/api/1.0", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+      const params = new URLSearchParams({
+        type: testType,
+        sessionid: adminKey,
+        name: selectedApp,
+        hwid: testHwid,
       });
-      const data = await res.json();
-      setRawResponse(data);
-      
-      // Auto-populate session ID if init is successful
-      if (action === "init" && data.success && data.sessionid) {
-        setSessionId(data.sessionid);
+
+      if (testType === "init") {
+        params.append("ver", "1.0");
       }
-    } catch (err: any) {
-      setRawResponse({ success: false, error: err.message || "Error de red" });
+
+      const url = `${window.location.origin}/api/1.0/?${params.toString()}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      setTestResponse(JSON.stringify(data, null, 2));
+    } catch (error: any) {
+      setTestResponse(`Error: ${error.message}`);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }
+  };
 
-  const cppCode = `#include <iostream>
-#include <string>
-#include <curl/curl.h>
-#include <nlohmann/json.hpp> // Instala json de nlohmann
-
-using json = nlohmann::json;
-
-// Inicializa sesión
-std::string initSession(const std::string& app_id, const std::string& secret, const std::string& hwid) {
-    CURL* curl = curl_easy_init();
-    if(curl) {
-        std::string response_string;
-        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:3002/api/1.0");
-        curl_easy_setopt(curl, CURLOPT_POST, 1L);
-        
-        json data;
-        data["type"] = "init";
-        data["appid"] = app_id;
-        data["secret"] = secret;
-        data["hwid"] = hwid;
-        
-        std::string json_str = data.dump();
-        
-        struct curl_slist* headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_str.c_str());
-        
-        // Función de escritura curl para guardar la respuesta...
-        // ...
-        CURLcode res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-        return response_string; // Devuelve JSON crudo
-    }
-    return "";
-}`;
-
-  const pythonCode = `import requests
-
-API_URL = "http://localhost:3002/api/1.0"
-APP_ID = "${appId}"
-APP_SECRET = "${appSecret}"
-HWID = "MY_HWID_123"
-
-# 1. Inicializar sesión
-def init():
-    payload = {
-        "type": "init",
-        "appid": APP_ID,
-        "secret": APP_SECRET,
-        "hwid": HWID
-    }
-    response = requests.post(API_URL, json=payload).json()
-    if response.get("success"):
-        print("Sesión iniciada:", response["sessionid"])
-        return response["sessionid"]
-    else:
-        print("Error de inicio:", response.get("message"))
-        return None
-
-# 2. Login de usuario
-def login(session_id, username, password):
-    payload = {
-        "type": "login",
-        "appid": APP_ID,
-        "sessionid": session_id,
-        "username": username,
-        "pass": password,
-        "hwid": HWID
-    }
-    response = requests.post(API_URL, json=payload).json()
-    if response.get("success"):
-        print("¡Login exitoso! Bienvenido", response["info"]["username"])
-    else:
-        print("Error al iniciar sesión:", response.get("message"))`;
-
-  const csharpCode = `using System;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json; // Requiere Newtonsoft.Json NuGet
-
-public class KeyAuthTester {
-    private static readonly HttpClient client = new HttpClient();
-    private const string ApiUrl = "http://localhost:3002/api/1.0";
-
-    public static async Task<string> InitSession(string appId, string secret, string hwid) {
-        var payload = new {
-            type = "init",
-            appid = appId,
-            secret = secret,
-            hwid = hwid
-        };
-
-        var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync(ApiUrl, content);
-        var json = await response.Content.ReadAsStringAsync();
-        return json;
-    }
-}`;
-
-  const activeCode = activeTab === "cpp" ? cppCode : activeTab === "python" ? pythonCode : csharpCode;
-
-  function copyCodeToClipboard() {
-    navigator.clipboard.writeText(activeCode);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  }
+  const apiUrl = typeof window !== "undefined" ? window.location.origin : "https://www.keyauthpro.xyz";
+  const exampleUrl = `${apiUrl}/api/1.0/?type=init&sessionid=${adminKey}&name=${selectedApp || "APP_NAME"}&ver=1.0&hwid=HWID`;
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto text-zinc-300">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-800/60 pb-5">
-        <div>
-          <h1 className="text-xl font-bold flex items-center gap-2 text-zinc-100">
-            <Code className="w-5 h-5 text-emerald-400" />
-            Integración de API
-          </h1>
-          <p className="text-xs text-zinc-500 mt-1">Conecta tu cheat/loader a nuestra API KeyAuth 1.0 compatible.</p>
-        </div>
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-3xl font-bold">Integración de API</h1>
+        <p className="text-muted-foreground mt-2">
+          Conecta tu client/loader a nuestra API KeyAuth 1.0 compatible
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Side: Code Examples */}
-        <div className="space-y-4 flex flex-col">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-1.5">
-              <Terminal className="w-4 h-4 text-emerald-400" /> Ejemplos de Código
-            </h2>
-            <div className="flex gap-1.5 text-[11px] bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg">
-              <button
-                onClick={() => setActiveTab("cpp")}
-                className={`px-3 py-1 rounded font-bold uppercase transition ${
-                  activeTab === "cpp" ? "bg-emerald-950/20 text-emerald-400 border border-emerald-900/35" : "text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                C++
-              </button>
-              <button
-                onClick={() => setActiveTab("python")}
-                className={`px-3 py-1 rounded font-bold uppercase transition ${
-                  activeTab === "python" ? "bg-emerald-950/20 text-emerald-400 border border-emerald-900/35" : "text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                Python
-              </button>
-              <button
-                onClick={() => setActiveTab("csharp")}
-                className={`px-3 py-1 rounded font-bold uppercase transition ${
-                  activeTab === "csharp" ? "bg-emerald-950/20 text-emerald-400 border border-emerald-900/35" : "text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                C#
-              </button>
-            </div>
-          </div>
+      <Tabs defaultValue="examples" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="examples">
+            <Code className="w-4 h-4 mr-2" />
+            Ejemplos de Código
+          </TabsTrigger>
+          <TabsTrigger value="tester">
+            <Bot className="w-4 h-4 mr-2" />
+            Probador de Endpoints (Tester)
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="relative rounded-lg border border-zinc-800 bg-zinc-950 overflow-hidden flex-1 flex flex-col min-h-[400px]">
-            {/* Window header */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-850 bg-zinc-900/20 text-[11px] text-zinc-500 font-mono">
-              <span>{activeTab === "cpp" ? "main.cpp" : activeTab === "python" ? "auth.py" : "KeyAuth.cs"}</span>
-              <button
-                onClick={copyCodeToClipboard}
-                className="flex items-center gap-1 hover:text-zinc-300 transition"
-              >
-                {copiedCode ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedCode ? "Copiado" : "Copiar"}</span>
-              </button>
-            </div>
-            
-            <pre className="p-4 overflow-auto font-mono text-[12px] text-zinc-400 leading-relaxed flex-1 select-text bg-black/40">
-              <code>{activeCode}</code>
-            </pre>
-          </div>
-        </div>
-
-        {/* Right Side: Interactive API Tester */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-1.5">
-            <Play className="w-4 h-4 text-emerald-400" /> Probador de Endpoints (Tester)
-          </h2>
-          
-          <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">App Name / ID</label>
-                <input
-                  type="text"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-700 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition font-mono"
-                  value={appId}
-                  onChange={(e) => setAppId(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">App Secret</label>
-                <input
-                  type="password"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-700 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition font-mono"
-                  value={appSecret}
-                  onChange={(e) => setAppSecret(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">Acción API (type)</label>
-                <select
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition"
-                  value={action}
-                  onChange={(e) => setAction(e.target.value as any)}
-                >
-                  <option value="init" className="bg-zinc-950">init (Iniciar Sesión)</option>
-                  <option value="login" className="bg-zinc-950">login (Iniciar Usuario)</option>
-                  <option value="register" className="bg-zinc-950">register (Registrar Usuario)</option>
-                  <option value="license" className="bg-zinc-950">license (Verificar Licencia)</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">Hardware ID (hwid)</label>
-                <input
-                  type="text"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition font-mono"
-                  value={hwid}
-                  onChange={(e) => setHwid(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {action !== "init" && (
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">ID Sesión (sessionid)</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Inicia con 'init' primero para obtener sessionid"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-250 placeholder:text-zinc-600 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition font-mono"
-                  value={sessionId}
-                  onChange={(e) => setSessionId(e.target.value)}
-                />
-              </div>
-            )}
-
-            {(action === "login" || action === "register") && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">Usuario</label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="carlos1"
-                  />
+        {/* TAB 1: EJEMPLOS DE CÓDIGO */}
+        <TabsContent value="examples" className="space-y-6">
+          {/* Configuración */}
+          <Card>
+            <CardHeader>
+              <CardTitle>🔑 Credenciales de API</CardTitle>
+              <CardDescription>
+                Usa estas credenciales para conectar tu aplicación
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>APP NAME / ID</Label>
+                  <div className="flex gap-2">
+                    <Input value={selectedApp} readOnly />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => copyToClipboard(selectedApp, "App ID")}
+                    >
+                      {copied === "App ID" ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">Contraseña</label>
-                  <input
-                    type="password"
-                    required
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition font-mono"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                  />
+
+                <div className="space-y-2">
+                  <Label>API SECRET</Label>
+                  <div className="flex gap-2">
+                    <Input type="password" value={adminKey} readOnly />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => copyToClipboard(adminKey, "API Secret")}
+                    >
+                      {copied === "API Secret" ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {(action === "register" || action === "license") && (
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1 block">Clave de Licencia (key)</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Guate Xiter-XXXX-XXXX-XXXX-XXXX"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-1.5 rounded-lg text-xs outline-none focus:border-emerald-500/50 transition font-mono"
-                  value={licenseKey}
-                  onChange={(e) => setLicenseKey(e.target.value)}
-                />
-              </div>
-            )}
-
-            <button
-              onClick={handleTestRequest}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase transition shadow-lg shadow-emerald-500/10 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Procesando petición...</>
-              ) : (
-                <><Send className="w-3.5 h-3.5" /> Enviar Solicitud</>
-              )}
-            </button>
-
-            {/* Test response panel */}
-            {rawResponse && (
               <div className="space-y-2">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Respuesta de la API</div>
-                <pre className="p-3 bg-zinc-950 border border-zinc-800 rounded-lg font-mono text-[11px] text-zinc-350 max-h-48 overflow-y-auto select-all">
-                  {JSON.stringify(rawResponse, null, 2)}
+                <Label>Seleccionar Aplicación</Label>
+                <Select value={selectedApp} onValueChange={setSelectedApp}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una app" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {apps.map((app) => (
+                      <SelectItem key={app.id} value={app.id}>
+                        {app.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ejemplo de URL */}
+          <Card>
+            <CardHeader>
+              <CardTitle>📝 Ejemplo de URL</CardTitle>
+              <CardDescription>URL Completa para inicializar sesión</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>URL Completa:</Label>
+                <div className="flex gap-2">
+                  <Input value={exampleUrl} readOnly className="font-mono text-xs" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(exampleUrl, "URL")}
+                  >
+                    {copied === "URL" ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Parámetros:</Label>
+                <div className="bg-muted p-4 rounded-lg space-y-1 text-sm font-mono">
+                  <div><span className="text-primary">type</span> - init, login, register, license, var, log, logout</div>
+                  <div><span className="text-primary">sessionid</span> - Tu API Secret</div>
+                  <div><span className="text-primary">name</span> - ID de tu aplicación</div>
+                  <div><span className="text-primary">ver</span> - Versión de la app (ej: 1.0)</div>
+                  <div><span className="text-primary">hwid</span> - Hardware ID del usuario</div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1">
+                  <Code className="w-4 h-4 mr-2" />
+                  Ver Documentación
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Ver Tutorial
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ejemplos de Código */}
+          <Card>
+            <CardHeader>
+              <CardTitle>💻 Ejemplos de Código</CardTitle>
+              <CardDescription>Implementaciones en diferentes lenguajes</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Tabs defaultValue="csharp">
+                <TabsList>
+                  <TabsTrigger value="csharp">C#</TabsTrigger>
+                  <TabsTrigger value="cpp">C++</TabsTrigger>
+                  <TabsTrigger value="python">Python</TabsTrigger>
+                  <TabsTrigger value="js">JavaScript</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="csharp">
+                  <div className="relative">
+                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+{`using System;
+using System.Net.Http;
+
+class Program
+{
+    static async Task Main()
+    {
+        string appName = "${selectedApp}";
+        string apiSecret = "${adminKey}";
+        string apiUrl = "${apiUrl}/api/1.0/";
+        
+        var client = new HttpClient();
+        var response = await client.GetAsync(
+            $"{apiUrl}?type=init&sessionid={apiSecret}&name={appName}&ver=1.0&hwid=HWID"
+        );
+        
+        string result = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(result);
+    }
+}`}
+                    </pre>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código C#")}
+                    >
+                      {copied === "Código C#" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="python">
+                  <div className="relative">
+                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+{`import requests
+
+app_name = "${selectedApp}"
+api_secret = "${adminKey}"
+api_url = "${apiUrl}/api/1.0/"
+
+params = {
+    "type": "init",
+    "sessionid": api_secret,
+    "name": app_name,
+    "ver": "1.0",
+    "hwid": "HWID"
+}
+
+response = requests.get(api_url, params=params)
+print(response.json())`}
+                    </pre>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código Python")}
+                    >
+                      {copied === "Código Python" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="js">
+                  <div className="relative">
+                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+{`const axios = require('axios');
+
+const appName = "${selectedApp}";
+const apiSecret = "${adminKey}";
+const apiUrl = "${apiUrl}/api/1.0/";
+
+const params = {
+    type: 'init',
+    sessionid: apiSecret,
+    name: appName,
+    ver: '1.0',
+    hwid: 'HWID'
+};
+
+axios.get(apiUrl, { params })
+    .then(response => console.log(response.data))
+    .catch(error => console.error(error));`}
+                    </pre>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código JS")}
+                    >
+                      {copied === "Código JS" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="cpp">
+                  <div className="relative">
+                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+{`#include <iostream>
+#include <curl/curl.h>
+
+int main() {
+    std::string appName = "${selectedApp}";
+    std::string apiSecret = "${adminKey}";
+    std::string apiUrl = "${apiUrl}/api/1.0/";
+    
+    std::string url = apiUrl + "?type=init&sessionid=" + apiSecret + 
+                      "&name=" + appName + "&ver=1.0&hwid=HWID";
+    
+    CURL* curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+    }
+    return 0;
+}`}
+                    </pre>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => copyToClipboard(document.querySelector('pre')?.textContent || "", "Código C++")}
+                    >
+                      {copied === "Código C++" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB 2: PROBADOR DE ENDPOINTS */}
+        <TabsContent value="tester" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>🧪 Probador de Endpoints (Tester)</CardTitle>
+              <CardDescription>
+                Prueba los endpoints de la API directamente desde aquí
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Acción (TYPE)</Label>
+                  <Select value={testType} onValueChange={setTestType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="init">init (Iniciar Sesión)</SelectItem>
+                      <SelectItem value="login">login (Login)</SelectItem>
+                      <SelectItem value="register">register (Registro)</SelectItem>
+                      <SelectItem value="license">license (Validar License)</SelectItem>
+                      <SelectItem value="var">var (Variables)</SelectItem>
+                      <SelectItem value="log">log (Logs)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>HWID</Label>
+                  <Input
+                    value={testHwid}
+                    onChange={(e) => setTestHwid(e.target.value)}
+                    placeholder="TEST-HWID-001"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={testEndpoint} disabled={isLoading} className="flex-1">
+                  {isLoading ? "Enviando..." : "✉️ ENVIAR SOLICITUD"}
+                </Button>
+              </div>
+
+              {testResponse && (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label>Respuesta:</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(testResponse, "Respuesta")}
+                    >
+                      {copied === "Respuesta" ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs max-h-96">
+                    {testResponse}
+                  </pre>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-500/20 bg-green-500/5">
+            <CardHeader>
+              <CardTitle className="text-green-500">✅ Ejemplos de Respuesta</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-green-500">✅ Éxito (init):</Label>
+                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs mt-2">
+{`{
+  "success": true,
+  "message": "Initialized",
+  "sessionid": "abc123...",
+  "app": {
+    "name": "MyApp",
+    "version": "1.0"
+  }
+}`}
                 </pre>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
+
+              <div>
+                <Label className="text-red-500">❌ Error:</Label>
+                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs mt-2">
+{`{
+  "success": false,
+  "message": "Invalid credentials"
+}`}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

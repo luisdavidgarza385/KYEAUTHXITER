@@ -513,4 +513,7 @@ export const localStore: Store = {
   async deleteSeller() {
     throw new Error("Sellers require Supabase");
   },
+  async listSubSellers() {
+    throw new Error("Sub-sellers require Supabase");
+  },
 };

@@ -35,6 +35,7 @@ const SECTIONS = [
       { href: "/dashboard/licenses", label: "Licencias", icon: Key, adminOnly: false },
       { href: "/dashboard/sellers", label: "Sellers", icon: Users, adminOnly: false },
       { href: "/dashboard/users", label: "Usuarios", icon: Users, adminOnly: false },
+      { href: "/dashboard/sub-resellers", label: "Sub resellers", icon: Users, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
       { href: "/dashboard/shop", label: "Comprar VIP / PayPal", icon: Coins, adminOnly: false, hideForSubReseller: true },
       { href: "/dashboard/chat", label: "Chat Global", icon: MessageSquare, adminOnly: false },

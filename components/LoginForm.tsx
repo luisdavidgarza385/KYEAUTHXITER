@@ -7,7 +7,7 @@ import styles from "@/app/login/auth.module.css";
 
 export function LoginForm() {
   const router = useRouter();
-  const [roleMode, setRoleMode] = useState<"admin" | "reseller">("admin");
+  const [roleMode, setRoleMode] = useState<"admin" | "reseller" | "seller">("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [appId, setAppId] = useState("");
@@ -21,6 +21,24 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
     try {
+      // Seller usa su propio endpoint
+      if (roleMode === "seller") {
+        const res = await fetch("/api/seller/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.message || "Credenciales inválidas");
+          return;
+        }
+        router.push("/seller/dashboard");
+        router.refresh();
+        return;
+      }
+
+      // Admin y Reseller usan el mismo endpoint
       const payload: Record<string, string> = { email, password };
       if (roleMode === "reseller") {
         payload.appId = appId;
@@ -46,7 +64,7 @@ export function LoginForm() {
 
   return (
     <div className="space-y-6">
-      {/* Role Toggle Selector */}
+      {/* Role Toggle Selector - 3 tabs */}
       <div className="flex bg-[#040c06] p-1.5 rounded-xl border border-emerald-500/10">
         <button
           type="button"
@@ -77,6 +95,21 @@ export function LoginForm() {
         >
           <Key className="w-3.5 h-3.5" />
           Revendedor
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setRoleMode("seller");
+            setError(null);
+          }}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${
+            roleMode === "seller"
+              ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/40 shadow-sm"
+              : "text-zinc-500 hover:text-zinc-350"
+          }`}
+        >
+          <ShieldAlert className="w-3.5 h-3.5" />
+          Seller
         </button>
       </div>
 

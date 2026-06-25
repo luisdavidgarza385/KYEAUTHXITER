@@ -37,8 +37,8 @@ const SECTIONS = [
   {
     label: "CUENTA",
     items: [
+      { href: "/seller/api", label: "API & Discord Bot", icon: Code },
       { href: "/seller/security", label: "Seguridad", icon: Lock },
-      { href: "/seller/api", label: "API", icon: Code },
       { href: "/seller/settings", label: "Configuración", icon: Settings },
     ],
   },

@@ -258,6 +258,16 @@ export const supabaseStore: Store = {
     await db().from("licenses").delete().eq("id", id);
   },
 
+  async resetLicenseHwid(id) {
+    const { data: row } = await db()
+      .from("licenses")
+      .update({ used_by: null, hwid_lock: false })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    return row as License | null;
+  },
+
   async getSession(sessionId) {
     const { data } = await db()
       .from("sessions")

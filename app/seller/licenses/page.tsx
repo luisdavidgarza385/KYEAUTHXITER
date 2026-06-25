@@ -105,6 +105,71 @@ export default function SellerLicensesPage() {
     setTimeout(() => setCopiedKey(null), 2000);
   }
 
+  async function handleResetHwid(licenseId: string) {
+    if (!confirm("¿Resetear el HWID de esta licencia?")) return;
+
+    try {
+      const res = await fetch(`/api/seller/licenses/${licenseId}/reset-hwid`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert("HWID reseteado correctamente");
+        loadLicenses();
+      } else {
+        alert(data.message || "Error al resetear HWID");
+      }
+    } catch (error) {
+      alert("Error de conexión");
+    }
+  }
+
+  async function handleBanLicense(licenseId: string, currentStatus: string) {
+    const newStatus = currentStatus === "banned" ? "unused" : "banned";
+    const action = newStatus === "banned" ? "banear" : "desbanear";
+    
+    if (!confirm(`¿Seguro que quieres ${action} esta licencia?`)) return;
+
+    try {
+      const res = await fetch(`/api/seller/licenses/${licenseId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`Licencia ${action === "banear" ? "baneada" : "desbaneada"} correctamente`);
+        loadLicenses();
+      } else {
+        alert(data.message || `Error al ${action} licencia`);
+      }
+    } catch (error) {
+      alert("Error de conexión");
+    }
+  }
+
+  async function handleDeleteLicense(licenseId: string) {
+    if (!confirm("¿Eliminar esta licencia? Esta acción no se puede deshacer.")) return;
+
+    try {
+      const res = await fetch(`/api/seller/licenses/${licenseId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert("Licencia eliminada correctamente");
+        loadLicenses();
+      } else {
+        alert(data.message || "Error al eliminar licencia");
+      }
+    } catch (error) {
+      alert("Error de conexión");
+    }
+  }
+
   const filteredLicenses = licenses.filter((license) =>
     license.key.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -243,6 +308,9 @@ export default function SellerLicensesPage() {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
                         Expira
                       </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-700">
@@ -293,6 +361,35 @@ export default function SellerLicensesPage() {
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-400">
                           {new Date(license.expires_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleResetHwid(license.id)}
+                              className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition"
+                              title="Resetear HWID"
+                            >
+                              Reset
+                            </button>
+                            <button
+                              onClick={() => handleBanLicense(license.id, license.status)}
+                              className={`px-2 py-1 text-white text-xs rounded transition ${
+                                license.status === "banned"
+                                  ? "bg-emerald-600 hover:bg-emerald-700"
+                                  : "bg-red-600 hover:bg-red-700"
+                              }`}
+                              title={license.status === "banned" ? "Desbanear" : "Banear"}
+                            >
+                              {license.status === "banned" ? "Desbanear" : "Banear"}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteLicense(license.id)}
+                              className="px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition"
+                              title="Eliminar"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

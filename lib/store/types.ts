@@ -190,6 +190,7 @@ export interface Store {
   listLicenses(filter?: { appId?: string; status?: string; limit?: number }): Promise<License[]>;
   updateLicense(id: string, data: Partial<License>): Promise<License | null>;
   deleteLicense(id: string): Promise<void>;
+  resetLicenseHwid(id: string): Promise<License | null>;
 
   getSession(sessionId: string): Promise<Session | null>;
   createSession(data: Omit<Session, "id" | "created_at">): Promise<Session>;

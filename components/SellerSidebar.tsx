@@ -31,6 +31,7 @@ const SECTIONS = [
     items: [
       { href: "/seller/licenses", label: "Licencias", icon: Key },
       { href: "/seller/users", label: "Usuarios", icon: Users },
+      { href: "/seller/sub-sellers", label: "Sub-sellers", icon: Users },
       { href: "/seller/credits", label: "Créditos", icon: Coins },
     ],
   },

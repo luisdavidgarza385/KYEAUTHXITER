@@ -571,5 +571,15 @@ export const supabaseStore: Store = {
       .eq("id", id);
     if (error) throw error;
   },
+
+  // Sub-sellers
+  async listSubSellers(parentSellerId) {
+    const { data } = await db()
+      .from("sellers")
+      .select("*")
+      .eq("parent_seller_id", parentSellerId)
+      .order("created_at", { ascending: false });
+    return (data || []) as any[];
+  },
 };
 

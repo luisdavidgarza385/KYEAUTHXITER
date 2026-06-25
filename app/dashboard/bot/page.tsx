@@ -29,7 +29,7 @@ export default function AdminBotPage() {
   }
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.keyauthpro.xyz';
-  const exampleUrl = `${baseUrl}/api/seller/?sellerkey=${adminKey}&type=add&app_id=APP_ID&expiry=30&amount=5&level=1&format=json`;
+  const exampleUrl = `${baseUrl}/api/seller/?sellerkey=${adminKey}&type=add&app_id=PBIPbImOA0CmqMvsGaPazYaDFR5ZSooa&expiry=30&amount=5&level=1&format=json`;
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -204,7 +204,13 @@ export default function AdminBotPage() {
               <span className="text-emerald-400 font-mono text-xs mt-0.5">4.</span>
               <div>
                 <code className="text-blue-300">DEFAULT_APP_ID:</code>
-                <span className="text-gray-400"> ID de la aplicación por defecto</span>
+                <code className="text-gray-400 ml-1">PBIPbImOA0CmqMvsGaPazYaDFR5ZSooa</code>
+                <button 
+                  onClick={() => copyToClipboard('PBIPbImOA0CmqMvsGaPazYaDFR5ZSooa', 'appid')}
+                  className="text-emerald-400 hover:text-emerald-300 underline ml-2 text-xs"
+                >
+                  {copied === 'appid' ? '✓ Copiado' : 'Copiar'}
+                </button>
               </div>
             </div>
           </div>
@@ -212,16 +218,27 @@ export default function AdminBotPage() {
 
         <div className="bg-purple-900/20 border border-purple-700/50 rounded-lg p-4 mb-4">
           <h4 className="text-sm font-semibold text-purple-300 mb-2">📝 Comandos del Bot:</h4>
-          <ul className="text-sm text-gray-300 space-y-1">
-            <li><code className="text-emerald-400">/reclamarkey</code> - Reclama licencia de 1 día</li>
-            <li><code className="text-emerald-400">/reclamarkey7</code> - Reclama licencia de 7 días</li>
-            <li><code className="text-emerald-400">/reclamarkey30</code> - Reclama licencia de 30 días</li>
-            <li><code className="text-emerald-400">/reclamarkey90</code> - Reclama licencia de 90 días</li>
-            <li><code className="text-emerald-400">/reclamarkeyvip</code> - Reclama licencia VIP de 365 días</li>
-            <li><code className="text-emerald-400">!generar [app_id] [cantidad] [días]</code> - Genera múltiples licencias (admin)</li>
-            <li><code className="text-emerald-400">!balance</code> - Consulta créditos</li>
-            <li><code className="text-emerald-400">!ayuda</code> - Muestra ayuda</li>
-          </ul>
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs text-purple-200 font-semibold mb-1">Comandos Slash (Usuarios):</p>
+              <ul className="text-sm text-gray-300 space-y-1 ml-3">
+                <li><code className="text-emerald-400">/reclamarkey</code> - Reclama licencia de 1 día</li>
+                <li><code className="text-emerald-400">/reclamarkey7</code> - Reclama licencia de 7 días</li>
+                <li><code className="text-emerald-400">/reclamarkey30</code> - Reclama licencia de 30 días</li>
+                <li><code className="text-emerald-400">/reclamarkey90</code> - Reclama licencia de 90 días</li>
+                <li><code className="text-emerald-400">/reclamarkeyvip</code> - Reclama licencia VIP de 365 días</li>
+                <li><code className="text-emerald-400">/crearuser</code> - Crea un usuario automáticamente con credenciales</li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs text-purple-200 font-semibold mb-1">Comandos de Texto (Admins):</p>
+              <ul className="text-sm text-gray-300 space-y-1 ml-3">
+                <li><code className="text-emerald-400">!generar [app_id] [cantidad] [días]</code> - Genera múltiples licencias</li>
+                <li><code className="text-emerald-400">!balance</code> - Consulta créditos disponibles</li>
+                <li><code className="text-emerald-400">!ayuda</code> - Muestra todos los comandos disponibles</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <div className="bg-blue-900/20 border border-blue-700/50 rounded-lg p-4">
@@ -233,6 +250,23 @@ export default function AdminBotPage() {
             <li>Ejecuta <code className="text-emerald-400">npm install</code> y luego <code className="text-emerald-400">npm start</code></li>
             <li>¡El bot estará listo para generar licencias!</li>
           </ol>
+          
+          <div className="mt-4 pt-4 border-t border-blue-800/50 space-y-2">
+            <p className="text-xs text-blue-200 font-semibold">📋 Ejemplo de archivo .env:</p>
+            <pre className="bg-gray-900 text-xs text-gray-300 p-3 rounded overflow-x-auto">
+{`BOT_TOKEN=tu_token_de_discord
+SELLER_KEY=${adminKey}
+API_URL=${baseUrl}
+DEFAULT_APP_ID=PBIPbImOA0CmqMvsGaPazYaDFR5ZSooa`}
+            </pre>
+            <button
+              onClick={() => copyToClipboard(`BOT_TOKEN=tu_token_de_discord\nSELLER_KEY=${adminKey}\nAPI_URL=${baseUrl}\nDEFAULT_APP_ID=PBIPbImOA0CmqMvsGaPazYaDFR5ZSooa`, 'envfile')}
+              className="w-full px-3 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded text-sm transition flex items-center justify-center gap-2"
+            >
+              {copied === 'envfile' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied === 'envfile' ? 'Copiado' : 'Copiar Configuración .env'}
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 flex items-center justify-between">

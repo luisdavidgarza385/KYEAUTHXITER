@@ -30,9 +30,13 @@ export default function SellerUsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
+    app_id: "",
     username: "",
     email: "",
     password: "",
+    subscription_level: "Basic",
+    expiry_unit: "Días",
+    expiry_duration: "30",
   });
 
   useEffect(() => {
@@ -44,6 +48,13 @@ export default function SellerUsersPage() {
       loadUsers();
     }
   }, [selectedAppId]);
+
+  useEffect(() => {
+    // Set app_id in form when apps load or selection changes
+    if (apps.length > 0 && !createForm.app_id) {
+      setCreateForm({ ...createForm, app_id: apps[0].id });
+    }
+  }, [apps]);
 
   async function loadApps() {
     try {
@@ -122,7 +133,7 @@ export default function SellerUsersPage() {
   async function handleCreateUser(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!selectedAppId) {
+    if (!createForm.app_id) {
       alert("Selecciona una aplicación");
       return;
     }
@@ -131,17 +142,25 @@ export default function SellerUsersPage() {
       const res = await fetch("/api/seller/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          app_id: selectedAppId,
-          ...createForm,
-        }),
+        body: JSON.stringify(createForm),
       });
 
       const data = await res.json();
       if (data.success) {
         setShowCreateModal(false);
-        setCreateForm({ username: "", email: "", password: "" });
-        loadUsers();
+        setCreateForm({
+          app_id: apps[0]?.id || "",
+          username: "",
+          email: "",
+          password: "",
+          subscription_level: "Basic",
+          expiry_unit: "Días",
+          expiry_duration: "30",
+        });
+        // Reload if viewing the same app
+        if (selectedAppId === createForm.app_id) {
+          loadUsers();
+        }
         alert("Usuario creado exitosamente");
       } else {
         alert(data.message || "Error al crear usuario");
@@ -360,13 +379,33 @@ export default function SellerUsersPage() {
       {/* Create User Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full border border-gray-700">
             <h2 className="text-xl font-bold text-white mb-4">Crear Usuario</h2>
 
             <form onSubmit={handleCreateUser} className="space-y-4">
+              {/* Application Selector */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nombre de Usuario *
+                  APLICACIÓN *
+                </label>
+                <select
+                  value={createForm.app_id}
+                  onChange={(e) => setCreateForm({ ...createForm, app_id: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  required
+                >
+                  {apps.map((app) => (
+                    <option key={app.id} value={app.id}>
+                      {app.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Username */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  USERNAME *
                 </label>
                 <input
                   type="text"
@@ -374,26 +413,14 @@ export default function SellerUsersPage() {
                   value={createForm.username}
                   onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                  placeholder="usuario123"
+                  placeholder="e.g. carlos"
                 />
               </div>
 
+              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={createForm.email}
-                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                  placeholder="usuario@ejemplo.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Contraseña *
+                  PASSWORD *
                 </label>
                 <input
                   type="password"
@@ -404,28 +431,112 @@ export default function SellerUsersPage() {
                   placeholder="••••••••"
                   minLength={6}
                 />
+                <p className="text-xs text-gray-500 mt-1">Generate random</p>
               </div>
 
-              <div className="bg-gray-700/50 border border-gray-600 rounded p-3 text-xs text-gray-400">
-                Se creará el usuario para la aplicación: <span className="text-white font-medium">{selectedApp?.name}</span>
+              {/* Subscription Level */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  NIVEL DE SUSCRIPCIÓN *
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, subscription_level: "Basic" })}
+                    className={`px-4 py-2 rounded border transition ${
+                      createForm.subscription_level === "Basic"
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                    }`}
+                  >
+                    Basic
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, subscription_level: "VIP" })}
+                    className={`px-4 py-2 rounded border transition ${
+                      createForm.subscription_level === "VIP"
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                    }`}
+                  >
+                    VIP
+                  </button>
+                </div>
               </div>
 
+              {/* Expiry */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    UNIDAD DE VENCIMIENTO *
+                  </label>
+                  <select
+                    value={createForm.expiry_unit}
+                    onChange={(e) => setCreateForm({ ...createForm, expiry_unit: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  >
+                    <option value="Días">Días</option>
+                    <option value="Meses">Meses</option>
+                    <option value="Años">Años</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    DURACIÓN *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={createForm.expiry_duration}
+                    onChange={(e) => setCreateForm({ ...createForm, expiry_duration: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                    placeholder="30"
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  EMAIL
+                </label>
+                <input
+                  type="email"
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  placeholder="user@example.com"
+                />
+              </div>
+
+              {/* Buttons */}
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false);
-                    setCreateForm({ username: "", email: "", password: "" });
+                    setCreateForm({
+                      app_id: apps[0]?.id || "",
+                      username: "",
+                      email: "",
+                      password: "",
+                      subscription_level: "Basic",
+                      expiry_unit: "Días",
+                      expiry_duration: "30",
+                    });
                   }}
                   className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition"
+                  className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded transition font-medium"
                 >
-                  Crear Usuario
+                  Create user
                 </button>
               </div>
             </form>

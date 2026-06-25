@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
-import { hashPassword } from "@/lib/auth";
+import bcrypt from "bcryptjs";
 
 // GET - List users for seller's apps
 export async function GET(req: NextRequest) {
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Hash password
-    const passwordHash = await hashPassword(password);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     // Create user
     const newUser = await store.createAppUser({

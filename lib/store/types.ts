@@ -24,7 +24,7 @@ export interface Admin {
 
 export interface App {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
   name: string;
   app_id: string;
   owner_secret: string;
@@ -147,6 +147,8 @@ export interface Seller {
   unlimited_credits: boolean;
   can_use_api: boolean;
   status: string;
+  parent_seller_id?: string | null;
+  created_by?: string | null;
   created_at: string;
 }
 
@@ -228,6 +230,7 @@ export interface Store {
   getSellerByKey(key: string): Promise<Seller | null>;
   getSellerByUsername(username: string): Promise<Seller | null>;
   listSellers(): Promise<Seller[]>;
+  listSubSellers(parentSellerId: string): Promise<Seller[]>;
   createSeller(data: Omit<Seller, "id" | "created_at">): Promise<Seller>;
   updateSeller(id: string, data: Partial<Seller>): Promise<Seller | null>;
   deleteSeller(id: string): Promise<void>;

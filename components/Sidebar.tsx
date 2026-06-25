@@ -18,7 +18,6 @@ import {
   Terminal,
   Settings,
   MessageSquare,
-  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,11 +33,8 @@ const SECTIONS = [
     label: "GESTION",
     items: [
       { href: "/dashboard/licenses", label: "Licencias", icon: Key, adminOnly: false },
-      { href: "/dashboard/sellers", label: "Sellers", icon: Users, adminOnly: false },
       { href: "/dashboard/users", label: "Usuarios", icon: Users, adminOnly: false },
-      { href: "/dashboard/sub-resellers", label: "Sub resellers", icon: Users, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
-      { href: "/dashboard/shop", label: "Comprar VIP / PayPal", icon: Coins, adminOnly: false, hideForSubReseller: true },
       { href: "/dashboard/chat", label: "Chat Global", icon: MessageSquare, adminOnly: false },
     ],
   },
@@ -47,7 +43,6 @@ const SECTIONS = [
     items: [
       { href: "/dashboard/security", label: "Seguridad (2FA)", icon: Lock, adminOnly: false },
       { href: "/dashboard/api", label: "API", icon: Code, adminOnly: false },
-      { href: "/dashboard/bot", label: "Bot Discord", icon: Bot, adminOnly: false },
       { href: "/dashboard/settings", label: "Configuración", icon: Settings, adminOnly: false },
     ],
   },

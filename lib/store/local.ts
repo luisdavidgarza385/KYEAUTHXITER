@@ -507,8 +507,37 @@ export const localStore: Store = {
   async getSellerById() {
     throw new Error("Sellers require Supabase");
   },
-  async getSellerByKey() {
-    throw new Error("Sellers require Supabase");
+  async getSellerByKey(key) {
+    const admins = await readData<Admin[]>("admins");
+    console.log("🔍 Buscando seller_key:", key);
+    console.log("📋 Total admins:", admins.length);
+    
+    const sellers = admins.filter((a) => a.role === "seller");
+    console.log("👥 Total sellers:", sellers.length);
+    
+    sellers.forEach((s: any) => {
+      console.log(`   - Seller ${s.email}: seller_key=${s.seller_key || "UNDEFINED"}`);
+    });
+    
+    const seller = admins.find((a) => a.role === "seller" && (a as any).seller_key === key);
+    console.log("✅ Seller encontrado:", seller ? (seller as any).email : "NO ENCONTRADO");
+    
+    if (!seller) return null;
+    
+    // Convertir el seller del formato admin al formato Seller
+    const s = seller as any;
+    return {
+      id: s.id,
+      username: s.email,
+      seller_key: s.seller_key || "",
+      credits: s.credits || 0,
+      unlimited_credits: s.unlimited_credits || false,
+      status: s.status || "active",
+      can_use_api: s.can_use_api !== false,
+      parent_seller_id: s.created_by || null,
+      created_by: s.created_by || null,
+      created_at: s.created_at,
+    };
   },
   async getSellerByUsername() {
     throw new Error("Sellers require Supabase");

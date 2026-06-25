@@ -240,6 +240,8 @@ async function handleAddUser(
     ip: null,
     last_login: null,
     created_by: seller.id,
+    banned: false,
+    ban_reason: null,
   };
 
   const createdUser = await store.createAppUser(newUser);

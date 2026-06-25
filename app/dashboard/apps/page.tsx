@@ -15,7 +15,12 @@ export default async function AppsPage({
   const me = await requireAdmin();
   const scopedIds = await getScopedAppIds(me);
   const allApps = await store.listApps();
-  const apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+  let apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+  
+  // IMPORTANT: Admin should NOT see seller apps (seller_id must be null for admin apps)
+  if (me.role === "admin" || me.role === "developer") {
+    apps = apps.filter((a) => a.seller_id === null || a.seller_id === undefined);
+  }
 
   const userCounts = new Map<string, number>();
   for (const a of apps) {

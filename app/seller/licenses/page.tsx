@@ -32,6 +32,7 @@ export default function SellerLicensesPage() {
     app_id: "",
     amount: "1",
     expiry: "30",
+    expiry_unit: "Días",
     level: "1",
   });
 
@@ -335,7 +336,7 @@ export default function SellerLicensesPage() {
                   <input
                     type="number"
                     min="1"
-                    max="100"
+                    max="1000"
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
@@ -344,35 +345,49 @@ export default function SellerLicensesPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Días
+                    Nivel
                   </label>
-                  <select
-                    value={formData.expiry}
-                    onChange={(e) => setFormData({ ...formData, expiry: e.target.value })}
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={formData.level}
+                    onChange={(e) => setFormData({ ...formData, level: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                  >
-                    <option value="1">1 día</option>
-                    <option value="7">7 días</option>
-                    <option value="30">30 días</option>
-                    <option value="90">90 días</option>
-                    <option value="180">180 días</option>
-                    <option value="365">365 días</option>
-                  </select>
+                  />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nivel
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={formData.level}
-                  onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Unidad de Vencimiento
+                  </label>
+                  <select
+                    value={formData.expiry_unit}
+                    onChange={(e) => setFormData({ ...formData, expiry_unit: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  >
+                    <option value="Días">Días</option>
+                    <option value="Meses">Meses</option>
+                    <option value="Años">Años</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Duración
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={formData.expiry}
+                    onChange={(e) => setFormData({ ...formData, expiry: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                    placeholder="30"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-4">

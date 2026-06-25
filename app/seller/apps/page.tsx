@@ -20,7 +20,9 @@ export default function SellerAppsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDescModal, setShowDescModal] = useState(false);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [selectedApp, setSelectedApp] = useState<App | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState("C++");
   const [formData, setFormData] = useState({
     name: "",
   });
@@ -31,6 +33,8 @@ export default function SellerAppsPage() {
     webhook_url: "",
   });
   const [description, setDescription] = useState("");
+
+  const languages = ["C++", "C#", "Python", "JavaScript", "TypeScript", "PHP", "Java", "VB.Net", "Rust", "Go", "Lua", "Ruby", "Perl"];
 
   useEffect(() => {
     loadApps();
@@ -248,6 +252,17 @@ export default function SellerAppsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedApp(app);
+                          setShowCredentialsModal(true);
+                        }}
+                        className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 rounded text-sm font-medium transition flex items-center gap-1.5"
+                        title="Selected / View Credentials"
+                      >
+                        <Shield className="w-3.5 h-3.5" />
+                        Selected
+                      </button>
                       <button
                         onClick={() => openEditModal(app)}
                         className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 rounded text-sm font-medium transition flex items-center gap-1.5"
@@ -472,6 +487,75 @@ export default function SellerAppsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Application Credentials Modal */}
+      {showCredentialsModal && selectedApp && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full border border-gray-700 my-8">
+            <h2 className="text-xl font-bold text-white mb-4">Application Credentials</h2>
+            <p className="text-sm text-gray-400 mb-4">
+              Simply replace the placeholder code in the example with these:
+            </p>
+
+            {/* Language Selector */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Select Language:
+              </label>
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+              >
+                {languages.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Credentials Display */}
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Application Name</label>
+                <code className="block bg-gray-900 text-emerald-400 px-3 py-2 rounded font-mono text-sm">
+                  {selectedApp.name}
+                </code>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">App ID</label>
+                <code className="block bg-gray-900 text-emerald-400 px-3 py-2 rounded font-mono text-sm break-all">
+                  {selectedApp.app_id}
+                </code>
+              </div>
+            </div>
+
+            {/* Code Example (mock) */}
+            <div className="bg-gray-900 rounded p-4 mb-4">
+              <pre className="text-xs text-gray-300 font-mono overflow-x-auto">
+{`// ${selectedLanguage} Example
+app_id = "${selectedApp.app_id}"
+app_name = "${selectedApp.name}"
+version = "${selectedApp.version}"`}
+              </pre>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCredentialsModal(false);
+                  setSelectedApp(null);
+                }}
+                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -43,7 +43,13 @@ export async function GET(req: NextRequest) {
     const admin = await requireAdmin();
     const allApps = await store.listApps();
     const scopedIds = await getScopedAppIds(admin);
-    const filtered = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+    
+    // Filter apps: admins only see their own (not seller apps)
+    let filtered = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+    
+    // Admin should NOT see seller apps (seller_id is not null means it's a seller app)
+    filtered = filtered.filter((a) => a.seller_id === null || a.seller_id === undefined);
+    
     return { data: { success: true, data: filtered } };
   });
 }

@@ -25,6 +25,7 @@ interface App {
 export default function SellerUsersPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [apps, setApps] = useState<App[]>([]);
+  const [subscriptions, setSubscriptions] = useState<string[]>(["Basic", "VIP", "Premium", "Enterprise"]);
   const [selectedAppId, setSelectedAppId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -439,29 +440,21 @@ export default function SellerUsersPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   NIVEL DE SUSCRIPCIÓN *
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setCreateForm({ ...createForm, subscription_level: "Basic" })}
-                    className={`px-4 py-2 rounded border transition ${
-                      createForm.subscription_level === "Basic"
-                        ? "bg-emerald-600 border-emerald-500 text-white"
-                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-                    }`}
-                  >
-                    Basic
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCreateForm({ ...createForm, subscription_level: "VIP" })}
-                    className={`px-4 py-2 rounded border transition ${
-                      createForm.subscription_level === "VIP"
-                        ? "bg-emerald-600 border-emerald-500 text-white"
-                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-                    }`}
-                  >
-                    VIP
-                  </button>
+                <div className="grid grid-cols-2 gap-2">
+                  {subscriptions.map((sub) => (
+                    <button
+                      key={sub}
+                      type="button"
+                      onClick={() => setCreateForm({ ...createForm, subscription_level: sub })}
+                      className={`px-3 py-2 rounded border transition text-sm ${
+                        createForm.subscription_level === sub
+                          ? "bg-emerald-600 border-emerald-500 text-white"
+                          : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                      }`}
+                    >
+                      {sub}
+                    </button>
+                  ))}
                 </div>
               </div>
 

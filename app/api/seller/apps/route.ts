@@ -23,12 +23,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get apps owned by this seller
-    const apps = await store.listApps({ ownerId: seller.id });
+    // Get apps owned by this seller (can be owner_id OR seller_id)
+    const ownedApps = await store.listApps({ ownerId: seller.id });
+    const sellerApps = await store.listApps({ sellerId: seller.id });
+    
+    // Merge and deduplicate
+    const allApps = [...ownedApps, ...sellerApps];
+    const uniqueApps = Array.from(new Map(allApps.map(app => [app.id, app])).values());
 
     return NextResponse.json({
       success: true,
-      data: apps,
+      data: uniqueApps,
     });
   } catch (error: any) {
     return NextResponse.json(

@@ -16,18 +16,5 @@ CREATE INDEX IF NOT EXISTS idx_sellers_username ON sellers(username);
 CREATE INDEX IF NOT EXISTS idx_sellers_seller_key ON sellers(seller_key);
 CREATE INDEX IF NOT EXISTS idx_sellers_status ON sellers(status);
 
--- Enable RLS
-ALTER TABLE sellers ENABLE ROW LEVEL SECURITY;
-
--- Create policies (adjust based on your auth setup)
-CREATE POLICY "Enable read access for authenticated users" ON sellers
-  FOR SELECT USING (true);
-
-CREATE POLICY "Enable insert for authenticated users" ON sellers
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Enable update for authenticated users" ON sellers
-  FOR UPDATE USING (true);
-
-CREATE POLICY "Enable delete for authenticated users" ON sellers
-  FOR DELETE USING (true);
+-- Disable RLS since we handle auth at the API level with admin_session cookie
+ALTER TABLE sellers DISABLE ROW LEVEL SECURITY;

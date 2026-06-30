@@ -22,12 +22,12 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
   }, [level]);
 
   useEffect(() => {
-    setPrefix((prev) => {
-      if (forcePrefix) return "KEYAUTHPRO";
-      if (prev === "KEYAUTHPRO" || !prev) return "Spectral X";
-      return prev;
-    });
-  }, [forcePrefix]);
+    if (forcePrefix) {
+      setPrefix("KEYAUTHPRO");
+    } else if (selectedApp) {
+      setPrefix(selectedApp.name);
+    }
+  }, [forcePrefix, selectedApp]);
   const [note, setNote] = useState("");
   const [durationDisplay, setDurationDisplay] = useState("1|days");
   const [hwidLock, setHwidLock] = useState(false);

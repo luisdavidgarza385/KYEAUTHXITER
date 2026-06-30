@@ -296,12 +296,12 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
   useEffect(() => {
     if (level === 1) {
       setPackageName("basic");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Spectral X");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : (selectedApp?.name || "Spectral X"));
     } else if (level === 2) {
       setPackageName("VIP");
-      setPrefix(forcePrefix ? "KEYAUTHPRO" : "Spectral X");
+      setPrefix(forcePrefix ? "KEYAUTHPRO" : (selectedApp?.name || "Spectral X"));
     }
-  }, [level, forcePrefix]);
+  }, [level, forcePrefix, selectedApp]);
   const [hwidLock, setHwidLock] = useState(false);
   const [ipLock, setIpLock] = useState(false);
   const [loading, setLoading] = useState(false);

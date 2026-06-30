@@ -80,6 +80,14 @@ function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { app
     }
   }, [level]);
 
+  useEffect(() => {
+    if (forcePrefix) return;
+    const selectedApp = apps.find((a) => a.id === appId);
+    if (selectedApp) {
+      setPrefix(selectedApp.name);
+    }
+  }, [appId, apps, forcePrefix]);
+
   async function submit() {
     setErr(null);
     if (!appId) { setErr("Application required"); return; }

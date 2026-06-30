@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Key, User, ShieldAlert } from "lucide-react";
@@ -16,11 +16,31 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("ka_remember_email");
+    const savedRole = localStorage.getItem("ka_remember_role") as "admin" | "reseller" | null;
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRemember(true);
+    }
+    if (savedRole) {
+      setRoleMode(savedRole);
+    }
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
+      if (remember) {
+        localStorage.setItem("ka_remember_email", email);
+        localStorage.setItem("ka_remember_role", roleMode);
+      } else {
+        localStorage.removeItem("ka_remember_email");
+        localStorage.removeItem("ka_remember_role");
+      }
+
       // Admin y Reseller usan el mismo endpoint
       const payload: Record<string, string> = { email, password };
       if (roleMode === "reseller") {

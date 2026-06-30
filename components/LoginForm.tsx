@@ -12,16 +12,23 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [appId, setAppId] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("ka_remember_email");
     const savedRole = localStorage.getItem("ka_remember_role") as "admin" | "reseller" | null;
+    const savedRemember = localStorage.getItem("ka_remember_preference");
+    
+    if (savedRemember !== null) {
+      setRemember(savedRemember === "true");
+    } else {
+      setRemember(true);
+    }
+    
     if (savedEmail) {
       setEmail(savedEmail);
-      setRemember(true);
     }
     if (savedRole) {
       setRoleMode(savedRole);
@@ -33,6 +40,7 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
     try {
+      localStorage.setItem("ka_remember_preference", remember ? "true" : "false");
       if (remember) {
         localStorage.setItem("ka_remember_email", email);
         localStorage.setItem("ka_remember_role", roleMode);

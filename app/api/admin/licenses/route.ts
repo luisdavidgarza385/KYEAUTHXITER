@@ -3,6 +3,7 @@ import { requireAdmin, safeRoute } from "@/lib/api-helpers";
 import { store } from "@/lib/store";
 import { generateKey } from "@/lib/utils";
 import { getScopedAppIds, checkQuota } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -69,11 +70,86 @@ export async function POST(req: NextRequest) {
       return { status: 403, data: { success: false, message: `License limit is ${quota.limit}. You have ${quota.licenses} and tried to add ${count}.` } };
     }
 
-    const items = Array.from({ length: count }).map(() => {
+    const generatedKeys = new Set<string>();
+    let retries = 0;
+    const maxRetries = 1000;
+
+    while (generatedKeys.size < count && retries < maxRetries) {
+      retries++;
       const segs = suffix.split("-").map((seg) =>
         seg.replace(/\*/g, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(Math.floor(Math.random() * 36)))
       );
       const key = prefix ? `${prefix}-${segs.join("-")}` : segs.join("-");
+      if (!generatedKeys.has(key)) {
+        generatedKeys.add(key);
+      }
+    }
+
+    const keysArray = Array.from(generatedKeys);
+    
+    // Check database to find if any of these keys exist
+    const existingKeys = new Set<string>();
+    if (process.env.STORAGE_BACKEND !== "local") {
+      try {
+        const supabase = supabaseAdmin();
+        const { data } = await supabase
+          .from("licenses")
+          .select("key")
+          .eq("app_id", appId)
+          .in("key", keysArray);
+        if (data) {
+          data.forEach((l: any) => existingKeys.add(l.key));
+        }
+      } catch (err) {
+        console.error("Error checking license key existence in database:", err);
+      }
+    } else {
+      // In local mode, check local store
+      for (const k of keysArray) {
+        const check = await store.getLicenseByKey(appId, k);
+        if (check) existingKeys.add(k);
+      }
+    }
+
+    // Replace keys that already exist in the database with brand-new random keys
+    const finalKeys: string[] = [];
+    for (const key of keysArray) {
+      if (!existingKeys.has(key)) {
+        finalKeys.push(key);
+      } else {
+        let replacedKey = key;
+        let replaceRetries = 0;
+        while (replaceRetries < 100) {
+          const randSuffix = Array.from({ length: 6 }).map(() =>
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(Math.floor(Math.random() * 36))
+          ).join("");
+          const candidate = `${key}-${randSuffix}`;
+          
+          let check = false;
+          if (process.env.STORAGE_BACKEND !== "local") {
+            const { data } = await supabaseAdmin()
+              .from("licenses")
+              .select("key")
+              .eq("app_id", appId)
+              .eq("key", candidate)
+              .maybeSingle();
+            if (data) check = true;
+          } else {
+            const checkObj = await store.getLicenseByKey(appId, candidate);
+            if (checkObj) check = true;
+          }
+          
+          if (!check && !generatedKeys.has(candidate) && !finalKeys.includes(candidate)) {
+            replacedKey = candidate;
+            break;
+          }
+          replaceRetries++;
+        }
+        finalKeys.push(replacedKey);
+      }
+    }
+
+    const items = finalKeys.map((key) => {
       return {
         app_id: appId,
         key,

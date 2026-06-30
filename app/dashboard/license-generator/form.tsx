@@ -13,6 +13,7 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
   const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Spectral X");
   const [suffix, setSuffix] = useState("****-****-****-****");
   const [level, setLevel] = useState(1);
+  const selectedApp = apps.find((a) => a.id === appId);
   useEffect(() => {
     if (level === 1) {
       setPackageName("basic");
@@ -36,8 +37,6 @@ export function GeneratorForm({ apps, forcePrefix }: { apps: App[]; forcePrefix:
   const [err, setErr] = useState<string | null>(null);
   const [generated, setGenerated] = useState<string[] | null>(null);
   const [copied, setCopied] = useState(false);
-
-  const selectedApp = apps.find((a) => a.id === appId);
 
   async function submit() {
     setErr(null);

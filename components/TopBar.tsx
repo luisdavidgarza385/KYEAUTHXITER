@@ -55,7 +55,7 @@ export async function TopBar({ current, showCreate = true, apps, currentAppId }:
         )}
       </div>
       {showCreate && list.length > 0 && <CreateMenu apps={list} role={role} />}
-      {showCreate && list.length === 0 && role !== "seller" && <CreateAppInlineButton label="Create Application" className="btn-primary text-sm" />}
+      {showCreate && list.length === 0 && role !== "seller" && <CreateAppInlineButton label="Crear Aplicación" className="btn-primary text-sm" />}
     </div>
   );
 }

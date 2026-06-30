@@ -29,20 +29,20 @@ export function CreateMenu({ apps, role }: { apps: App[]; role?: string }) {
   return (
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen((v) => !v)} className="btn-primary text-sm">
-        <Plus className="w-4 h-4" /> Create
+        <Plus className="w-4 h-4" /> Agregar
         <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
       </button>
       {open && (
         <div className="absolute right-0 top-full mt-1 z-50 min-w-[200px] rounded-md border border-border bg-bg-card shadow-xl overflow-hidden">
           <button onClick={() => pick("user")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition">
-            <User className="w-4 h-4 text-accent-glow" /> Create User
+            <User className="w-4 h-4 text-accent-glow" /> Crear Usuario
           </button>
           <button onClick={() => pick("license")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
-            <Key className="w-4 h-4 text-accent-glow" /> Create License
+            <Key className="w-4 h-4 text-accent-glow" /> Crear Licencia
           </button>
           {role !== "seller" && (
             <button onClick={() => pick("app")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
-              <AppWindow className="w-4 h-4 text-accent-glow" /> Create Application
+              <AppWindow className="w-4 h-4 text-accent-glow" /> Crear Aplicación
             </button>
           )}
         </div>
@@ -540,7 +540,7 @@ function CreateAppModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function CreateAppInlineButton({ label = "Create Application", className }: { label?: string; className?: string }) {
+export function CreateAppInlineButton({ label = "Crear Aplicación", className }: { label?: string; className?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -556,7 +556,7 @@ export function CreateAppInlineButton({ label = "Create Application", className 
   );
 }
 
-export function CreateUserInlineButton({ apps, defaultAppId, label = "Create User", className }: { apps: App[]; defaultAppId?: string; label?: string; className?: string }) {
+export function CreateUserInlineButton({ apps, defaultAppId, label = "Crear Usuario", className }: { apps: App[]; defaultAppId?: string; label?: string; className?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -572,7 +572,7 @@ export function CreateUserInlineButton({ apps, defaultAppId, label = "Create Use
   );
 }
 
-export function CreateLicenseInlineButton({ apps, defaultAppId, label = "Create License", className, forcePrefix }: { apps: App[]; defaultAppId?: string; label?: string; className?: string; forcePrefix?: boolean }) {
+export function CreateLicenseInlineButton({ apps, defaultAppId, label = "Crear Licencia", className, forcePrefix }: { apps: App[]; defaultAppId?: string; label?: string; className?: string; forcePrefix?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <>

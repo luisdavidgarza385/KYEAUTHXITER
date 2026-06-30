@@ -111,6 +111,7 @@ export function LoginForm() {
             <input
               type="text"
               className={`${styles.premiumInput} pl-10`}
+              style={{ paddingLeft: "42px" }}
               placeholder="e.g. VENDEDORES"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

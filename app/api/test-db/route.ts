@@ -6,11 +6,17 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
+    const supabase = supabaseAdmin();
+    
+    // Query supabase logs
+    const { data: supabaseLogs } = await supabase
+      .from("logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(10);
+      
     return NextResponse.json({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "NOT SET",
-      supabaseAnonKeyExists: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      supabaseServiceRoleKeyExists: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      nodeEnv: process.env.NODE_ENV
+      supabaseLogs: supabaseLogs || []
     });
   } catch (e: any) {
     return NextResponse.json({ error: e.message });

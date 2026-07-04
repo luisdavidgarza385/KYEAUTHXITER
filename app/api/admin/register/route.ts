@@ -34,7 +34,10 @@ export async function POST(req: NextRequest) {
     }
 
     const allAdmins = await store.listAdmins();
-    const role = allAdmins.length === 0 ? "developer" : "admin";
+    if (allAdmins.length > 0) {
+      return json({ success: false, message: "El registro de nuevos administradores está deshabilitado." }, 403);
+    }
+    const role = "developer";
 
     const hash = await bcrypt.hash(password, 10);
     const admin = await store.createAdmin({

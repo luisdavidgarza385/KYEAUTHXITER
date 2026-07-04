@@ -34,6 +34,7 @@ const SECTIONS = [
     items: [
       { href: "/dashboard/licenses", label: "Licencias", icon: Key, adminOnly: false },
       { href: "/dashboard/users", label: "Usuarios", icon: Users, adminOnly: false },
+      { href: "/dashboard/subscriptions", label: "Suscripciones", icon: Layers, adminOnly: true },
       { href: "/dashboard/sub-resellers", label: "Sub-resellers", icon: Layers, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
       { href: "/dashboard/chat", label: "Chat Global", icon: MessageSquare, adminOnly: false },

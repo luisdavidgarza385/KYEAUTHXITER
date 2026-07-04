@@ -1,23 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Coins, CreditCard, Sparkles, Check, Loader2, ArrowRight, X, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ShopPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [showPaypalModal, setShowPaypalModal] = useState(false);
-  const [showCardModal, setShowCardModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number; type: "monthly" | "yearly" } | null>(null);
   
-  // Form fields
-  const [email, setEmail] = useState("");
-  const [paypalEmail, setPaypalEmail] = useState("");
-  const [paypalPassword, setPaypalPassword] = useState("");
-  
-  const [cardHolder, setCardHolder] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
+  const [sdkReady, setSdkReady] = useState(false);
+  const [sdkLoading, setSdkLoading] = useState(false);
 
   const router = useRouter();
 
@@ -58,57 +50,151 @@ export default function ShopPage() {
   function handleOpenPaypal(plan: typeof plans[0]) {
     setSelectedPlan(plan);
     setShowPaypalModal(true);
+    setSdkReady(false);
+    setSdkLoading(false);
   }
 
   function handleOpenCard(plan: typeof plans[0]) {
+    // Both point to PayPal because PayPal SDK renders Debit/Credit card options securely!
     setSelectedPlan(plan);
-    setShowCardModal(true);
+    setShowPaypalModal(true);
+    setSdkReady(false);
+    setSdkLoading(false);
   }
 
-  async function handlePaymentSuccess(userEmail: string) {
-    if (!selectedPlan) return;
+  // Effect to load PayPal SDK dynamically when modal is opened
+  useEffect(() => {
+    if (!showPaypalModal || !selectedPlan) return;
+    
+    let isMounted = true;
+    
+    async function initPaypal() {
+      if ((window as any).paypal) {
+        setSdkReady(true);
+        return;
+      }
+      
+      setSdkLoading(true);
+      try {
+        const res = await fetch("/api/admin/checkout/config");
+        const data = await res.json();
+        if (!res.ok || !data.clientId) {
+          throw new Error("No se pudo obtener el Client ID de PayPal");
+        }
+        
+        if (!isMounted) return;
+        
+        // Check if script already exists to avoid duplication
+        const existingScript = document.getElementById("paypal-sdk-script");
+        if (existingScript) {
+          const interval = setInterval(() => {
+            if ((window as any).paypal) {
+              clearInterval(interval);
+              if (isMounted) {
+                setSdkReady(true);
+                setSdkLoading(false);
+              }
+            }
+          }, 100);
+          return;
+        }
+        
+        const script = document.createElement("script");
+        script.id = "paypal-sdk-script";
+        script.src = `https://www.paypal.com/sdk/js?client-id=${data.clientId}&currency=USD&intent=capture&enable-funding=card`;
+        script.onload = () => {
+          if (isMounted) {
+            setSdkReady(true);
+            setSdkLoading(false);
+          }
+        };
+        script.onerror = () => {
+          console.error("Error al cargar el SDK de PayPal");
+          if (isMounted) {
+            setSdkLoading(false);
+            alert("No se pudo cargar la pasarela de PayPal");
+          }
+        };
+        document.body.appendChild(script);
+      } catch (err: any) {
+        console.error("Error al inicializar PayPal:", err);
+        if (isMounted) {
+          setSdkLoading(false);
+          alert("Error al inicializar PayPal: " + err.message);
+        }
+      }
+    }
+    
+    initPaypal();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [showPaypalModal, selectedPlan]);
+
+  // Effect to render PayPal Buttons when SDK is ready and element exists
+  useEffect(() => {
+    if (!sdkReady || !showPaypalModal || !selectedPlan) return;
+    
+    const container = document.getElementById("paypal-button-container");
+    if (!container) return;
+    
+    // Clear any previous button rendering
+    container.innerHTML = "";
     
     try {
-      const res = await fetch("/api/admin/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planType: selectedPlan.type,
-          price: selectedPlan.price
-        })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        alert(
-          `¡Pago exitoso de $${selectedPlan.price} USD procesado correctamente!\n\n` +
-          `Tu cuenta ahora tiene acceso VIP Ilimitado.\n` +
-          `Se ha enviado una notificación de confirmación de transferencia al correo: ${userEmail}`
-        );
-        setShowPaypalModal(false);
-        setShowCardModal(false);
-        router.refresh();
-        router.push("/dashboard");
-      } else {
-        alert(data.message || "Error al procesar el pago");
-      }
+      (window as any).paypal.Buttons({
+        style: {
+          layout: "vertical",
+          color: "gold",
+          shape: "rect",
+          label: "pay",
+          height: 45
+        },
+        createOrder: async () => {
+          const res = await fetch("/api/admin/checkout/create-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ planType: selectedPlan.type }),
+          });
+          const orderData = await res.json();
+          if (!res.ok || !orderData.id) {
+            throw new Error(orderData.message || "Error al crear la orden de pago");
+          }
+          return orderData.id;
+        },
+        onApprove: async (approveData: any) => {
+          setLoading("paypal_capture");
+          try {
+            const res = await fetch("/api/admin/checkout/capture-order", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderId: approveData.orderID, planType: selectedPlan.type }),
+            });
+            const captureData = await res.json();
+            if (res.ok && captureData.success) {
+              alert(`¡Pago exitoso! Plan activado correctamente.\n\nTu cuenta ahora cuenta con acceso VIP Ilimitado.`);
+              setShowPaypalModal(false);
+              router.refresh();
+              router.push("/dashboard");
+            } else {
+              alert(captureData.message || "Error al capturar el pago");
+            }
+          } catch (err) {
+            alert("Error de red al procesar el pago");
+          } finally {
+            setLoading(null);
+          }
+        },
+        onError: (err: any) => {
+          console.error("PayPal Error:", err);
+          alert("Error en la pasarela de PayPal. Por favor, intente de nuevo.");
+        }
+      }).render("#paypal-button-container");
     } catch (err) {
-      alert("Error de conexión");
-    } finally {
-      setLoading(null);
+      console.error("Fallo al renderizar los botones de PayPal:", err);
     }
-  }
-
-  async function handleSimulatePaypal(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading("paypal");
-    await handlePaymentSuccess(paypalEmail);
-  }
-
-  async function handleSimulateCard(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading("card");
-    await handlePaymentSuccess(email);
-  }
+  }, [sdkReady, showPaypalModal, selectedPlan]);
 
   return (
     <div className="p-6 lg:p-8 max-w-[1200px] mx-auto space-y-8 text-zinc-350">
@@ -184,190 +270,57 @@ export default function ShopPage() {
         ))}
       </div>
 
-      {/* Simulated PayPal Modal */}
+      {/* Real PayPal Modal */}
       {showPaypalModal && selectedPlan && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#003087] border border-blue-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-6 text-zinc-100">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0b0f19] border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-6 text-zinc-100">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-blue-900 pb-4">
-              <div className="font-black italic text-xl text-white tracking-wider flex items-center gap-2">
-                <span>PayPal</span>
-                <span className="text-[10px] not-italic font-medium text-blue-300 bg-blue-900/60 px-2 py-0.5 rounded">Checkout</span>
+            <div className="flex items-center justify-between border-b border-zinc-850 pb-4">
+              <div>
+                <h3 className="font-extrabold text-lg text-zinc-150">Pagar Suscripción</h3>
+                <p className="text-xs text-zinc-500 mt-1">Conexión cifrada de extremo a extremo</p>
               </div>
               <button
                 onClick={() => setShowPaypalModal(false)}
-                className="text-blue-300 hover:text-white transition"
+                className="text-zinc-400 hover:text-zinc-200 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Plan summary */}
-            <div className="bg-[#00246b]/60 border border-blue-900 p-4 rounded-xl space-y-2">
-              <div className="text-xs text-blue-300 uppercase font-bold tracking-wider">Destinatario: luisdavidgarza388@gmail.com</div>
+            <div className="bg-zinc-950/50 border border-zinc-850 p-4 rounded-xl space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-semibold">{selectedPlan.name}</span>
-                <span className="font-mono font-bold text-lg">${selectedPlan.price.toFixed(2)} USD</span>
+                <span className="text-sm font-semibold text-zinc-350">{selectedPlan.name}</span>
+                <span className="font-mono font-bold text-lg text-emerald-400">${selectedPlan.price.toFixed(2)} USD</span>
               </div>
             </div>
 
-            {/* Login form */}
-            <form onSubmit={handleSimulatePaypal} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-blue-300 mb-1.5 block">Correo Electrónico de PayPal</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="ejemplo@paypal.com"
-                  className="w-full bg-[#00246b] border border-blue-850 text-white placeholder:text-blue-400/60 px-3 py-2.5 rounded-lg text-sm outline-none focus:border-blue-400 transition"
-                  value={paypalEmail}
-                  onChange={(e) => setPaypalEmail(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-blue-300 mb-1.5 block">Contraseña</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className="w-full bg-[#00246b] border border-blue-850 text-white placeholder:text-blue-400/60 px-3 py-2.5 rounded-lg text-sm outline-none focus:border-blue-400 transition font-mono"
-                  value={paypalPassword}
-                  onChange={(e) => setPaypalPassword(e.target.value)}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading !== null}
-                className="w-full py-3.5 bg-[#0079C1] hover:bg-[#008CDE] rounded-xl text-white font-bold text-sm uppercase tracking-wider transition shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
-              >
-                {loading === "paypal" ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Procesando pago...
-                  </>
-                ) : (
-                  "Iniciar Sesión y Pagar"
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Simulated Credit Card Modal */}
-      {showCardModal && selectedPlan && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-6 text-zinc-300">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-              <h3 className="font-bold text-base text-zinc-150 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-emerald-400" />
-                Pagar con Tarjeta
-              </h3>
-              <button
-                onClick={() => setShowCardModal(false)}
-                className="text-zinc-500 hover:text-zinc-300 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            {/* Loader / PayPal Container */}
+            <div className="space-y-4">
+              {sdkLoading && (
+                <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                  <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+                  <span className="text-xs text-zinc-400">Cargando métodos de pago seguros...</span>
+                </div>
+              )}
+              
+              <div 
+                id="paypal-button-container" 
+                className={sdkLoading ? "hidden" : "block min-h-[150px]"}
+              />
+              
+              {loading === "paypal_capture" && (
+                <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-3.5 text-xs text-emerald-400 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                  <span>Verificando y activando su suscripción VIP... Por favor, no cierre esta ventana.</span>
+                </div>
+              )}
             </div>
-
-            {/* Plan summary */}
-            <div className="bg-zinc-900/60 border border-zinc-850 p-4 rounded-xl flex justify-between items-center">
-              <div>
-                <div className="text-xs text-zinc-500 uppercase font-bold tracking-wider">Plan Seleccionado</div>
-                <span className="text-sm font-semibold text-zinc-200">{selectedPlan.name}</span>
-              </div>
-              <span className="font-mono font-bold text-lg text-emerald-400">${selectedPlan.price.toFixed(2)} USD</span>
-            </div>
-
-            {/* Credit Card Form */}
-            <form onSubmit={handleSimulateCard} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Nombre en la Tarjeta</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Juan Perez"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-600 px-3 py-2.5 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition"
-                  value={cardHolder}
-                  onChange={(e) => setCardHolder(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Número de Tarjeta</label>
-                <input
-                  type="text"
-                  required
-                  maxLength={19}
-                  placeholder="4000 1234 5678 9010"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-600 px-3 py-2.5 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Expiración (MM/AA)</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={5}
-                    placeholder="12/29"
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-600 px-3 py-2.5 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
-                    value={cardExpiry}
-                    onChange={(e) => setCardExpiry(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">CVV / CVC</label>
-                  <input
-                    type="password"
-                    required
-                    maxLength={4}
-                    placeholder="•••"
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-600 px-3 py-2.5 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
-                    value={cardCvv}
-                    onChange={(e) => setCardCvv(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Correo para Recibo / Transferencia</label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    required
-                    placeholder="tu-correo@ejemplo.com"
-                    className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-600 pl-10 pr-3 py-2.5 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <Mail className="w-4 h-4 text-zinc-650 absolute left-3 top-1/2 -translate-y-1/2" />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading !== null}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-bold text-sm uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
-              >
-                {loading === "card" ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Procesando pago...
-                  </>
-                ) : (
-                  "Confirmar Pago de Tarjeta"
-                )}
-              </button>
-            </form>
           </div>
         </div>
       )}
     </div>
   );
 }
+

@@ -9,16 +9,24 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   return safeRoute(async () => {
     const me = await requireAdmin();
-    if (me.role !== "admin") {
-      return { status: 403, data: { success: false, message: "Only admins can list managers" } };
+    if (me.role !== "admin" && me.role !== "developer") {
+      return { status: 403, data: { success: false, message: "Only admins/developers can list managers" } };
     }
     const admins = await store.listAdmins();
     const apps = await store.listApps();
+    
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isSuperAdmin = me.email === bootstrapEmail;
+    
+    const filteredAdmins = isSuperAdmin
+      ? admins
+      : admins.filter((a) => a.created_by === me.id || a.id === me.id);
+
     const appsBySeller = new Map<string, number>();
     for (const a of apps) {
       if (a.seller_id) appsBySeller.set(a.seller_id, (appsBySeller.get(a.seller_id) || 0) + 1);
     }
-    const managers = admins.map((a) => ({
+    const managers = filteredAdmins.map((a) => ({
       id: a.id,
       email: a.email,
       role: a.role,
@@ -53,7 +61,7 @@ export async function POST(req: NextRequest) {
       return { status: 409, data: { success: false, message: "Email already registered" } };
     }
     const password_hash = await bcrypt.hash(password, 10);
-    const manager = await store.createAdmin({ email, password_hash, role });
+    const manager = await store.createAdmin({ email, password_hash, role, created_by: me.id });
 
     let app = null;
     if (role === "developer") {

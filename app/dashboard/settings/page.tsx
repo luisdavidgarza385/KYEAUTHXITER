@@ -1,5 +1,5 @@
 import { store } from "@/lib/store";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, getScopedAppIds } from "@/lib/auth";
 import { Settings as SettingsIcon, Key, Palette } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 import { VariablesManager } from "@/components/VariablesManager";
@@ -10,7 +10,12 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const admin = await requireAdmin();
-  const apps = await store.listApps();
+  const scopedIds = await getScopedAppIds(admin);
+  const allApps = await store.listApps();
+  const apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = admin.email === bootstrapEmail;
 
   return (
     <div className="p-8 space-y-6">
@@ -23,8 +28,8 @@ export default async function SettingsPage() {
         <h2 className="font-semibold mb-3">Account</h2>
         <div className="grid sm:grid-cols-2 gap-3 text-sm">
           <div>
-            <div className="label">Email</div>
-            <div className="font-mono text-text-muted">{admin.email}</div>
+            <div className="label">Username</div>
+            <div className="font-semibold">{admin.email}</div>
           </div>
           <div>
             <div className="label">Role</div>
@@ -33,8 +38,8 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      {/* Broadcast Notifications for Admin/Developer */}
-      {(admin.role === "admin" || admin.role === "developer") && (
+      {/* Broadcast Notifications for Super Admin only */}
+      {isSuperAdmin && (
         <div className="card">
           <BroadcastNotificationManager />
         </div>

@@ -9,7 +9,8 @@ export default async function CreditsPage() {
   const fullAdmin = await store.getAdminById(me.id);
 
   const credits = typeof fullAdmin?.credits === "number" ? fullAdmin.credits : 0;
-  const isUnlimited = fullAdmin?.role === "developer" || fullAdmin?.role === "admin" || fullAdmin?.email === "spectralx@gmail.com";
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isUnlimited = fullAdmin?.email === bootstrapEmail;
 
   return (
     <div className="p-6 lg:p-8 max-w-[1200px] mx-auto space-y-8 text-zinc-350">
@@ -77,7 +78,7 @@ export default async function CreditsPage() {
               ¿Necesitas más créditos?
             </h3>
             <p className="text-xs text-zinc-500 leading-relaxed">
-              Al registrarte recibes un saldo promocional de 200 créditos. Si necesitas generar más licencias de manera ilimitada, puedes comprar una suscripción VIP en nuestra tienda para tener cuotas ilimitadas sin restricciones.
+              Al registrarte recibes un saldo promocional de 3000 créditos. Si necesitas generar más licencias de manera ilimitada, puedes comprar una suscripción VIP en nuestra tienda para tener cuotas ilimitadas sin restricciones.
             </p>
           </div>
           <div className="pt-4">

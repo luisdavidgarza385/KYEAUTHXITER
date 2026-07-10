@@ -33,10 +33,6 @@ export async function POST(req: NextRequest) {
       return json({ success: false, message: "Email already registered" }, 409);
     }
 
-    const allAdmins = await store.listAdmins();
-    if (allAdmins.length > 0) {
-      return json({ success: false, message: "El registro de nuevos administradores está deshabilitado." }, 403);
-    }
     const role = "developer";
 
     const hash = await bcrypt.hash(password, 10);
@@ -44,7 +40,7 @@ export async function POST(req: NextRequest) {
       email,
       password_hash: hash,
       role,
-      credits: 200,
+      credits: 3000,
       status: "Activo",
       permissions: ["generar", "hwid", "ban", "delete"]
     });

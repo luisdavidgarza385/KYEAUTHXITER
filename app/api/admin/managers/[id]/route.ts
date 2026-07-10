@@ -11,12 +11,17 @@ export async function PATCH(
 ) {
   return safeRoute(async () => {
     const me = await requireAdmin();
-    if (me.role !== "admin") {
-      return { status: 403, data: { success: false, message: "Only admins can edit managers" } };
+    if (me.role !== "admin" && me.role !== "developer") {
+      return { status: 403, data: { success: false, message: "Only admins/developers can edit managers" } };
     }
     const target = await store.getAdminById(params.id);
     if (!target) {
       return { status: 404, data: { success: false, message: "Manager not found" } };
+    }
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isSuperAdmin = me.email === bootstrapEmail;
+    if (!isSuperAdmin && target.created_by !== me.id) {
+      return { status: 403, data: { success: false, message: "Forbidden" } };
     }
     const body = await req.json().catch(() => ({}));
     const updates: any = { ...target };
@@ -40,12 +45,17 @@ export async function DELETE(
 ) {
   return safeRoute(async () => {
     const me = await requireAdmin();
-    if (me.role !== "admin") {
-      return { status: 403, data: { success: false, message: "Only admins can delete managers" } };
+    if (me.role !== "admin" && me.role !== "developer") {
+      return { status: 403, data: { success: false, message: "Only admins/developers can delete managers" } };
     }
     const target = await store.getAdminById(params.id);
     if (!target) {
       return { status: 404, data: { success: false, message: "Manager not found" } };
+    }
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isSuperAdmin = me.email === bootstrapEmail;
+    if (!isSuperAdmin && target.created_by !== me.id) {
+      return { status: 403, data: { success: false, message: "Forbidden" } };
     }
     if (target.id === me.id) {
       return { status: 400, data: { success: false, message: "Cannot delete yourself" } };

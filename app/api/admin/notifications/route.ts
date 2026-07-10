@@ -7,8 +7,9 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   return safeRoute(async () => {
     const admin = await requireAdmin();
-    // Only allow admin or developer roles to create notifications
-    if (admin.role !== "admin" && admin.role !== "developer") {
+    // Only allow super admin (bootstrap email) to create global notifications
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    if (admin.email !== bootstrapEmail) {
       return { status: 403, data: { success: false, message: "Acción no permitida" } };
     }
 

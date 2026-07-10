@@ -1,5 +1,5 @@
 import { store } from "@/lib/store";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, getScopedAppIds } from "@/lib/auth";
 import { UserCog, Mail, Key, Trash2, Edit3, FolderTree, Shield } from "lucide-react";
 import { ManagerCardMenu } from "./ManagerCardMenu";
 import { CreateManagerButton } from "./CreateManagerButton";
@@ -20,18 +20,25 @@ export default async function ManagersPage() {
     );
   }
 
-  const admins = await store.listAdmins();
+  const scopedIds = await getScopedAppIds(me);
   const allApps = await store.listApps();
-  const managers = admins.filter((a) => a.role === "seller");
-  const adminsList = admins.filter((a) => a.role === "admin");
+  const apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+
+  const admins = await store.listAdmins();
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = me.email === bootstrapEmail;
+
+  const managers = admins.filter((a) => a.role === "seller" && (isSuperAdmin || a.created_by === me.id));
+  const adminsList = admins.filter((a) => a.role === "admin" && (isSuperAdmin || a.id === me.id));
+
   const appsBySeller = new Map<string, string[]>();
-  for (const a of allApps) {
+  for (const a of apps) {
     if (a.seller_id) {
       if (!appsBySeller.has(a.seller_id)) appsBySeller.set(a.seller_id, []);
       appsBySeller.get(a.seller_id)!.push(a.id);
     }
   }
-  const appsById = new Map(allApps.map((a) => [a.id, a]));
+  const appsById = new Map(apps.map((a) => [a.id, a]));
 
   return (
     <div>
@@ -46,14 +53,14 @@ export default async function ManagersPage() {
               Give friends or resellers limited access to specific applications. Managers can create licenses and users, but only for the apps you assign.
             </p>
           </div>
-          <CreateManagerButton apps={allApps} />
+          <CreateManagerButton apps={apps} />
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Stat label="Total Admins" value={adminsList.length} />
           <Stat label="Total Managers" value={managers.length} />
-          <Stat label="Apps Assigned" value={allApps.filter((a) => a.seller_id).length} />
-          <Stat label="Unassigned Apps" value={allApps.filter((a) => !a.seller_id).length} />
+          <Stat label="Apps Assigned" value={apps.filter((a) => a.seller_id).length} />
+          <Stat label="Unassigned Apps" value={apps.filter((a) => !a.seller_id).length} />
         </div>
 
         {managers.length === 0 ? (
@@ -78,7 +85,7 @@ export default async function ManagersPage() {
                         <div className="text-[10px] text-text-dim font-mono">Manager · ID {m.id.slice(0, 8)}</div>
                       </div>
                     </div>
-                    <ManagerCardMenu manager={{ id: m.id, email: m.email }} apps={allApps} currentAssignedIds={appsBySeller.get(m.id) || []} />
+                    <ManagerCardMenu manager={{ id: m.id, email: m.email }} apps={apps} currentAssignedIds={appsBySeller.get(m.id) || []} />
                   </div>
 
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs">

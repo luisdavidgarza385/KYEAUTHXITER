@@ -4,7 +4,11 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background-color: #020603;
+  background-color: #030604;
+  background-image: url('/bg_cyber_network_v1.png');
+  background-size: 140% 140%;
+  background-repeat: no-repeat;
+  animation: bgPan 45s ease-in-out infinite;
   color: #f3f4f6;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: relative;

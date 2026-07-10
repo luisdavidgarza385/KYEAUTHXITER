@@ -47,7 +47,11 @@ export function clearAdminSession() {
 }
 
 export async function getScopedAppIds(me: AdminSession): Promise<string[] | null> {
-  if (me.role === "admin" || me.role === "developer") return null;
+  if (me.role === "admin" || me.role === "developer") {
+    // Developers and admins only see apps they own
+    const developerApps = await store.listApps({ ownerId: me.id });
+    return developerApps.map((a) => a.id);
+  }
 
   // Apps assigned via seller_id (legacy managers)
   const sellerApps = await store.listApps({ sellerId: me.id });
@@ -63,13 +67,17 @@ export async function getScopedAppIds(me: AdminSession): Promise<string[] | null
 }
 
 export async function canAccessApp(me: AdminSession, appId: string): Promise<boolean> {
-  if (me.role === "admin" || me.role === "developer") return true;
+  if (me.role === "admin" || me.role === "developer") {
+    const app = await store.getAppById(appId);
+    return app?.owner_id === me.id;
+  }
   const apps = await store.listApps({ sellerId: me.id });
   return apps.some((a) => a.id === appId);
 }
 
 export function hasUnlimitedQuota(me: AdminSession): boolean {
-  return true;
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  return me.email === bootstrapEmail;
 }
 
 export const QUOTA_LIMIT = 10;
@@ -78,15 +86,51 @@ export async function checkQuota(me: AdminSession, appId: string): Promise<{ ok:
   if (hasUnlimitedQuota(me)) {
     return { ok: true, users: 0, licenses: 0, limit: 9999 };
   }
-  const [users, licenses] = await Promise.all([
-    store.listAppUsers({ appId, limit: 1000 }),
-    store.listLicenses({ appId, limit: 1000 }),
-  ]);
-  if (users.length >= QUOTA_LIMIT) {
-    return { ok: false, reason: `User limit reached (${QUOTA_LIMIT} per app). Ask the developer to increase your quota.`, users: users.length, licenses: licenses.length, limit: QUOTA_LIMIT };
+
+  if (me.role === "seller") {
+    const [users, licenses] = await Promise.all([
+      store.listAppUsers({ appId, limit: 1000 }),
+      store.listLicenses({ appId, limit: 1000 }),
+    ]);
+    if (users.length >= QUOTA_LIMIT) {
+      return { ok: false, reason: `User limit reached (${QUOTA_LIMIT} per app). Ask the developer to increase your quota.`, users: users.length, licenses: licenses.length, limit: QUOTA_LIMIT };
+    }
+    if (licenses.length >= QUOTA_LIMIT) {
+      return { ok: false, reason: `License limit reached (${QUOTA_LIMIT} per app). Ask the developer to increase your quota.`, users: users.length, licenses: licenses.length, limit: QUOTA_LIMIT };
+    }
+    return { ok: true, users: users.length, licenses: licenses.length, limit: QUOTA_LIMIT };
+  } else {
+    // Restricted developer/admin: total limit of 50 across all apps
+    const apps = await store.listApps({ ownerId: me.id });
+    const appIds = apps.map((a) => a.id);
+    
+    const [allUsers, allLicenses] = await Promise.all([
+      store.listAppUsers({ limit: 10000 }),
+      store.listLicenses({ limit: 10000 }),
+    ]);
+    
+    const users = allUsers.filter((u) => appIds.includes(u.app_id));
+    const licenses = allLicenses.filter((l) => appIds.includes(l.app_id));
+    
+    const LIMIT = 50;
+    if (users.length >= LIMIT) {
+      return {
+        ok: false,
+        reason: `Has alcanzado el límite máximo de ${LIMIT} usuarios registrados permitidos para tu cuenta.`,
+        users: users.length,
+        licenses: licenses.length,
+        limit: LIMIT,
+      };
+    }
+    if (licenses.length >= LIMIT) {
+      return {
+        ok: false,
+        reason: `Has alcanzado el límite máximo de ${LIMIT} licencias permitidas para tu cuenta.`,
+        users: users.length,
+        licenses: licenses.length,
+        limit: LIMIT,
+      };
+    }
+    return { ok: true, users: users.length, licenses: licenses.length, limit: LIMIT };
   }
-  if (licenses.length >= QUOTA_LIMIT) {
-    return { ok: false, reason: `License limit reached (${QUOTA_LIMIT} per app). Ask the developer to increase your quota.`, users: users.length, licenses: licenses.length, limit: QUOTA_LIMIT };
-  }
-  return { ok: true, users: users.length, licenses: licenses.length, limit: QUOTA_LIMIT };
 }

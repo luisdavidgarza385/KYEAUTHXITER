@@ -83,7 +83,8 @@ export default async function DashboardPage() {
   });
 
   const credits = typeof fullAdmin?.credits === "number" ? fullAdmin.credits : 0.0;
-  const isUnlimited = fullAdmin?.role === "developer" || fullAdmin?.role === "admin";
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isUnlimited = fullAdmin?.email === bootstrapEmail;
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto text-zinc-300">

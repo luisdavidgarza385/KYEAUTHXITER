@@ -45,10 +45,10 @@ export async function POST(req: NextRequest) {
     const admin = await store.getAdminById(me.id);
     if (!admin) return { status: 404, data: { success: false, message: "User not found" } };
 
-    // Ilimitado si: es admin/developer, o es seller con plan ilimitado (credits === 0 significa plan ilimitado)
+    // Ilimitado si: es el super admin (bootstrap email) o un seller con plan ilimitado
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
     const isUnlimited =
-      admin.role === "admin" ||
-      admin.role === "developer" ||
+      admin.email === bootstrapEmail ||
       (admin.role === "seller" && (admin.credits === 0 || admin.credits === null || admin.credits === undefined));
 
     const cost = count * 20;

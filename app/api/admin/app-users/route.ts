@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
     const admin = await store.getAdminById(me.id);
     if (!admin) return { status: 404, data: { success: false, message: "User not found" } };
 
-    const isUnlimited = admin.email === "spectralx@gmail.com" || admin.role === "developer";
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isUnlimited = admin.email === bootstrapEmail;
     const cost = 20;
 
     if (!isUnlimited) {

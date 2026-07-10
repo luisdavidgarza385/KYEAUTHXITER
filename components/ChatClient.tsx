@@ -22,7 +22,7 @@ interface ParsedMessage {
   isSelf: boolean;
 }
 
-export function ChatClient({ role, email }: { role: string; email: string }) {
+export function ChatClient({ role, email, isSuperAdmin }: { role: string; email: string; isSuperAdmin: boolean }) {
   const [logs, setLogs] = useState<Log[]>([]);
   const [messages, setMessages] = useState<ParsedMessage[]>([]);
   const [inputText, setInputText] = useState("");
@@ -134,7 +134,7 @@ export function ChatClient({ role, email }: { role: string; email: string }) {
   // Handle message send
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!inputText.trim() || isSending || !isAdmin) return;
+    if (!inputText.trim() || isSending || !isSuperAdmin) return;
 
     setIsSending(true);
     setError(null);
@@ -326,7 +326,7 @@ export function ChatClient({ role, email }: { role: string; email: string }) {
 
         {/* Chat Input or Read-Only Notice */}
         <div className="p-4 border-t border-zinc-800/80 bg-zinc-950/40">
-          {isAdmin ? (
+          {isSuperAdmin ? (
             <form onSubmit={handleSend} className="flex gap-2">
               <input
                 type="text"

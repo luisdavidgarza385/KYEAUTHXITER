@@ -3,6 +3,8 @@ import { ChatClient } from "@/components/ChatClient";
 
 export default async function ChatPage() {
   const me = await requireAdmin();
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = me.email === bootstrapEmail;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -15,7 +17,7 @@ export default async function ChatPage() {
         </p>
       </div>
 
-      <ChatClient role={me.role} email={me.email} />
+      <ChatClient role={me.role} email={me.email} isSuperAdmin={isSuperAdmin} />
     </div>
   );
 }

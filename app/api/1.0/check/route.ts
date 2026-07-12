@@ -33,20 +33,16 @@ async function getParams(req: NextRequest): Promise<Record<string, string>> {
 export async function POST(req: NextRequest) {
   try {
     const p = await getParams(req);
-    // El SDK C++ manda: type=var&ownerid=...&name=...&varid=...&sessionid=...
     const sessionId = p.sessionid;
-    const varid = p.varid || p.var || p.name_var;
     const name = p.name;
     const ownerid = p.ownerid || p.appid;
+    const ip = getClientIp(req);
 
     if (!sessionId) {
       return json({ success: false, message: "sessionid required" }, 400);
     }
-    if (!varid) {
-      return json({ success: false, message: "varid required" }, 400);
-    }
 
-    // Buscar la app
+    // Buscar la app por name o ownerid
     let app: any = null;
     if (name) app = await store.getAppByName(String(name));
     if (!app && ownerid) app = await store.getAppByAppId(String(ownerid));
@@ -56,36 +52,51 @@ export async function POST(req: NextRequest) {
       return json({ success: false, message: "Application is " + app.status }, 403);
     }
 
-    // Validar sesión
+    // Validar la sesión en base de datos
     const session = await store.getSession(String(sessionId));
     if (!session || session.app_id !== app.id) {
       return json({ success: false, message: "Invalid session" }, 401);
     }
+
+    // Verificar que la sesión no expiró
     if (new Date(session.expires_at) < new Date()) {
+      await store.invalidateSession(String(sessionId));
       return json({ success: false, message: "Session expired" }, 401);
     }
 
-    // Buscar la variable — primero por nombre exacto, luego por varid
-    let variable = await store.getVariable(app.id, String(varid));
+    // Si hay usuario vinculado a la sesión, verificar que no está baneado
+    if (session.user_id) {
+      const user = await store.getAppUserById(session.user_id);
+      if (!user) {
+        return json({ success: false, message: "User not found" }, 401);
+      }
+      if (user.banned) {
+        return json({ success: false, message: "You are banned: " + (user.ban_reason || "") }, 403);
+      }
 
-    // Si la variable tiene authed=true, requiere usuario autenticado
-    if (variable && variable.authed && !session.user_id) {
-      return json({ success: false, message: "Authentication required to access this variable" }, 403);
-    }
+      // Verificar que tiene al menos una licencia activa
+      const allLicenses = await store.listLicenses({ appId: app.id });
+      const now = new Date();
+      const activeLicense = allLicenses.find(
+        (l: any) =>
+          l.used_by === session.user_id &&
+          l.status === "used" &&
+          (!l.expires_at || new Date(l.expires_at) > now)
+      );
 
-    if (!variable) {
-      return json({ success: false, message: "Variable not found" }, 404);
+      if (!activeLicense) {
+        return json({ success: false, message: "Subscription expired" }, 403);
+      }
     }
 
     await store.createLog({
       app_id: app.id,
       user_id: session.user_id || null,
-      message: `var fetch: ${varid}`,
+      message: `check from ${ip} session=${sessionId}`,
       level: "info",
     });
 
-    // El SDK C++ espera: { success: true, message: "<valor>" }
-    return json({ success: true, message: variable.value });
+    return json({ success: true, message: "Session valid" });
   } catch (e: any) {
     return json({ success: false, message: e?.message || "Server error" }, 500);
   }

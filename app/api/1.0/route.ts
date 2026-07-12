@@ -521,14 +521,102 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (type === "log" || type === "var") {
-      return json({ success: false, message: "Endpoint not yet implemented: " + type }, 501);
+    if (type === "check") {
+      const sessionId = p.sessionid;
+      const checkName = p.name;
+      const checkOwnerid = p.ownerid || p.appid;
+
+      if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
+
+      let checkApp: any = null;
+      if (checkName) checkApp = await store.getAppByName(String(checkName));
+      if (!checkApp && checkOwnerid) checkApp = await store.getAppByAppId(String(checkOwnerid));
+      if (!checkApp) return json({ success: false, message: "Application not found" }, 404);
+
+      if (checkApp.status !== "active") return json({ success: false, message: "Application is " + checkApp.status }, 403);
+
+      const checkSession = sessionsMap.get(String(sessionId)) || await store.getSession(String(sessionId));
+      if (!checkSession || checkSession.app_id !== checkApp.id) return json({ success: false, message: "Invalid session" }, 401);
+
+      if (new Date(checkSession.expires_at) < new Date()) {
+        await store.invalidateSession(String(sessionId));
+        return json({ success: false, message: "Session expired" }, 401);
+      }
+
+      if (checkSession.user_id) {
+        const checkUser = await store.getAppUserById(checkSession.user_id);
+        if (!checkUser) return json({ success: false, message: "User not found" }, 401);
+        if (checkUser.banned) return json({ success: false, message: "You are banned: " + (checkUser.ban_reason || "") }, 403);
+
+        const allLics = await store.listLicenses({ appId: checkApp.id });
+        const now = new Date();
+        const activeLic = allLics.find(
+          (l: any) => l.used_by === checkSession.user_id &&
+            l.status === "used" &&
+            (!l.expires_at || new Date(l.expires_at) > now)
+        );
+        if (!activeLic) return json({ success: false, message: "Subscription expired" }, 403);
+      }
+
+      await store.createLog({ app_id: checkApp.id, user_id: checkSession.user_id || null, message: `check from ${ip}`, level: "info" });
+      return json({ success: true, message: "Session valid" });
+    }
+
+    if (type === "var") {
+      const varSessionId = p.sessionid;
+      const varid = p.varid || p.var;
+      const varName = p.name;
+      const varOwnerid = p.ownerid || p.appid;
+
+      if (!varSessionId) return json({ success: false, message: "sessionid required" }, 400);
+      if (!varid) return json({ success: false, message: "varid required" }, 400);
+
+      let varApp: any = null;
+      if (varName) varApp = await store.getAppByName(String(varName));
+      if (!varApp && varOwnerid) varApp = await store.getAppByAppId(String(varOwnerid));
+      if (!varApp) return json({ success: false, message: "Application not found" }, 404);
+      if (varApp.status !== "active") return json({ success: false, message: "Application is " + varApp.status }, 403);
+
+      const varSession = sessionsMap.get(String(varSessionId)) || await store.getSession(String(varSessionId));
+      if (!varSession || varSession.app_id !== varApp.id) return json({ success: false, message: "Invalid session" }, 401);
+      if (new Date(varSession.expires_at) < new Date()) return json({ success: false, message: "Session expired" }, 401);
+
+      const variable = await store.getVariable(varApp.id, String(varid));
+      if (!variable) return json({ success: false, message: "Variable not found" }, 404);
+      if (variable.authed && !varSession.user_id) return json({ success: false, message: "Authentication required to access this variable" }, 403);
+
+      await store.createLog({ app_id: varApp.id, user_id: varSession.user_id || null, message: `var fetch: ${varid}`, level: "info" });
+      return json({ success: true, message: variable.value });
+    }
+
+    if (type === "log") {
+      const logSessionId = p.sessionid;
+      const logMsg = p.message || p.msg;
+      const logName = p.name;
+      const logOwnerid = p.ownerid || p.appid;
+
+      if (!logSessionId) return json({ success: false, message: "sessionid required" }, 400);
+      if (!logMsg) return json({ success: false, message: "message required" }, 400);
+
+      let logApp: any = null;
+      if (logName) logApp = await store.getAppByName(String(logName));
+      if (!logApp && logOwnerid) logApp = await store.getAppByAppId(String(logOwnerid));
+      if (!logApp) return json({ success: false, message: "Application not found" }, 404);
+      if (logApp.status !== "active") return json({ success: false, message: "Application is " + logApp.status }, 403);
+
+      const logSession = sessionsMap.get(String(logSessionId)) || await store.getSession(String(logSessionId));
+      if (!logSession || logSession.app_id !== logApp.id) return json({ success: false, message: "Invalid session" }, 401);
+      if (new Date(logSession.expires_at) < new Date()) return json({ success: false, message: "Session expired" }, 401);
+
+      const sanitized = String(logMsg).replace(/[<>]/g, "").slice(0, 500);
+      await store.createLog({ app_id: logApp.id, user_id: logSession.user_id || null, message: `[CLIENT] ${sanitized} | ip=${ip}`, level: "info" });
+      return json({ success: true, message: "Log saved" });
     }
 
     return json({
       success: true,
       message: "KeyAuth API 1.0",
-      endpoints: ["init", "login", "register", "license", "log", "var"],
+      endpoints: ["init", "login", "register", "license", "check", "var", "log"],
     });
   } catch (e: any) {
     return json({ success: false, message: e?.message || "Server error" }, 500);

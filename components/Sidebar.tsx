@@ -27,6 +27,7 @@ const SECTIONS = [
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
       { href: "/dashboard/apps", label: "Aplicaciones", icon: Shield, adminOnly: false },
+      { href: "/dashboard/builder", label: "Builder", icon: Terminal, adminOnly: false },
     ],
   },
   {

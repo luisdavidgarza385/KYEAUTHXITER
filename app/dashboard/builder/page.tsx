@@ -464,7 +464,7 @@ export default function BuilderPage() {
     if (!confirm(`¿Eliminar el módulo "${filename}"?`)) return;
 
     try {
-      const res = await fetch(`${API}/projects/${activeProj.id}/dlls/${filename}`, {
+      const res = await fetch(`${API}/projects/${activeProj.id}/dlls/${encodeURIComponent(filename)}`, {
         method: "DELETE"
       });
 

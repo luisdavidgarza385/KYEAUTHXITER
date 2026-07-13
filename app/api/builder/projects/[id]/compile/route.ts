@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Build the API URL that the loader will use to download DLLs
     const host = req.headers.get('host') || 'keyauthpro.xyz';
     const proto = host.includes('localhost') ? 'http' : 'https';
-    const apiUrl = `${proto}://${host}/api/builder/projects/${project.id}/dlls`;
+    const apiUrl = `${proto}://${host}/api/projects/${project.id}/dlls`;
 
     // Attempt to download base_loader.exe
     let baseExeBuf: Buffer | null = null;

@@ -11,13 +11,16 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
+    "@types/formidable": "^3.5.1",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
+    "formidable": "^3.5.4",
     "lucide-react": "^1.24.0",
     "next": "14.2.33",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "resedit": "^3.0.2",
     "tailwind-merge": "^2.5.3",
     "zod": "^3.23.8"
   },

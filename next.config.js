@@ -2,7 +2,7 @@
 const nextConfig = {
   skipTrailingSlashRedirect: true,
   experimental: {
-    serverActions: { bodySizeLimit: "2mb" },
+    serverActions: { bodySizeLimit: "55mb" },
   },
 };
 

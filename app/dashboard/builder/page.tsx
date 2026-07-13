@@ -7,9 +7,9 @@ import {
   MessageCircle, Send, X as XIcon
 } from "lucide-react";
 
-// API endpoints configuration
-const API_BASE = "https://consola-dll.vercel.app";
-const API = `${API_BASE}/api`;
+// API endpoints — all served locally from keyauthpro.xyz
+const API_BASE = "";
+const API = `/api/builder`;
 
 interface DllInfo {
   name: string;
@@ -255,7 +255,7 @@ export default function BuilderPage() {
     setFormKaOwner(p.keyAuthOwner || "");
     setFormKaVer(p.keyAuthVer || "1.0");
     setFormKaSecret(p.keyAuthSecret || "");
-    setIconPreview(p.hasIcon ? `${API_BASE}/icons/${p.id}.png?t=${Date.now()}` : null);
+    setIconPreview(p.hasIcon ? `/api/builder/files/icons/${p.id}.png?t=${Date.now()}` : null);
     setIconFile(null);
     setIsSettingsOpen(true);
   };
@@ -433,6 +433,32 @@ export default function BuilderPage() {
     }
   };
 
+  const handleUploadBaseLoader = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    showToast("Subiendo Base Loader...");
+
+    try {
+      const res = await fetch(`${API}/upload-base-loader`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (res.ok) {
+        showToast("✅ Base Loader subido con éxito");
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Error al subir el Base Loader", "err");
+      }
+    } catch (err) {
+      showToast("Fallo al conectar con el servidor", "err");
+    }
+  };
+
   const handleDeleteDll = async (filename: string) => {
     if (!activeProj) return;
     if (!confirm(`¿Eliminar el módulo "${filename}"?`)) return;
@@ -513,13 +539,30 @@ export default function BuilderPage() {
             Unifica la compilación de tus Loaders de Spectral X y administra tus DLLs conectadas a KeyAuth.
           </p>
         </div>
-        <button 
-          onClick={() => { resetForm(); setIsCreateOpen(true); }}
-          className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 shadow-md shadow-emerald-950/50 transition cursor-pointer self-start md:self-auto"
-        >
-          <Plus className="w-4.5 h-4.5" />
-          Crear Aplicación
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <input 
+            type="file" 
+            id="baseLoaderInput" 
+            accept=".exe" 
+            className="hidden" 
+            onChange={handleUploadBaseLoader}
+          />
+          <button 
+            onClick={() => document.getElementById("baseLoaderInput")?.click()}
+            className="flex items-center justify-center gap-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-semibold text-xs px-4 py-2.5 shadow-md transition cursor-pointer"
+          >
+            <Upload className="w-4 h-4 text-zinc-400" />
+            Subir Base Loader
+          </button>
+          
+          <button 
+            onClick={() => { resetForm(); setIsCreateOpen(true); }}
+            className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 shadow-md shadow-emerald-950/50 transition cursor-pointer"
+          >
+            <Plus className="w-4.5 h-4.5" />
+            Crear Aplicación
+          </button>
+        </div>
       </div>
 
       {/* Metrics Cards */}
@@ -592,7 +635,7 @@ export default function BuilderPage() {
                       >
                         {p.hasIcon ? (
                           <img 
-                            src={`${API_BASE}/icons/${p.id}.png?t=${Date.now()}`}
+                            src={`/api/builder/files/icons/${p.id}.png?t=${Date.now()}`}
                             alt={p.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -733,7 +776,7 @@ export default function BuilderPage() {
                     ) : build?.status === "success" && build.file ? (
                       <div className="flex items-center gap-1">
                         <a 
-                          href={`${API_BASE}/builds/${build.file}`} 
+                          href={`/api/builder/files/builds/${build.file}`} 
                           download
                           onClick={() => handleClearBuild(p.id)}
                           className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 flex items-center gap-1.5 shadow-sm transition"

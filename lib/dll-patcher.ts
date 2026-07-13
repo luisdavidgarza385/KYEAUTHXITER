@@ -74,7 +74,6 @@ export function patchExe(baseExeBuf: Buffer, project: Project, apiUrl: string, i
   // Try to inject icon using resedit (optional)
   if (iconBuf && iconBuf.length > 0) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const ResEdit = require('resedit');
       const lf = ResEdit.NtExecutable.fromBuffer(buf);
       const resources = ResEdit.NtExecutableResource.from(lf);

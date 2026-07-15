@@ -2,7 +2,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { requireAdmin, getScopedAppIds } from "@/lib/auth";
 import { store } from "@/lib/store";
-import { ParticlesBackground } from "@/components/ParticlesBackground";
+
 import { GlobalBroadcastNotifier } from "@/components/GlobalBroadcastNotifier";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +15,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="theme-vyper flex min-h-screen bg-transparent text-text relative overflow-hidden">
-      <ParticlesBackground />
+      {/* Video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover opacity-30"
+      >
+        <source src="/tunnel.mp4" type="video/mp4" />
+      </video>
       <GlobalBroadcastNotifier currentUserEmail={me.email} />
       <Sidebar role={me.role} email={me.email} isSubReseller={isSubReseller} />
       <div className="flex-1 flex flex-col min-w-0 relative z-10">

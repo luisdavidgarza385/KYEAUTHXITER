@@ -71,6 +71,33 @@ export default function BuilderPage() {
   // Build statuses tracking
   const [buildStatuses, setBuildStatuses] = useState<Record<string, { status: string; file?: string; error?: string }>>({});
 
+  // KeyAuth Apps state & helpers
+  const [keyAuthApps, setKeyAuthApps] = useState<any[]>([]);
+
+  const loadKeyAuthApps = async () => {
+    try {
+      const res = await fetch("/api/admin/apps");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setKeyAuthApps(data.data);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching KeyAuth apps:", err);
+    }
+  };
+
+  const handleSelectKaApp = (appId: string) => {
+    const selected = keyAuthApps.find(a => a.app_id === appId);
+    if (selected) {
+      setFormKaName(selected.name);
+      setFormKaOwner(selected.owner_id);
+      setFormKaVer(selected.version || "1.0");
+      setFormKaSecret(selected.app_secret);
+    }
+  };
+
   // Chat state
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatProject, setChatProject] = useState<Project | null>(null);
@@ -102,6 +129,7 @@ export default function BuilderPage() {
 
   useEffect(() => {
     loadProjects();
+    loadKeyAuthApps();
   }, []);
 
   // ── CHAT HELPERS ──
@@ -594,214 +622,292 @@ export default function BuilderPage() {
           <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
           <span className="text-sm font-semibold">Cargando la consola del Builder...</span>
         </div>
-      ) : projects.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900/5 text-center py-16 px-4">
-          <Terminal className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-          <h3 className="font-semibold text-zinc-200">No tienes aplicaciones de compilación todavía</h3>
-          <p className="text-xs text-zinc-500 mt-1.5 max-w-sm mx-auto">
-            Inicializa tu primer loader configurando su nombre, icono, color y credenciales de KeyAuth para empezar.
-          </p>
-          <button 
-            onClick={() => { resetForm(); setIsCreateOpen(true); }}
-            className="mt-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-xs px-3.5 py-2 transition cursor-pointer"
-          >
-            Añadir Primer Proyecto
-          </button>
-        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {projects.map((p) => {
-            const build = buildStatuses[p.id];
-            const isKaConfigured = p.keyAuthName && p.keyAuthOwner && p.keyAuthSecret;
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+          {/* Main Area: Builder Projects */}
+          <div className="flex-1 w-full space-y-6">
+            {projects.length === 0 ? (
+              <div className="rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900/5 text-center py-16 px-4">
+                <Terminal className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+                <h3 className="font-semibold text-zinc-200">No tienes aplicaciones de compilación todavía</h3>
+                <p className="text-xs text-zinc-500 mt-1.5 max-w-sm mx-auto">
+                  Inicializa tu primer loader configurando su nombre, icono, color y credenciales de KeyAuth para empezar.
+                </p>
+                <button 
+                  onClick={() => { resetForm(); setIsCreateOpen(true); }}
+                  className="mt-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-xs px-3.5 py-2 transition cursor-pointer"
+                >
+                  Añadir Primer Proyecto
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {projects.map((p) => {
+                  const build = buildStatuses[p.id];
+                  const isKaConfigured = p.keyAuthName && p.keyAuthOwner && p.keyAuthSecret;
 
-            return (
-              <div 
-                key={p.id}
-                className="rounded-xl border border-zinc-800/80 bg-zinc-950/45 hover:border-emerald-500/25 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-inner group relative"
-                style={{ 
-                  boxShadow: `inset 0 0 20px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.15)`
-                }}
-              >
-                {/* Visual Accent bar at the top */}
-                <div className="h-1 w-full" style={{ backgroundColor: p.color || "#9333ea" }}></div>
+                  return (
+                    <div 
+                      key={p.id}
+                      className="rounded-xl border border-zinc-800/80 bg-zinc-950/45 hover:border-emerald-500/25 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-inner group relative"
+                      style={{ 
+                        boxShadow: `inset 0 0 20px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.15)`
+                      }}
+                    >
+                      {/* Visual Accent bar at the top */}
+                      <div className="h-1 w-full" style={{ backgroundColor: p.color || "#9333ea" }}></div>
 
-                <div className="p-5 space-y-4">
-                  {/* Card Header */}
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div 
-                        className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center font-bold text-white shadow-md relative overflow-hidden"
-                        style={{ background: `linear-gradient(135deg, ${p.color || "#9333ea"}, ${p.color ? p.color + "99" : "#7928ca"})` }}
-                      >
-                        {p.hasIcon ? (
-                          <img 
-                            src={`/api/builder/files/icons/${p.id}.png?t=${Date.now()}`}
-                            alt={p.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          p.name.charAt(0).toUpperCase()
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-zinc-100 text-sm md:text-base leading-snug truncate">
-                          {p.name}
-                        </h3>
-                        <div className="text-[10.5px] font-mono text-zinc-500 truncate mt-0.5">
-                          {p.process}
+                      <div className="p-5 space-y-4">
+                        {/* Card Header */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div 
+                              className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center font-bold text-white shadow-md relative overflow-hidden"
+                              style={{ background: `linear-gradient(135deg, ${p.color || "#9333ea"}, ${p.color ? p.color + "99" : "#7928ca"})` }}
+                            >
+                              {p.hasIcon ? (
+                                <img 
+                                  src={`/api/builder/files/icons/${p.id}.png?t=${Date.now()}`}
+                                  alt={p.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                p.name.charAt(0).toUpperCase()
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="font-bold text-zinc-100 text-sm md:text-base leading-snug truncate">
+                                {p.name}
+                              </h3>
+                              <div className="text-[10.5px] font-mono text-zinc-500 truncate mt-0.5">
+                                {p.process}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Settings / Gear button */}
+                          <div className="flex items-center gap-1.5">
+                            <button 
+                              onClick={() => openSettings(p)}
+                              className="p-2 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-855 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
+                              title="Configurar Aplicación"
+                            >
+                              <Settings className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteProject(p.id, p.name)}
+                              className="p-2 rounded-lg bg-zinc-900/80 hover:bg-red-955/20 border border-zinc-855 hover:border-red-900/30 text-zinc-500 hover:text-red-400 transition cursor-pointer"
+                              title="Eliminar Proyecto"
+                            >
+                              <Trash className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Config Indicators Badges */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {isKaConfigured ? (
+                            <span className="text-[9.5px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded bg-emerald-955/40 text-emerald-400 border border-emerald-500/20">
+                              🔑 KeyAuth OK
+                            </span>
+                          ) : (
+                            <span className="text-[9.5px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded bg-amber-955/40 text-amber-400 border border-amber-500/20">
+                              ⚠️ Sin KeyAuth
+                            </span>
+                          )}
+                          <span className="text-[9.5px] font-semibold tracking-wide px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                            {p.dlls ? p.dlls.length : 0} Módulos
+                          </span>
+                        </div>
+
+                        {/* Credentials block */}
+                        <div className="rounded-lg bg-black/35 border border-zinc-900/60 p-3 space-y-2 text-[11px]">
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="text-zinc-500">App Name:</span>
+                            <span className="font-mono text-zinc-300 font-semibold truncate max-w-[170px] flex items-center gap-1">
+                              {p.keyAuthName || "---"}
+                              {p.keyAuthName && (
+                                <button 
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(p.keyAuthName || "");
+                                    showToast("Copiado!");
+                                  }}
+                                  className="hover:text-emerald-400 text-zinc-600 transition"
+                                >
+                                  <Copy className="w-2.5 h-2.5" />
+                                </button>
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="text-zinc-500">Owner ID:</span>
+                            <span className="font-mono text-zinc-300 font-semibold truncate max-w-[170px] flex items-center gap-1">
+                              {p.keyAuthOwner || "---"}
+                              {p.keyAuthOwner && (
+                                <button 
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(p.keyAuthOwner || "");
+                                    showToast("Copiado!");
+                                  }}
+                                  className="hover:text-emerald-400 text-zinc-600 transition"
+                                >
+                                  <Copy className="w-2.5 h-2.5" />
+                                </button>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex gap-2 pt-2 border-t border-zinc-900/50">
+                          <button 
+                            onClick={() => openDlls(p)}
+                            className="flex-1 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-350 hover:text-white text-xs font-bold py-2 flex items-center justify-center gap-1 transition cursor-pointer"
+                          >
+                            📁 DLLs
+                          </button>
+                          <button 
+                            onClick={() => openSettings(p)}
+                            className="flex-1 rounded-lg bg-zinc-900 hover:bg-zinc-855 border border-zinc-800 text-zinc-350 hover:text-white text-xs font-bold py-2 flex items-center justify-center gap-1 transition cursor-pointer"
+                          >
+                            ⚙ Config
+                          </button>
+                          <button 
+                            onClick={() => openChat(p)}
+                            className="rounded-lg bg-zinc-900 hover:bg-zinc-855 border border-zinc-800 text-zinc-350 hover:text-white text-xs font-bold px-2 py-2 flex items-center justify-center transition cursor-pointer"
+                            title="Chat Global del Loader"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          </button>
+
+                          {build?.status === "running" ? (
+                            <button 
+                              disabled
+                              className="rounded-lg bg-zinc-850 text-zinc-400 text-xs font-semibold px-3 py-2 flex items-center gap-1 shadow-sm border border-zinc-800 animate-pulse"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                              Compilando...
+                            </button>
+                          ) : build?.status === "success" && build.file ? (
+                            <div className="flex items-center gap-1">
+                              <a 
+                                href={`/api/builder/files/builds/${build.file}`} 
+                                download
+                                onClick={() => handleClearBuild(p.id)}
+                                className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 flex items-center gap-1.5 shadow-sm transition"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                Descargar
+                              </a>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => handleCompile(p.id)}
+                              className="rounded-lg text-white text-xs font-semibold px-3.5 py-2 flex items-center gap-1 shadow-sm transition hover:scale-[1.02] cursor-pointer"
+                              style={{ 
+                                background: `linear-gradient(135deg, ${p.color || "#9333ea"}, ${p.color ? p.color + "cc" : "#7928ca"})`,
+                                boxShadow: `0 4px 10px rgba(0,0,0,0.15)`
+                              }}
+                            >
+                              ⚡ Compilar
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
-                    
-                    {/* Settings / Gear button */}
-                    <div className="flex items-center gap-1.5">
-                      <button 
-                        onClick={() => openSettings(p)}
-                        className="p-2 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
-                        title="Configurar Aplicación"
-                      >
-                        <Settings className="w-3.5 h-3.5" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteProject(p.id, p.name)}
-                        className="p-2 rounded-lg bg-zinc-900/80 hover:bg-red-950/20 border border-zinc-850 hover:border-red-900/30 text-zinc-500 hover:text-red-400 transition cursor-pointer"
-                        title="Eliminar Proyecto"
-                      >
-                        <Trash className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Config Indicators Badges */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {isKaConfigured ? (
-                      <span className="text-[9.5px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-500/20">
-                        🔑 KeyAuth OK
-                      </span>
-                    ) : (
-                      <span className="text-[9.5px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded bg-amber-950/40 text-amber-400 border border-amber-500/20">
-                        ⚠️ Sin KeyAuth
-                      </span>
-                    )}
-                    <span className="text-[9.5px] font-semibold tracking-wide px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
-                      {p.dlls ? p.dlls.length : 0} Módulos
-                    </span>
-                  </div>
-
-                  {/* Credentials block */}
-                  <div className="rounded-lg bg-black/35 border border-zinc-900/60 p-3 space-y-2 text-[11px]">
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-zinc-500">App Name:</span>
-                      <span className="font-mono text-zinc-300 font-semibold truncate max-w-[170px] flex items-center gap-1">
-                        {p.keyAuthName || "---"}
-                        {p.keyAuthName && (
-                          <button 
-                            onClick={() => handleCopy(`kan-${p.id}`, p.keyAuthName || "")}
-                            className="text-zinc-600 hover:text-emerald-400 cursor-pointer"
-                          >
-                            {copiedField === `kan-${p.id}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          </button>
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-zinc-500">Owner ID:</span>
-                      <span className="font-mono text-zinc-300 font-semibold truncate max-w-[170px] flex items-center gap-1">
-                        {p.keyAuthOwner ? `${p.keyAuthOwner.substring(0, 8)}...` : "---"}
-                        {p.keyAuthOwner && (
-                          <button 
-                            onClick={() => handleCopy(`kao-${p.id}`, p.keyAuthOwner || "")}
-                            className="text-zinc-600 hover:text-emerald-400 cursor-pointer"
-                          >
-                            {copiedField === `kao-${p.id}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          </button>
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-zinc-500">Secret Key:</span>
-                      <span className="font-mono text-zinc-300 font-semibold truncate max-w-[170px] flex items-center gap-1">
-                        {p.keyAuthSecret ? `${p.keyAuthSecret.substring(0, 8)}...` : "---"}
-                        {p.keyAuthSecret && (
-                          <button 
-                            onClick={() => handleCopy(`kas-${p.id}`, p.keyAuthSecret || "")}
-                            className="text-zinc-600 hover:text-emerald-400 cursor-pointer"
-                          >
-                            {copiedField === `kas-${p.id}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          </button>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Actions Footer */}
-                <div className="bg-black/10 border-t border-zinc-900/60 p-4 flex items-center justify-between gap-3 mt-auto">
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => openDlls(p)}
-                      className="rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 hover:border-zinc-700 text-xs font-semibold px-3 py-2 transition cursor-pointer text-zinc-300"
-                    >
-                      📁 DLLs
-                    </button>
-                    <button 
-                      onClick={() => openSettings(p)}
-                      className="rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 hover:border-zinc-700 text-xs font-semibold px-3 py-2 transition cursor-pointer text-zinc-300"
-                    >
-                      ⚙ Config
-                    </button>
-                    <button 
-                      onClick={() => openChat(p)}
-                      className="rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 hover:border-emerald-600/40 text-xs font-semibold px-3 py-2 transition cursor-pointer text-emerald-400 flex items-center gap-1.5"
-                      title="Chat de Soporte"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      Chat
-                    </button>
-                  </div>
-
-                  {/* Compile state / Build action button */}
-                  <div>
-                    {build?.status === "compiling" ? (
-                      <button 
-                        disabled
-                        className="rounded-lg bg-zinc-900 border border-zinc-850 text-xs font-semibold px-3.5 py-2 flex items-center gap-1.5 text-zinc-400"
-                      >
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-400" />
-                        Compilando...
-                      </button>
-                    ) : build?.status === "success" && build.file ? (
-                      <div className="flex items-center gap-1">
-                        <a 
-                          href={`/api/builder/files/builds/${build.file}`} 
-                          download
-                          onClick={() => handleClearBuild(p.id)}
-                          className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 flex items-center gap-1.5 shadow-sm transition"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Descargar
-                        </a>
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={() => handleCompile(p.id)}
-                        className="rounded-lg text-white text-xs font-semibold px-3.5 py-2 flex items-center gap-1 shadow-sm transition hover:scale-[1.02] cursor-pointer"
-                        style={{ 
-                          background: `linear-gradient(135deg, ${p.color || "#9333ea"}, ${p.color ? p.color + "cc" : "#7928ca"})`,
-                          boxShadow: `0 4px 10px rgba(0,0,0,0.15)`
-                        }}
-                      >
-                        ⚡ Compilar
-                      </button>
-                    )}
-                  </div>
-                </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Sidebar Area: KeyAuth IDs Copy List */}
+          {keyAuthApps.length > 0 && (
+            <div 
+              className="w-full lg:w-76 shrink-0 bg-[#07080c]/90 border border-zinc-800/80 rounded-xl p-4 space-y-4 shadow-2xl relative overflow-hidden self-start"
+              style={{
+                boxShadow: `inset 0 0 15px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.3)`
+              }}
+            >
+              <div className="absolute top-0 right-0 w-[100px] h-[100px] bg-emerald-500/5 blur-xl pointer-events-none" />
+              <h3 className="text-[11px] font-black uppercase text-emerald-400 tracking-wider flex items-center gap-2 border-b border-zinc-850 pb-2.5">
+                <Info className="w-4 h-4 text-emerald-400" />
+                Copiar IDs KeyAuth
+              </h3>
+              
+              <div className="space-y-3.5 max-h-[580px] overflow-y-auto pr-1">
+                {keyAuthApps.map((ka) => (
+                  <div 
+                    key={ka.id} 
+                    className="bg-[#0b0d13]/70 rounded-lg border border-zinc-850/80 p-3 space-y-2 hover:border-emerald-500/10 transition-colors shadow-sm"
+                  >
+                    <div className="font-extrabold text-xs text-white truncate border-b border-zinc-900 pb-1 flex justify-between items-center">
+                      <span>{ka.name}</span>
+                      <span className="text-[9px] text-zinc-550 font-mono">v{ka.version}</span>
+                    </div>
+                    
+                    {/* Item App ID */}
+                    <div className="flex justify-between items-center gap-2 text-[10.5px]">
+                      <span className="text-zinc-500 font-semibold uppercase">App ID:</span>
+                      <div className="flex items-center gap-1 font-mono text-zinc-300">
+                        <span className="truncate max-w-[110px] text-[10px]">{ka.app_id}</span>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(ka.app_id);
+                            showToast("¡App ID copiado!");
+                          }}
+                          className="hover:text-emerald-400 transition cursor-pointer text-zinc-550 p-0.5"
+                          title="Copiar App ID"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Item Owner ID */}
+                    <div className="flex justify-between items-center gap-2 text-[10.5px]">
+                      <span className="text-zinc-500 font-semibold uppercase">Owner ID:</span>
+                      <div className="flex items-center gap-1 font-mono text-zinc-300">
+                        <span className="truncate max-w-[110px] text-[10px]">{ka.owner_id}</span>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(ka.owner_id);
+                            showToast("¡Owner ID copiado!");
+                          }}
+                          className="hover:text-emerald-400 transition cursor-pointer text-zinc-550 p-0.5"
+                          title="Copiar Owner ID"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Item Secret */}
+                    <div className="flex justify-between items-center gap-2 text-[10.5px]">
+                      <span className="text-zinc-500 font-semibold uppercase">Secret:</span>
+                      <div className="flex items-center gap-1 font-mono text-zinc-300">
+                        <span className="truncate max-w-[110px] text-[10px]">{ka.app_secret}</span>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(ka.app_secret);
+                            showToast("¡Secret Key copiado!");
+                          }}
+                          className="hover:text-emerald-400 transition cursor-pointer text-zinc-550 p-0.5"
+                          title="Copiar Secret Key"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -920,6 +1026,26 @@ export default function BuilderPage() {
                   <Info className="w-4.5 h-4.5 text-emerald-400" />
                   Credenciales KeyAuth (Opcional)
                 </div>
+
+                {keyAuthApps.length > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-emerald-400 uppercase block">
+                      Vincular con App KeyAuth existente
+                    </label>
+                    <select
+                      onChange={(e) => handleSelectKaApp(e.target.value)}
+                      defaultValue=""
+                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="" disabled>--- Seleccione una aplicación ---</option>
+                      {keyAuthApps.map((a) => (
+                        <option key={a.id} value={a.app_id}>
+                          {a.name} ({a.app_id.slice(0, 8)}...)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1 col-span-2 sm:col-span-1">
@@ -1089,6 +1215,26 @@ export default function BuilderPage() {
                   <Info className="w-4.5 h-4.5 text-emerald-400" />
                   Credenciales KeyAuth de la Aplicación
                 </div>
+
+                {keyAuthApps.length > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-emerald-400 uppercase block">
+                      Vincular con App KeyAuth existente
+                    </label>
+                    <select
+                      onChange={(e) => handleSelectKaApp(e.target.value)}
+                      defaultValue=""
+                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="" disabled>--- Seleccione una aplicación ---</option>
+                      {keyAuthApps.map((a) => (
+                        <option key={a.id} value={a.app_id}>
+                          {a.name} ({a.app_id.slice(0, 8)}...)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1 col-span-2 sm:col-span-1">

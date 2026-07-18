@@ -103,6 +103,10 @@ export async function POST(req: NextRequest) {
       permissions: ["generar", "hwid", "ban", "delete"],
     });
 
+    if (!updated) {
+      throw new Error("No se pudo actualizar el rol del usuario en la base de datos");
+    }
+
     // Actualizar automáticamente la cookie de sesión en el navegador con el nuevo rol
     setAdminSession({
       id: updated.id,

@@ -64,6 +64,16 @@ export function LoginForm() {
         setError(data.message || "Credenciales inválidas");
         return;
       }
+
+      // Reproducir audio de bienvenida
+      const audio = new Audio("/welcome.ogg");
+      audio.volume = 0.8;
+      audio.play().catch(() => {
+        const fallbackAudio = new Audio("/welcome.wav");
+        fallbackAudio.volume = 0.8;
+        fallbackAudio.play().catch((e) => console.error("Audio error:", e));
+      });
+
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {

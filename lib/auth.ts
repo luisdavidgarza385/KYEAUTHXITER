@@ -77,7 +77,10 @@ export async function canAccessApp(me: AdminSession, appId: string): Promise<boo
 
 export function hasUnlimitedQuota(me: AdminSession): boolean {
   const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
-  return me.email === bootstrapEmail;
+  if (me.email === bootstrapEmail) return true;
+  if (me.role === "admin") return true;
+  if (me.role === "seller") return true;
+  return false;
 }
 
 export const QUOTA_LIMIT = 10;

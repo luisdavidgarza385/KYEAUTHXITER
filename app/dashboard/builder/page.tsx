@@ -622,26 +622,22 @@ export default function BuilderPage() {
           <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
           <span className="text-sm font-semibold">Cargando la consola del Builder...</span>
         </div>
+      ) : projects.length === 0 ? (
+        <div className="rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900/5 text-center py-16 px-4">
+          <Terminal className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+          <h3 className="font-semibold text-zinc-200">No tienes aplicaciones de compilación todavía</h3>
+          <p className="text-xs text-zinc-500 mt-1.5 max-w-sm mx-auto">
+            Inicializa tu primer loader configurando su nombre, icono, color y credenciales de KeyAuth para empezar.
+          </p>
+          <button 
+            onClick={() => { resetForm(); setIsCreateOpen(true); }}
+            className="mt-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-xs px-3.5 py-2 transition cursor-pointer"
+          >
+            Añadir Primer Proyecto
+          </button>
+        </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          {/* Main Area: Builder Projects */}
-          <div className="flex-1 w-full space-y-6">
-            {projects.length === 0 ? (
-              <div className="rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900/5 text-center py-16 px-4">
-                <Terminal className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-                <h3 className="font-semibold text-zinc-200">No tienes aplicaciones de compilación todavía</h3>
-                <p className="text-xs text-zinc-500 mt-1.5 max-w-sm mx-auto">
-                  Inicializa tu primer loader configurando su nombre, icono, color y credenciales de KeyAuth para empezar.
-                </p>
-                <button 
-                  onClick={() => { resetForm(); setIsCreateOpen(true); }}
-                  className="mt-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-xs px-3.5 py-2 transition cursor-pointer"
-                >
-                  Añadir Primer Proyecto
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {projects.map((p) => {
                   const build = buildStatuses[p.id];
                   const isKaConfigured = p.keyAuthName && p.keyAuthOwner && p.keyAuthSecret;
@@ -821,95 +817,9 @@ export default function BuilderPage() {
                   );
                 })}
               </div>
-            )}
-          </div>
-
-          {/* Sidebar Area: KeyAuth IDs Copy List */}
-          {keyAuthApps.length > 0 && (
-            <div 
-              className="w-full lg:w-76 shrink-0 bg-[#07080c]/90 border border-zinc-800/80 rounded-xl p-4 space-y-4 shadow-2xl relative overflow-hidden self-start"
-              style={{
-                boxShadow: `inset 0 0 15px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.3)`
-              }}
-            >
-              <div className="absolute top-0 right-0 w-[100px] h-[100px] bg-emerald-500/5 blur-xl pointer-events-none" />
-              <h3 className="text-[11px] font-black uppercase text-emerald-400 tracking-wider flex items-center gap-2 border-b border-zinc-850 pb-2.5">
-                <Info className="w-4 h-4 text-emerald-400" />
-                Copiar IDs KeyAuth
-              </h3>
-              
-              <div className="space-y-3.5 max-h-[580px] overflow-y-auto pr-1">
-                {keyAuthApps.map((ka) => (
-                  <div 
-                    key={ka.id} 
-                    className="bg-[#0b0d13]/70 rounded-lg border border-zinc-850/80 p-3 space-y-2 hover:border-emerald-500/10 transition-colors shadow-sm"
-                  >
-                    <div className="font-extrabold text-xs text-white truncate border-b border-zinc-900 pb-1 flex justify-between items-center">
-                      <span>{ka.name}</span>
-                      <span className="text-[9px] text-zinc-550 font-mono">v{ka.version}</span>
-                    </div>
-                    
-                    {/* Item App ID */}
-                    <div className="flex justify-between items-center gap-2 text-[10.5px]">
-                      <span className="text-zinc-500 font-semibold uppercase">App ID:</span>
-                      <div className="flex items-center gap-1 font-mono text-zinc-300">
-                        <span className="truncate max-w-[110px] text-[10px]">{ka.app_id}</span>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(ka.app_id);
-                            showToast("¡App ID copiado!");
-                          }}
-                          className="hover:text-emerald-400 transition cursor-pointer text-zinc-550 p-0.5"
-                          title="Copiar App ID"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Item Owner ID */}
-                    <div className="flex justify-between items-center gap-2 text-[10.5px]">
-                      <span className="text-zinc-500 font-semibold uppercase">Owner ID:</span>
-                      <div className="flex items-center gap-1 font-mono text-zinc-300">
-                        <span className="truncate max-w-[110px] text-[10px]">{ka.owner_id}</span>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(ka.owner_id);
-                            showToast("¡Owner ID copiado!");
-                          }}
-                          className="hover:text-emerald-400 transition cursor-pointer text-zinc-550 p-0.5"
-                          title="Copiar Owner ID"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Item Secret */}
-                    <div className="flex justify-between items-center gap-2 text-[10.5px]">
-                      <span className="text-zinc-500 font-semibold uppercase">Secret:</span>
-                      <div className="flex items-center gap-1 font-mono text-zinc-300">
-                        <span className="truncate max-w-[110px] text-[10px]">{ka.app_secret}</span>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(ka.app_secret);
-                            showToast("¡Secret Key copiado!");
-                          }}
-                          className="hover:text-emerald-400 transition cursor-pointer text-zinc-550 p-0.5"
-                          title="Copiar Secret Key"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
       )}
+
+
 
       {/* CREATE MODAL */}
       {isCreateOpen && (

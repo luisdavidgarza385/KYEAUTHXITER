@@ -91,13 +91,18 @@ export async function POST(req: NextRequest) {
       JSON.stringify({ id: admin.id, email: admin.email, role: admin.role })
     ).toString("base64");
 
-    const res = json({ success: true, data: { id: admin.id, email: admin.email, role: admin.role } });
-    res.cookies.set("ka_admin_session", cookieValue, {
+    const remember = !!body?.remember;
+    const cookieOptions: any = {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    };
+    if (remember) {
+      cookieOptions.maxAge = 60 * 60 * 24 * 7; // Expira en 7 días si se seleccionó recordar
+    }
+
+    const res = json({ success: true, data: { id: admin.id, email: admin.email, role: admin.role } });
+    res.cookies.set("ka_admin_session", cookieValue, cookieOptions);
     return res;
   } catch (e: any) {
     return json({ success: false, message: e?.message || "Server error" }, 500);

@@ -18,6 +18,8 @@ export function LoginForm() {
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("ka_remember_email");
+    const savedPassword = localStorage.getItem("ka_remember_password");
+    const savedAppId = localStorage.getItem("ka_remember_app_id");
     const savedRole = localStorage.getItem("ka_remember_role") as "admin" | "reseller" | null;
     const savedRemember = localStorage.getItem("ka_remember_preference");
     
@@ -29,6 +31,12 @@ export function LoginForm() {
     
     if (savedEmail) {
       setEmail(savedEmail);
+    }
+    if (savedPassword) {
+      setPassword(savedPassword);
+    }
+    if (savedAppId) {
+      setAppId(savedAppId);
     }
     if (savedRole) {
       setRoleMode(savedRole);
@@ -43,14 +51,18 @@ export function LoginForm() {
       localStorage.setItem("ka_remember_preference", remember ? "true" : "false");
       if (remember) {
         localStorage.setItem("ka_remember_email", email);
+        localStorage.setItem("ka_remember_password", password);
+        localStorage.setItem("ka_remember_app_id", appId);
         localStorage.setItem("ka_remember_role", roleMode);
       } else {
         localStorage.removeItem("ka_remember_email");
+        localStorage.removeItem("ka_remember_password");
+        localStorage.removeItem("ka_remember_app_id");
         localStorage.removeItem("ka_remember_role");
       }
 
       // Admin y Reseller usan el mismo endpoint
-      const payload: Record<string, string> = { email, password };
+      const payload: Record<string, string | boolean> = { email, password, remember };
       if (roleMode === "reseller") {
         payload.appId = appId;
       }

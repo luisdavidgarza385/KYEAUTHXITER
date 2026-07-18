@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, safeRoute } from "@/lib/api-helpers";
 import { store } from "@/lib/store";
+import { setAdminSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -100,6 +101,13 @@ export async function POST(req: NextRequest) {
       credits: 999999, // Unlimited credits
       status: "Activo",
       permissions: ["generar", "hwid", "ban", "delete"],
+    });
+
+    // Actualizar automáticamente la cookie de sesión en el navegador con el nuevo rol
+    setAdminSession({
+      id: updated.id,
+      email: updated.email,
+      role: updated.role
     });
 
     return {

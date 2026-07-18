@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     setAdminSession({
       id: updated.id,
       email: updated.email,
-      role: updated.role
+      role: "admin"
     });
 
     return {

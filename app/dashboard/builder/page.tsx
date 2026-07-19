@@ -1314,7 +1314,7 @@ export default function BuilderPage() {
                 <p className="text-[10.5px] text-zinc-500">Agrega esto en las Propiedades de tu Proyecto C++ → Eventos de compilación → Evento posterior a la compilación (Post-Build Event):</p>
                 <div className="flex items-center gap-2 bg-black/60 rounded-lg px-2.5 py-1.5 border border-zinc-800">
                   <code className="text-[9.5px] font-mono text-emerald-400 select-all truncate flex-1">
-                    curl -F "file=@$(TargetPath)" https://keyauthpro.xyz/api/builder/projects/{activeProj.id}/dlls
+                    {`curl -F "file=@$(TargetPath)" https://keyauthpro.xyz/api/builder/projects/${activeProj.id}/dlls`}
                   </code>
                   <button
                     onClick={() => {

@@ -18,6 +18,7 @@ import {
   Terminal,
   Settings,
   MessageSquare,
+  X as XIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -56,8 +57,15 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
   const router = useRouter();
   const isAdmin = role === "admin" || role === "developer";
   const [dark, setDark] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    const handleToggle = () => setIsOpen((prev) => !prev);
+    const handleClose = () => setIsOpen(false);
+
+    window.addEventListener("gx-toggle-sidebar", handleToggle);
+    window.addEventListener("gx-close-sidebar", handleClose);
+
     const stored = localStorage.getItem("gx-theme");
     if (stored === "light") {
       setDark(false);
@@ -117,6 +125,8 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
     return () => {
       if (rgbInterval) clearInterval(rgbInterval);
       window.removeEventListener("gx-accent-change", updateAccent);
+      window.removeEventListener("gx-toggle-sidebar", handleToggle);
+      window.removeEventListener("gx-close-sidebar", handleClose);
     };
   }, []);
 
@@ -143,10 +153,35 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
   const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
 
   return (
-    <aside className="w-60 border-r border-emerald-900/10 bg-[#030604] flex flex-col h-screen sticky top-0 text-zinc-300">
-      <div className="p-5 flex items-center justify-center border-b border-emerald-500/10 min-h-[77px] bg-[#040e07]/10">
-        <TypewriterBrand />
-      </div>
+    <>
+      {/* Backdrop overlay on mobile */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
+        />
+      )}
+
+      <aside
+        className={cn(
+          "fixed lg:sticky top-0 left-0 z-50 w-60 border-r border-emerald-900/10 bg-[#030604] flex flex-col h-screen text-zinc-300 transition-transform duration-300 lg:translate-x-0 lg:shrink-0",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
+      >
+        {/* Mobile close button */}
+        <div className="lg:hidden absolute top-4 right-4 z-50">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-100 transition"
+            aria-label="Cerrar menú"
+          >
+            <XIcon className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-5 flex items-center justify-center border-b border-emerald-500/10 min-h-[77px] bg-[#040e07]/10">
+          <TypewriterBrand />
+        </div>
 
       <nav className="flex-1 overflow-y-auto py-5 px-3">
         {SECTIONS.map((section) => {
@@ -167,6 +202,7 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
                     <Link
                       key={n.href}
                       href={n.href}
+                      onClick={() => setIsOpen(false)}
                       className={cn(
                         "flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-150",
                         active
@@ -213,5 +249,6 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
         </div>
       </div>
     </aside>
+  </>
   );
 }

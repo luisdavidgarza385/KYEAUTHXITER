@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Bell, Search, ChevronDown, LogOut, User as UserIcon, Settings, Loader2 } from "lucide-react";
+import { Bell, Search, ChevronDown, LogOut, User as UserIcon, Settings, Loader2, Menu } from "lucide-react";
 
 export function DashboardHeader({ email, role, apps }: { email: string; role: string; apps: { id: string; name: string }[] }) {
   const router = useRouter();
@@ -56,6 +56,14 @@ export function DashboardHeader({ email, role, apps }: { email: string; role: st
 
   return (
     <header className="h-14 border-b border-border bg-bg-secondary/40 backdrop-blur-md flex items-center px-6 gap-4 sticky top-0 z-20">
+      <button
+        onClick={() => window.dispatchEvent(new CustomEvent("gx-toggle-sidebar"))}
+        className="p-1.5 rounded-md hover:bg-bg-hover text-text-muted hover:text-text lg:hidden transition shrink-0"
+        aria-label="Toggle Sidebar"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
       <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
         <div className="w-8 h-8 rounded-md overflow-hidden ring-1 ring-accent/30">
           <img src="/logo.png" alt="Spectral X" className="w-full h-full object-cover" />

@@ -119,25 +119,26 @@ export async function checkQuota(me: AdminSession, appId: string): Promise<{ ok:
     const users = allUsers.filter((u) => appIds.includes(u.app_id));
     const licenses = allLicenses.filter((l) => appIds.includes(l.app_id));
     
-    const LIMIT = 50;
-    if (users.length >= LIMIT) {
+    const USER_LIMIT = 50;
+    const LICENSE_LIMIT = 60;
+    if (users.length >= USER_LIMIT) {
       return {
         ok: false,
-        reason: `Has alcanzado el límite máximo de ${LIMIT} usuarios registrados permitidos para tu cuenta.`,
+        reason: `Has alcanzado el límite máximo de ${USER_LIMIT} usuarios registrados permitidos para tu cuenta.`,
         users: users.length,
         licenses: licenses.length,
-        limit: LIMIT,
+        limit: USER_LIMIT,
       };
     }
-    if (licenses.length >= LIMIT) {
+    if (licenses.length >= LICENSE_LIMIT) {
       return {
         ok: false,
-        reason: `Has alcanzado el límite máximo de ${LIMIT} licencias permitidas para tu cuenta.`,
+        reason: `Has alcanzado el límite máximo de ${LICENSE_LIMIT} licencias permitidas para tu cuenta.`,
         users: users.length,
         licenses: licenses.length,
-        limit: LIMIT,
+        limit: LICENSE_LIMIT,
       };
     }
-    return { ok: true, users: users.length, licenses: licenses.length, limit: LIMIT };
+    return { ok: true, users: users.length, licenses: licenses.length, limit: USER_LIMIT };
   }
 }

@@ -49,14 +49,23 @@ export async function POST(req: NextRequest) {
       return json({ success: false, message: "Parent admin not found" }, 404);
     }
 
-    const isUnlimited = parentAdmin.role === "developer" || parentAdmin.role === "admin";
-    if (plan === "credits" && !isUnlimited) {
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isUnlimited = parentAdmin.email === bootstrapEmail || parentAdmin.role === "admin";
+
+    const creationCost = 300;
+    const assignedCredits = plan === "credits" ? credits : 0;
+    const totalCost = creationCost + assignedCredits;
+
+    if (!isUnlimited) {
       const parentCredits = parentAdmin.credits || 0;
-      if (parentCredits < credits) {
-        return json({ success: false, message: `Créditos insuficientes (Tienes ${parentCredits})` }, 400);
+      if (parentCredits < totalCost) {
+        return json({
+          success: false,
+          message: `Créditos insuficientes. Crear un sub-reseller cuesta 300 créditos (más los créditos asignados). Costo total: ${totalCost} créditos (tienes ${parentCredits}).`
+        }, 400);
       }
       // Deduct credits
-      parentAdmin.credits = parentCredits - credits;
+      parentAdmin.credits = parentCredits - totalCost;
       await store.updateAdmin(parentAdmin.id, parentAdmin);
     }
 

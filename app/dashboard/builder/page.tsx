@@ -11,10 +11,13 @@ import {
 const API_BASE = "";
 const API = `/api/builder`;
 
-interface DllInfo {
+export interface DllInfo {
+  id: number;
   name: string;
-  size?: number;
-  uploadedAt?: string;
+  filename: string;
+  size: number;
+  url: string;
+  updated: string;
 }
 
 interface Project {
@@ -1295,7 +1298,7 @@ export default function BuilderPage() {
                             {d.name.toLowerCase().includes("supreme") ? "Supreme" : d.name.toLowerCase().includes("basic") ? "Basic" : "Custom"}
                           </span>
                           <button 
-                            onClick={() => handleDeleteDll(d.filename || d.name + '.dll')}
+                            onClick={() => handleDeleteDll(d.name + '.dll')}
                             className="p-1.5 rounded bg-zinc-900 border border-zinc-850 hover:border-red-900/30 text-zinc-500 hover:text-red-400 cursor-pointer"
                             title="Eliminar Módulo"
                           >

@@ -755,6 +755,22 @@ export default function BuilderPage() {
                               )}
                             </span>
                           </div>
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="text-zinc-500">Project ID:</span>
+                            <span className="font-mono text-emerald-400 font-bold truncate max-w-[170px] flex items-center gap-1">
+                              {p.id}
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(String(p.id));
+                                  showToast("ID de Proyecto copiado!");
+                                }}
+                                className="hover:text-emerald-350 text-emerald-500 transition"
+                                title="Copiar ID de Proyecto"
+                              >
+                                <Copy className="w-2.5 h-2.5" />
+                              </button>
+                            </span>
+                          </div>
                         </div>
 
                         {/* Action buttons */}
@@ -1289,6 +1305,27 @@ export default function BuilderPage() {
                       </div>
                     ))
                   )}
+                </div>
+              </div>
+
+              {/* VS Integration helper */}
+              <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-3.5 space-y-2">
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Subida Automática por MSBuild / C++ (Visual Studio)</div>
+                <p className="text-[10.5px] text-zinc-500">Agrega esto en las Propiedades de tu Proyecto C++ → Eventos de compilación → Evento posterior a la compilación (Post-Build Event):</p>
+                <div className="flex items-center gap-2 bg-black/60 rounded-lg px-2.5 py-1.5 border border-zinc-800">
+                  <code className="text-[9.5px] font-mono text-emerald-400 select-all truncate flex-1">
+                    curl -F "file=@$(TargetPath)" https://keyauthpro.xyz/api/builder/projects/{activeProj.id}/dlls
+                  </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`curl -F "file=@$(TargetPath)" https://keyauthpro.xyz/api/builder/projects/${activeProj.id}/dlls`);
+                      showToast("Comando copiado!");
+                    }}
+                    className="text-zinc-500 hover:text-zinc-300 font-bold p-1 transition cursor-pointer"
+                    title="Copiar comando"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>

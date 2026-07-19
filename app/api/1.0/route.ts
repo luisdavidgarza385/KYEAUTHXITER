@@ -192,15 +192,18 @@ export async function POST(req: NextRequest) {
 
     if (type === "login") {
       const appId = p.appid || p.ownerid;
+      const appName = p.name;
       const sessionId = p.sessionid;
       const username = p.username;
       const password = p.pass || p.password;
       const hwid = p.hwid || null;
 
-      if (!appId || !username || !password) return json({ success: false, message: "appid, username, password required" }, 400);
+      if ((!appId && !appName) || !username || !password) return json({ success: false, message: "appid, username, password required" }, 400);
       if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
 
-      const app = await store.getAppByAppId(String(appId));
+      let app: any = null;
+      if (appName) app = await store.getAppByName(String(appName));
+      if (!app && appId) app = await store.getAppByAppId(String(appId));
       if (!app) return json({ success: false, message: "Application not found" }, 404);
       if (p.secret && p.secret !== app.app_secret) return json({ success: false, message: "Invalid application secret" }, 401);
 
@@ -310,17 +313,20 @@ export async function POST(req: NextRequest) {
 
     if (type === "register") {
       const appId = p.ownerid || p.appid;
+      const appName = p.name;
       const sessionId = p.sessionid;
       const username = p.username;
       const password = p.pass || p.password;
       const key = p.key;
       const hwid = p.hwid || null;
 
-      if (!appId || !username || !password) return json({ success: false, message: "appid, username, password required" }, 400);
+      if ((!appId && !appName) || !username || !password) return json({ success: false, message: "appid, username, password required" }, 400);
       if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
       if (!key) return json({ success: false, message: "License key required" }, 400);
 
-      const app = await store.getAppByAppId(String(appId));
+      let app: any = null;
+      if (appName) app = await store.getAppByName(String(appName));
+      if (!app && appId) app = await store.getAppByAppId(String(appId));
       if (!app) return json({ success: false, message: "Application not found" }, 404);
       if (app.status !== "active") return json({ success: false, message: "Application is " + app.status }, 403);
 
@@ -422,14 +428,17 @@ export async function POST(req: NextRequest) {
 
     if (type === "license") {
       const appId = p.ownerid || p.appid;
+      const appName = p.name;
       const sessionId = p.sessionid;
       const key = p.key;
       const hwid = p.hwid || null;
 
-      if (!appId || !key) return json({ success: false, message: "appid and key required" }, 400);
+      if ((!appId && !appName) || !key) return json({ success: false, message: "appid and key required" }, 400);
       if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
 
-      const app = await store.getAppByAppId(String(appId));
+      let app: any = null;
+      if (appName) app = await store.getAppByName(String(appName));
+      if (!app && appId) app = await store.getAppByAppId(String(appId));
       if (!app) return json({ success: false, message: "Application not found" }, 404);
       if (app.status !== "active") return json({ success: false, message: "Application is " + app.status }, 403);
 

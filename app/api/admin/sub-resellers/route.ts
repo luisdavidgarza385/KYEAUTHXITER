@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       password_hash: hash,
       role: "seller",
       created_by: me.id,
-      credits: plan === "ilimitado" ? 0 : credits,
+      credits: plan === "ilimitado" ? -1 : credits,
       status: "active",
       permissions,
       subscriptions,
@@ -137,7 +137,7 @@ export async function PUT(req: NextRequest) {
       sub.password_hash = await bcrypt.hash(password, 10);
     }
     
-    sub.credits = plan === "ilimitado" ? 0 : credits;
+    sub.credits = plan === "ilimitado" ? -1 : credits;
     sub.permissions = permissions;
     sub.subscriptions = subscriptions;
 

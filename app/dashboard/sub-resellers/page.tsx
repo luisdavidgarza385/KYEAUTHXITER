@@ -166,8 +166,8 @@ export default function SubResellersPage() {
   function startEdit(sub: SubReseller) {
     setEditingSub(sub);
     setEditPassword("");
-    setEditPlan(sub.credits > 0 ? "credits" : "ilimitado");
-    setEditCredits(sub.credits);
+    setEditPlan(sub.credits === -1 ? "ilimitado" : "credits");
+    setEditCredits(sub.credits === -1 ? 10 : sub.credits);
     setEditSelectedApps(sub.subscriptions || []);
     setEditPermGenerar(sub.permissions.includes("generar"));
     setEditPermResetHwid(sub.permissions.includes("hwid"));
@@ -307,7 +307,7 @@ export default function SubResellersPage() {
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        {sub.credits === 0 ? (
+                        {sub.credits === -1 ? (
                           <span className="inline-flex items-center gap-1 rounded bg-emerald-950/20 border border-emerald-900/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400 uppercase">
                             Ilimitado
                           </span>
@@ -317,7 +317,7 @@ export default function SubResellersPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-4 font-mono font-bold text-zinc-300">{sub.credits === 0 ? "—" : sub.credits}</td>
+                      <td className="px-5 py-4 font-mono font-bold text-zinc-300">{sub.credits === -1 ? "—" : sub.credits}</td>
                       <td className="px-5 py-4 text-xs text-zinc-400">
                         {sub.subscriptions && sub.subscriptions.length > 0 ? (
                           <div className="flex gap-1 flex-wrap">

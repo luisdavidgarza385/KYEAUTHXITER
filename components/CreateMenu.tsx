@@ -639,6 +639,55 @@ export function BulkDeleteLicensesModal({ apps, onClose }: { apps: App[]; onClos
   );
 }
 
+export function BulkDeleteUsersModal({ apps, onClose }: { apps: App[]; onClose: () => void }) {
+  const router = useRouter();
+  const [mode, setMode] = useState<"all" | "banned">("all");
+  const [appId, setAppId] = useState(apps[0]?.id || "all");
+  const [loading, setLoading] = useState(false);
+
+  async function submit() {
+    if (!confirm(`¿Eliminar todos los usuarios (${mode === "all" ? "Todos" : "Baneados"})${appId !== "all" ? " para esta aplicación" : ""}?`)) return;
+    setLoading(true);
+    const res = await fetch("/api/admin/app-users/bulk-delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode, appId: appId === "all" ? undefined : appId }),
+    });
+    setLoading(false);
+    const data = await res.json();
+    if (!res.ok) { alert(data.message || "Error"); return; }
+    onClose();
+    router.refresh();
+  }
+
+  return (
+    <ModalShell title="Eliminar Usuarios" onClose={onClose} width="sm">
+      <div className="space-y-3">
+        <div>
+          <FieldLabel required>Modo de eliminación</FieldLabel>
+          <select className="input" value={mode} onChange={(e) => setMode(e.target.value as any)}>
+            <option value="all">Todos los usuarios</option>
+            <option value="banned">Solo baneados</option>
+          </select>
+        </div>
+        <div>
+          <FieldLabel>Aplicación</FieldLabel>
+          <select className="input" value={appId} onChange={(e) => setAppId(e.target.value)}>
+            <option value="all">Todas las aplicaciones</option>
+            {apps.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+          </select>
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button onClick={onClose} className="btn-secondary text-sm">Cancelar</button>
+          <button onClick={submit} className="btn-danger text-sm" disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Eliminar usuarios</>}
+          </button>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
+
 function generatePassword(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
   let pw = "";

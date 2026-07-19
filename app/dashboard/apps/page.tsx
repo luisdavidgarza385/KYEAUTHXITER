@@ -110,6 +110,7 @@ export default async function AppsPage({
                       app={a}
                       userCount={userCounts.get(a.id) || 0}
                       isSelected={a.id === selectedId}
+                      role={me.role}
                     />
                   ))}
                   {filtered.length === 0 && (

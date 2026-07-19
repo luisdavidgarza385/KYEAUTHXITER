@@ -75,18 +75,22 @@ export async function canAccessApp(me: AdminSession, appId: string): Promise<boo
   return apps.some((a) => a.id === appId);
 }
 
-export function hasUnlimitedQuota(me: AdminSession): boolean {
+export async function hasUnlimitedQuota(me: AdminSession): Promise<boolean> {
   const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
   if (me.email === bootstrapEmail) return true;
   if (me.role === "admin") return true;
-  if (me.role === "seller") return true;
+  if (me.role === "seller") {
+    const admin = await store.getAdminById(me.id);
+    return admin?.credits === -1;
+  }
   return false;
 }
 
 export const QUOTA_LIMIT = 10;
 
 export async function checkQuota(me: AdminSession, appId: string): Promise<{ ok: boolean; reason?: string; users: number; licenses: number; limit: number }> {
-  if (hasUnlimitedQuota(me)) {
+  const unlimited = await hasUnlimitedQuota(me);
+  if (unlimited) {
     return { ok: true, users: 0, licenses: 0, limit: 9999 };
   }
 

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Users, Search, Filter, LayoutGrid, Clock, RotateCcw, FileText, Trash2, ShieldCheck, Star } from "lucide-react";
 import { UserCardMenu } from "@/components/UserCardMenu";
-import { CreateUserInlineButton } from "@/components/CreateMenu";
+import { CreateUserInlineButton, BulkDeleteUsersModal } from "@/components/CreateMenu";
 import Link from "next/link";
 import { SubscriptionBadge } from "./LicensesPageClient";
 
@@ -64,6 +64,7 @@ export function UsersPageClient({
   const [page, setPage] = useState<number>(1);
   const [sortByDate, setSortByDate] = useState<"desc" | "asc">("desc");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   React.useEffect(() => {
     setUsers(initialUsers);
@@ -187,6 +188,15 @@ export function UsersPageClient({
             defaultAppId={selectedAppId !== "all" ? selectedAppId : undefined}
             className="w-9 h-9 rounded-md flex items-center justify-center border border-emerald-500/40 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-900/30 transition"
           />
+
+          {/* Bulk Delete Users Button */}
+          <button
+            onClick={() => setBulkOpen(true)}
+            className="w-9 h-9 rounded-md flex items-center justify-center border border-danger/40 bg-danger/10 text-danger hover:bg-danger/20 transition"
+            title="Eliminar usuarios"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
 
           {/* Toggle Sort by Date */}
           <button
@@ -407,6 +417,9 @@ export function UsersPageClient({
             Siguiente
           </button>
         </div>
+      )}
+      {bulkOpen && (
+        <BulkDeleteUsersModal apps={apps} onClose={() => setBulkOpen(false)} />
       )}
     </div>
   );

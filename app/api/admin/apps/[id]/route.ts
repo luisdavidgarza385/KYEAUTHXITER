@@ -42,6 +42,10 @@ export async function DELETE(
 ) {
   return safeRoute(async () => {
     const me = await requireAdmin();
+    if (me.role === "seller") {
+      return { status: 403, data: { success: false, message: "Only administrators can delete applications." } };
+    }
+
     const app = await store.getAppById(params.id);
     if (!app) return { status: 404, data: { success: false, message: "App not found" } };
     

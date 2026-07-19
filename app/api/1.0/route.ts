@@ -32,6 +32,25 @@ function registerSuccess(ip: string) {
   rateLimits.delete(ip);
 }
 
+async function getGeoInfo(ip: string): Promise<string> {
+  if (!ip || ip === "::1" || ip === "127.0.0.1" || ip.startsWith("10.") || ip.startsWith("192.168.")) {
+    return ip;
+  }
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 1200); // 1.2s timeout
+    const res = await fetch(`http://ip-api.com/json/${ip}`, { signal: controller.signal });
+    clearTimeout(id);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.status === "success") {
+        return `${ip} (${data.countryCode || data.country} - ${data.isp || "WiFi/ISP"})`;
+      }
+    }
+  } catch {}
+  return ip;
+}
+
 function xorDecrypt(hexData: string, key: string): string {
   const buf = Buffer.from(hexData, "hex");
   const keyBuf = Buffer.from(key, "utf-8");
@@ -229,9 +248,10 @@ export async function POST(req: NextRequest) {
       const myLicenses = userLicenses.filter(l => l.used_by === user.id);
       const activeLicenses = myLicenses.filter(l => l.status === "used" && (!l.expires_at || new Date(l.expires_at) > new Date()));
 
-      await store.updateAppUser(user.id, { last_login: new Date().toISOString(), ip, hwid: hwid || user.hwid });
+      const geoIp = await getGeoInfo(ip);
+      await store.updateAppUser(user.id, { last_login: new Date().toISOString(), ip: geoIp, hwid: hwid || user.hwid });
       await store.updateSession(String(sessionId), { user_id: user.id, hwid, ip });
-      await store.createLog({ app_id: app.id, user_id: user.id, message: `login ${username}`, level: "info" });
+      await store.createLog({ app_id: app.id, user_id: user.id, message: `login ${username} de ${geoIp.includes("(") ? geoIp.substring(geoIp.indexOf("(")) : ip}`, level: "info" });
 
       registerSuccess(ip);
 
@@ -348,6 +368,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      const geoIp = await getGeoInfo(ip);
       const passwordHash = await bcrypt.hash(String(password), 10);
       const user = await store.createAppUser({
         app_id: app.id,
@@ -355,7 +376,7 @@ export async function POST(req: NextRequest) {
         email: null,
         password_hash: passwordHash,
         hwid,
-        ip,
+        ip: geoIp,
         last_login: new Date().toISOString(),
         banned: false,
         ban_reason: null,
@@ -371,7 +392,7 @@ export async function POST(req: NextRequest) {
         uses: lic.uses + 1,
       });
       sessionsMap.set(String(sessionId), { ...session, user_id: user.id, hwid, ip });
-      await store.createLog({ app_id: app.id, user_id: user.id, message: `registered ${username}`, level: "info" });
+      await store.createLog({ app_id: app.id, user_id: user.id, message: `registered ${username} de ${geoIp.includes("(") ? geoIp.substring(geoIp.indexOf("(")) : ip}`, level: "info" });
 
       let subName = "basic";
       if (lic.level === 2) subName = "VIP";

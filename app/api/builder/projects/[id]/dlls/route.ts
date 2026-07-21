@@ -3,6 +3,20 @@ import { getProjectById, updateProject, uploadFile, downloadFile, deleteFile } f
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
+// Aumentar el límite de tamaño del body para permitir DLLs grandes
+export const fetchCache = 'force-no-store';
+
+// Next.js config para esta ruta — permite hasta 50MB
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+    responseLimit: '50mb',
+  },
+};
 
 type Params = { params: { id: string } };
 

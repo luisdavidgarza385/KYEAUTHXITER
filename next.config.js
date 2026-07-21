@@ -10,6 +10,13 @@ const nextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: "55mb" },
   },
+  // Permitir DLLs grandes en API routes
+  api: {
+    bodyParser: {
+      sizeLimit: "50mb",
+    },
+    responseLimit: "50mb",
+  },
 };
 
 module.exports = nextConfig;

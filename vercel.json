@@ -6,6 +6,10 @@
   "functions": {
     "app/api/builder/**": {
       "maxDuration": 60
+    },
+    "app/api/builder/projects/[id]/dlls/route": {
+      "maxDuration": 60,
+      "maxRequestBodySize": "50mb"
     }
   }
 }

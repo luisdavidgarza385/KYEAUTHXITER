@@ -70,9 +70,17 @@ export async function POST(req: NextRequest) {
         level: "info"
       });
 
+      // Fetch application name
+      const { data: appObj } = await db
+        .from("applications")
+        .select("name")
+        .eq("id", license.app_id)
+        .maybeSingle();
+      const appName = appObj?.name || "Desconocida";
+
       return json({
         success: true,
-        message: `¡Encontrado! La licencia está vinculada al usuario **${appUser.username}**. Su HWID ha sido reseteado con éxito. Ya puede iniciar sesión.`
+        message: `¡Encontrado! La licencia pertenece a la aplicación **${appName}** y está vinculada al usuario **${appUser.username}**. Su HWID ha sido reseteado con éxito. Ya puede iniciar sesión.`
       });
     }
 
@@ -111,9 +119,17 @@ export async function POST(req: NextRequest) {
         level: "info"
       });
 
+      // Fetch application name
+      const { data: appObj } = await db
+        .from("applications")
+        .select("name")
+        .eq("id", targetUser.app_id)
+        .maybeSingle();
+      const appName = appObj?.name || "Desconocida";
+
       return json({
         success: true,
-        message: `¡Encontrado! El usuario **${targetUser.username}** ha sido localizado. Su HWID ha sido reseteado con éxito. Ya puede iniciar sesión.`
+        message: `¡Encontrado! El usuario **${targetUser.username}** de la aplicación **${appName}** ha sido localizado. Su HWID ha sido reseteado con éxito. Ya puede iniciar sesión.`
       });
     }
 

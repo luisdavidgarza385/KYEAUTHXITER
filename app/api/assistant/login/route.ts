@@ -21,8 +21,9 @@ export async function POST(req: NextRequest) {
       return json({ success: false, message: "Usuario y contraseña requeridos" }, 400);
     }
 
-    // Direct check for credentials: RESET 12 reset / 12
-    if (username === "RESET 12 reset" && password === "12") {
+    // Direct check for credentials: reset global / 12
+    const cleanUser = username.toLowerCase();
+    if ((cleanUser === "reset global" || username === "RESET 12 reset") && password === "12") {
       const cookieValue = Buffer.from(
         JSON.stringify({ username, role: "assistant", authenticated: true })
       ).toString("base64");

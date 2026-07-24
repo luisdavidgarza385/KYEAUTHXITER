@@ -89,7 +89,7 @@ export default function AssistantLoginPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. RESET 12 reset"
+                    placeholder="e.g. reset global"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full h-11 bg-zinc-950/60 border border-emerald-500/15 focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/30 text-white placeholder-zinc-650 rounded-xl px-4 pl-10 text-sm font-medium transition-all outline-none"

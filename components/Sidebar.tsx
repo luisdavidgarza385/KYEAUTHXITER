@@ -35,7 +35,7 @@ const SECTIONS = [
   {
     label: "HERRAMIENTAS",
     items: [
-      { href: "/dashboard/hex-converter", label: "Convertidor Hex", icon: Binary, adminOnly: false },
+      { href: "/dashboard/hex-converter", label: "Convertidor Hex", icon: Binary, adminOnly: true },
     ],
   },
   {

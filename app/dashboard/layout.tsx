@@ -4,6 +4,7 @@ import { requireAdmin, getScopedAppIds } from "@/lib/auth";
 import { store } from "@/lib/store";
 
 import { GlobalBroadcastNotifier } from "@/components/GlobalBroadcastNotifier";
+import { GlobalMusicPlayer } from "@/components/GlobalMusicPlayer";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const me = await requireAdmin();
@@ -26,6 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <source src="/tunnel.mp4" type="video/mp4" />
       </video>
       <GlobalBroadcastNotifier currentUserEmail={me.email} />
+      <GlobalMusicPlayer />
       <Sidebar role={me.role} email={me.email} isSubReseller={isSubReseller} />
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         <DashboardHeader email={me.email} role={me.role} apps={apps} />

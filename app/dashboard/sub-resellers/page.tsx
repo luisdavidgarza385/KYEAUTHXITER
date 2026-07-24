@@ -581,13 +581,18 @@ export default function SubResellersPage() {
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Asignar Créditos</label>
                   <input
-                    type="number"
-                    min={1}
+                    type="text"
+                    inputMode="numeric"
                     required
                     className="w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder:text-zinc-650 px-3 py-2 rounded-lg text-sm outline-none focus:border-emerald-500/50 transition font-mono"
                     value={newCredits}
-                    onChange={(e) => setNewCredits(parseInt(e.target.value) || 1)}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, "");
+                      setNewCredits(Number(val) || 0);
+                    }}
+                    placeholder="Ej. 99999999999"
                   />
+                  <p className="text-[10px] text-zinc-600 mt-1">Sin límite. Introduce la cantidad que desees.</p>
                 </div>
               )}
 
@@ -601,19 +606,25 @@ export default function SubResellersPage() {
                     {newExpiryDays > 0 ? `${newExpiryDays} días` : "Sin Expiración"}
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2 mb-2">
-                  {[30, 60, 90, 0].map((d) => (
+                <div className="grid grid-cols-5 gap-1.5 mb-2">
+                  {[
+                    { label: "30 Días", val: 30 },
+                    { label: "1 Año", val: 365 },
+                    { label: "2 Años", val: 730 },
+                    { label: "5 Años", val: 1825 },
+                    { label: "Ilimitado", val: 0 },
+                  ].map((p) => (
                     <button
-                      key={d}
+                      key={p.label}
                       type="button"
-                      onClick={() => setNewExpiryDays(d)}
-                      className={`py-1.5 rounded border text-xs font-bold transition ${
-                        newExpiryDays === d
+                      onClick={() => setNewExpiryDays(p.val)}
+                      className={`py-1.5 rounded border text-[11px] font-bold transition text-center truncate ${
+                        newExpiryDays === p.val
                           ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-400"
                           : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850"
                       }`}
                     >
-                      {d === 0 ? "Ilimitado" : `${d} Días`}
+                      {p.label}
                     </button>
                   ))}
                 </div>
@@ -882,19 +893,25 @@ export default function SubResellersPage() {
                     {editExpiryDays > 0 ? `${editExpiryDays} días` : "Sin Expiración"}
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2 mb-2">
-                  {[30, 60, 90, 0].map((d) => (
+                <div className="grid grid-cols-5 gap-1.5 mb-2">
+                  {[
+                    { label: "30 Días", val: 30 },
+                    { label: "1 Año", val: 365 },
+                    { label: "2 Años", val: 730 },
+                    { label: "5 Años", val: 1825 },
+                    { label: "Ilimitado", val: 0 },
+                  ].map((p) => (
                     <button
-                      key={d}
+                      key={p.label}
                       type="button"
-                      onClick={() => setEditExpiryDays(d)}
-                      className={`py-1.5 rounded border text-xs font-bold transition ${
-                        editExpiryDays === d
+                      onClick={() => setEditExpiryDays(p.val)}
+                      className={`py-1.5 rounded border text-[11px] font-bold transition text-center truncate ${
+                        editExpiryDays === p.val
                           ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-400"
                           : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-850"
                       }`}
                     >
-                      {d === 0 ? "Ilimitado" : `${d} Días`}
+                      {p.label}
                     </button>
                   ))}
                 </div>

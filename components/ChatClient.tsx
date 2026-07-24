@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Volume2, VolumeX, MessageSquare, AlertCircle, Sparkles, Clock, User, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { playGlobalNotificationChime } from "@/lib/audio";
 
 interface Log {
   id: number;
@@ -45,16 +46,10 @@ export function ChatClient({ role, email, isSuperAdmin }: { role: string; email:
 
   const isAdmin = role === "admin" || role === "developer";
 
-  // Plays PlayStation App notification sound chime
+  // Plays notification sound chime
   function playFuturisticChime() {
     if (!soundEnabled) return;
-    try {
-      const audio = new Audio("/universfield-new-notification-051-494246.mp3");
-      audio.volume = 0.35;
-      audio.play().catch((e) => console.warn("Audio play blocked by browser:", e));
-    } catch (e) {
-      console.warn("Audio chime play failed:", e);
-    }
+    playGlobalNotificationChime();
   }
 
   // Fetch logs and parse broadcasts

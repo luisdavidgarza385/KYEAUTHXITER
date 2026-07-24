@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, X, MessageSquare, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { playGlobalNotificationChime } from "@/lib/audio";
 
 interface Log {
   id: any;
@@ -62,15 +62,7 @@ export function GlobalBroadcastNotifier({ currentUserEmail }: { currentUserEmail
 
   // Audio playing helper
   const playChime = () => {
-    try {
-      const audio = new Audio("/universfield-new-notification-051-494246.mp3");
-      audio.volume = 0.45;
-      audio.play().catch((err) => {
-        console.warn("Audio chime autoplay blocked by browser. Awaiting user interaction.", err);
-      });
-    } catch (e) {
-      console.error("Failed to play audio notification chime:", e);
-    }
+    playGlobalNotificationChime();
   };
 
   // Poll for new broadcast announcements
@@ -102,21 +94,11 @@ export function GlobalBroadcastNotifier({ currentUserEmail }: { currentUserEmail
             cleanMessage = match[2];
           }
 
-          // If sender is current user, we don't play sound/toast (but we update localStorage)
-          const isFromSelf = sender === currentUserEmail;
-
           // Check if this message is new compared to the ref
           const isNewMessage = lastSeenIdRef.current !== null && latestIdStr !== lastSeenIdRef.current;
-          
-          // First load offline check:
-          // If lastSeenIdRef is null (meaning localStorage key doesn't exist), we save the current one and don't play chime
-          // unless we want it to chime on fresh cookies. But if they had a stored ID, and this is greater/different, it's new.
-          const isOfflineUnread = isFirstPoll.current && 
-                                  lastSeenIdRef.current !== null && 
-                                  latestIdStr !== lastSeenIdRef.current;
 
-          if ((isNewMessage || isOfflineUnread) && !isFromSelf) {
-            // Play audio chime
+          if (isNewMessage) {
+            // Play audio chime for all users
             playChime();
 
             // Display toast if they are NOT already on the chat page

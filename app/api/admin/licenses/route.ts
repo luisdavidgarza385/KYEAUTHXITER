@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { requireAdmin, safeRoute } from "@/lib/api-helpers";
 import { store } from "@/lib/store";
 import { generateKey } from "@/lib/utils";
-import { getScopedAppIds, checkQuota } from "@/lib/auth";
+import { getScopedAppIds, checkQuota, checkSubResellerExpiration } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +10,11 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   return safeRoute(async () => {
     const me = await requireAdmin();
+
+    const expCheck = await checkSubResellerExpiration(me);
+    if (expCheck.expired) {
+      return { status: 403, data: { success: false, message: expCheck.reason } };
+    }
     const body = await req.json().catch(() => ({}));
     const appId = String(body?.appId || "");
     const count = Math.min(Math.max(parseInt(String(body?.count || 1)) || 1, 1), 500);

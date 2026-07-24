@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { 
   Terminal, Wrench, Plus, Upload, Download, Trash, RefreshCw, 
   Copy, Check, FileCode, CheckCircle2, AlertTriangle, Settings, FolderClosed, Cpu, Info,
-  MessageCircle, Send, X as XIcon
+  MessageCircle, Send, Binary, X as XIcon
 } from "lucide-react";
 
 // API endpoints — all served locally from keyauthpro.xyz

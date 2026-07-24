@@ -11,7 +11,8 @@ export async function GET(_req: NextRequest, { params }: { params: { path: strin
   const pathname = pathParts.join('/');
 
   try {
-    const buf = await downloadFile(pathname);
+    const storagePath = pathname.replace(/\u3164/g, ' ');
+    const buf = await downloadFile(storagePath);
     
     // Determine content type
     let contentType = 'application/octet-stream';

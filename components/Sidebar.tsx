@@ -18,6 +18,7 @@ import {
   Terminal,
   Settings,
   MessageSquare,
+  Binary,
   X as XIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,12 @@ const SECTIONS = [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
       { href: "/dashboard/apps", label: "Aplicaciones", icon: Shield, adminOnly: false },
       { href: "/dashboard/builder", label: "Builder", icon: Terminal, adminOnly: false },
+    ],
+  },
+  {
+    label: "HERRAMIENTAS",
+    items: [
+      { href: "/dashboard/hex-converter", label: "Convertidor Hex", icon: Binary, adminOnly: false },
     ],
   },
   {

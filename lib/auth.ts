@@ -86,9 +86,30 @@ export async function hasUnlimitedQuota(me: AdminSession): Promise<boolean> {
   return false;
 }
 
+export async function checkSubResellerExpiration(me: AdminSession): Promise<{ expired: boolean; reason?: string }> {
+  if (me.role === "seller") {
+    const admin = await store.getAdminById(me.id);
+    if (admin && admin.subscription_end) {
+      const expDate = new Date(admin.subscription_end).getTime();
+      if (expDate < Date.now()) {
+        return {
+          expired: true,
+          reason: "Tu suscripción de sub-reseller ha expirado. Por favor contacta al Desarrollador Principal (Main Developer) para realizar tu pago y reactivar tu acceso."
+        };
+      }
+    }
+  }
+  return { expired: false };
+}
+
 export const QUOTA_LIMIT = 10;
 
 export async function checkQuota(me: AdminSession, appId: string): Promise<{ ok: boolean; reason?: string; users: number; licenses: number; limit: number }> {
+  const expCheck = await checkSubResellerExpiration(me);
+  if (expCheck.expired) {
+    return { ok: false, reason: expCheck.reason, users: 0, licenses: 0, limit: 0 };
+  }
+
   const unlimited = await hasUnlimitedQuota(me);
   if (unlimited) {
     return { ok: true, users: 0, licenses: 0, limit: 9999 };

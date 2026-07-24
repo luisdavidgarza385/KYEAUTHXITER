@@ -30,6 +30,14 @@ export async function POST(req: NextRequest) {
     const credits = Math.max(0, parseInt(String(body?.credits || 0)) || 0);
     const permissions = Array.isArray(body?.permissions) ? body.permissions : [];
     const subscriptions = Array.isArray(body?.subscriptions) ? body.subscriptions : [];
+    const expiryDays = parseInt(String(body?.expiryDays || 0)) || 0;
+
+    let subscription_end: string | null = null;
+    if (expiryDays > 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + expiryDays);
+      subscription_end = d.toISOString();
+    }
 
     if (!email || !password) {
       return json({ success: false, message: "Usuario y contraseña requeridos" }, 400);
@@ -80,6 +88,7 @@ export async function POST(req: NextRequest) {
       status: "active",
       permissions,
       subscriptions,
+      subscription_end,
     });
 
     return json({ success: true, data: subReseller });
@@ -113,6 +122,17 @@ export async function PUT(req: NextRequest) {
     const credits = Math.max(0, parseInt(String(body?.credits || 0)) || 0);
     const permissions = Array.isArray(body?.permissions) ? body.permissions : [];
     const subscriptions = Array.isArray(body?.subscriptions) ? body.subscriptions : [];
+
+    if (body?.expiryDays !== undefined) {
+      const expiryDays = parseInt(String(body.expiryDays)) || 0;
+      if (expiryDays > 0) {
+        const d = new Date();
+        d.setDate(d.getDate() + expiryDays);
+        sub.subscription_end = d.toISOString();
+      } else if (expiryDays === 0) {
+        sub.subscription_end = null;
+      }
+    }
 
     if (password && password.length < 5) {
       return json({ success: false, message: "La contraseña debe tener al menos 5 caracteres" }, 400);

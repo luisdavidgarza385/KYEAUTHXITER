@@ -164,6 +164,7 @@ export interface Store {
     status?: string;
     permissions?: string[];
     subscriptions?: string[];
+    subscription_end?: string | null;
   }): Promise<Admin>;
   updateAdmin(id: string, data: Admin): Promise<Admin | null>;
   deleteAdmin(id: string): Promise<void>;

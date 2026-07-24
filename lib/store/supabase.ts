@@ -54,6 +54,7 @@ export const supabaseStore: Store = {
         status: data.status || "active",
         permissions: data.permissions || [],
         subscriptions: data.subscriptions || [],
+        subscription_end: data.subscription_end || null,
       } as any)
       .select()
       .single();

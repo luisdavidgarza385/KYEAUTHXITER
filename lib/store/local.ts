@@ -136,7 +136,7 @@ export const localStore: Store = {
         password_hash: data.password_hash,
         role: data.role,
         created_at: now(),
-        subscription_end: null,
+        subscription_end: data.subscription_end || null,
         subscription_app_id: null,
         seller_label: data.role === "seller" ? data.email.toLowerCase() : "keyauthpro",
         created_by: data.created_by || null,

@@ -19,6 +19,8 @@ import {
   Settings,
   MessageSquare,
   Binary,
+  Clock,
+  AlertTriangle,
   X as XIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -54,12 +56,12 @@ const SECTIONS = [
     items: [
       { href: "/dashboard/security", label: "Seguridad (2FA)", icon: Lock, adminOnly: false },
       { href: "/dashboard/api", label: "API", icon: Code, adminOnly: false },
-      { href: "/dashboard/settings", label: "Configuración", icon: Settings, adminOnly: false },
+      { href: "/dashboard/settings", label: "Configuración", icon: Settings, adminOnly: true },
     ],
   },
 ];
 
-export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" | "seller" | "developer"; email: string; isSubReseller?: boolean }) {
+export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = null }: { role: "admin" | "seller" | "developer"; email: string; isSubReseller?: boolean; subscriptionEnd?: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = role === "admin" || role === "developer";
@@ -237,6 +239,50 @@ export function Sidebar({ role, email, isSubReseller = false }: { role: "admin" 
               {role === "admin" ? "Administrador" : role === "developer" ? "Desarrollador" : "Revendedor"}
             </div>
           </div>
+
+          {/* Subscription Days for Sub-resellers */}
+          {isSubReseller && (() => {
+            if (!subscriptionEnd) {
+              return (
+                <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800/60">
+                  <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="text-[11px] text-emerald-400 font-bold">∞ Ilimitado</span>
+                </div>
+              );
+            }
+            const endDate = new Date(subscriptionEnd);
+            const now = new Date();
+            const diffMs = endDate.getTime() - now.getTime();
+            const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+            const isExpired = daysLeft <= 0;
+            const isWarning = daysLeft > 0 && daysLeft <= 5;
+            return (
+              <div className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border ${
+                isExpired
+                  ? "bg-red-950/30 border-red-500/30"
+                  : isWarning
+                    ? "bg-yellow-950/30 border-yellow-500/30"
+                    : "bg-emerald-950/20 border-emerald-500/20"
+              }`}>
+                {isExpired ? (
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                ) : (
+                  <Clock className={`w-3.5 h-3.5 shrink-0 ${isWarning ? "text-yellow-400" : "text-emerald-400"}`} />
+                )}
+                <div className="min-w-0">
+                  <p className={`text-[11px] font-bold ${
+                    isExpired ? "text-red-400" : isWarning ? "text-yellow-400" : "text-emerald-400"
+                  }`}>
+                    {isExpired ? "Expirado" : `${daysLeft} día${daysLeft !== 1 ? "s" : ""} restante${daysLeft !== 1 ? "s" : ""}`}
+                  </p>
+                  {isExpired && (
+                    <p className="text-[9px] text-red-400/70 mt-0.5">Contacta al Developer</p>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="flex items-center justify-between pt-2 border-t border-zinc-850">
             <button
               onClick={toggleTheme}

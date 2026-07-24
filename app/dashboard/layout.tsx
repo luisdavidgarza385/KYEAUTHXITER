@@ -28,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </video>
       <GlobalBroadcastNotifier currentUserEmail={me.email} />
       <GlobalMusicPlayer />
-      <Sidebar role={me.role} email={me.email} isSubReseller={isSubReseller} />
+      <Sidebar role={me.role} email={me.email} isSubReseller={isSubReseller} subscriptionEnd={fullAdmin?.subscription_end || null} />
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         <DashboardHeader email={me.email} role={me.role} apps={apps} />
         <main className="flex-1 overflow-x-hidden">{children}</main>

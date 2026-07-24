@@ -62,6 +62,14 @@ export async function POST(req: NextRequest) {
         return json({ success: false, message: "Error al actualizar el usuario en la base de datos." }, 500);
       }
 
+      // If the license is paused, unpause it
+      if (license.status === "paused") {
+        await db
+          .from("licenses")
+          .update({ status: "used" })
+          .eq("id", license.id);
+      }
+
       // Log the reset activity
       await db.from("logs").insert({
         app_id: license.app_id,
@@ -110,6 +118,13 @@ export async function POST(req: NextRequest) {
       if (updateErr) {
         return json({ success: false, message: "Error al actualizar el usuario en la base de datos." }, 500);
       }
+
+      // Unpause any paused licenses for this user
+      await db
+        .from("licenses")
+        .update({ status: "used" })
+        .eq("used_by", targetUser.id)
+        .eq("status", "paused");
 
       // Log the reset activity
       await db.from("logs").insert({

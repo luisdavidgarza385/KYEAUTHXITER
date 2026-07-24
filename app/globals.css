@@ -85,6 +85,21 @@ html.light {
   --auth-link: #059669;
 }
 
+html.light .theme-vyper {
+  --bg-rgb: 248 247 255;
+  --bg-secondary-rgb: 238 238 248;
+  --bg-card-rgb: 255 255 255;
+  --bg-hover-rgb: 232 230 242;
+  --border-rgb: 212 210 224;
+  
+  --auth-bg: #f3faf5;
+  --auth-card: rgba(255, 255, 255, 0.85);
+  --auth-card-border: rgba(16, 185, 129, 0.25);
+  --auth-input-bg: rgba(255, 255, 255, 0.95);
+  --auth-input-border: rgba(0, 0, 0, 0.08);
+  --auth-link: #059669;
+}
+
 @layer base {
   html {
     color-scheme: dark;
@@ -94,7 +109,7 @@ html.light {
   }
   body {
     @apply bg-bg text-text antialiased;
-    background-color: #030604;
+    background-color: rgb(var(--bg-rgb));
     background-image:
       radial-gradient(circle at 15% 15%, rgb(var(--accent-rgb) / 0.15) 0px, transparent 50%),
       radial-gradient(circle at 85% 85%, rgb(var(--accent-rgb) / 0.10) 0px, transparent 50%),

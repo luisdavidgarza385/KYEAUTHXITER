@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { getClientIp, generateId } from "@/lib/utils";
 import bcrypt from "bcryptjs";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,75 @@ const secureJson = (data: unknown, status = 200) => {
 };
 
 const json = secureJson;
+
+const sessionsMap = new Map();
+
+async function checkForSimultaneousSessions(userId: string, currentHwid: string, licenseKey?: string): Promise<boolean> {
+  if (!userId || !currentHwid) return false;
+  const db = supabaseAdmin() as any;
+  
+  // Find other active, valid sessions for this user with a different HWID
+  const { data: activeSessions } = await db
+    .from("sessions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("valid", true)
+    .neq("hwid", currentHwid);
+    
+  if (activeSessions && activeSessions.length > 0) {
+    const now = new Date();
+    // Filter to ensure sessions are not expired yet
+    const unexpiredSessions = activeSessions.filter((s: any) => new Date(s.expires_at) > now);
+    
+    if (unexpiredSessions.length > 0) {
+      // simultaneous session detected!
+      // 1. Invalidate all sessions for this user in DB
+      await db
+        .from("sessions")
+        .update({ valid: false })
+        .eq("user_id", userId);
+        
+      // 2. Clear from local sessionsMap if applicable
+      for (const [key, value] of sessionsMap.entries()) {
+        if (value.user_id === userId) {
+          sessionsMap.delete(key);
+        }
+      }
+      
+      // 3. Pause the license
+      if (licenseKey) {
+        const { data: lic } = await db
+          .from("licenses")
+          .select("*")
+          .eq("key", licenseKey)
+          .maybeSingle();
+        if (lic) {
+          await db
+            .from("licenses")
+            .update({ status: "paused" })
+            .eq("id", lic.id);
+        }
+      } else {
+        // Find licenses of this user and pause them
+        const { data: lics } = await db
+          .from("licenses")
+          .select("*")
+          .eq("used_by", userId);
+        if (lics) {
+          for (const lic of lics) {
+            await db
+              .from("licenses")
+              .update({ status: "paused" })
+              .eq("id", lic.id);
+          }
+        }
+      }
+      
+      return true; // simultaneous usage detected and handled
+    }
+  }
+  return false;
+}
 
 // Brute-force & Anti-spam Rate Limiting state
 const rateLimits = new Map<string, { attempts: number; blockedUntil: number }>();
@@ -93,8 +163,6 @@ async function getParams(req: NextRequest): Promise<Record<string, string>> {
   }
   return params;
 }
-
-const sessionsMap = new Map();
 
 function toUnixTimestamp(dateVal: any): string {
   if (!dateVal) return "0";
@@ -241,6 +309,12 @@ export async function POST(req: NextRequest) {
       if (!valid) {
         registerFailure(ip);
         return json({ success: false, message: "Invalid credentials" }, 401);
+      }
+
+      // Check for simultaneous sessions
+      const simultaneousDetected = await checkForSimultaneousSessions(user.id, hwid || "");
+      if (simultaneousDetected) {
+        return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad. Utiliza el asistente virtual para reactivarla." }, 403);
       }
 
       // Cualquier usuario autenticado correctamente tiene acceso
@@ -469,7 +543,17 @@ export async function POST(req: NextRequest) {
       const lic = await store.getLicenseByKey(app.id, String(key));
       if (!lic) return json({ success: false, message: "Invalid license" }, 404);
       if (lic.status === "banned") return json({ success: false, message: "License banned" }, 403);
+      if (lic.status === "paused") {
+        return json({ success: false, message: "Esta licencia está pausada por seguridad debido a doble inicio de sesión. Por favor, utiliza el asistente virtual para reactivarla." }, 403);
+      }
       if (lic.status === "unused" && lic.uses >= lic.max_uses) return json({ success: false, message: "No uses left" }, 403);
+
+      if (lic.used_by) {
+        const simultaneousDetected = await checkForSimultaneousSessions(lic.used_by, hwid || "", lic.key);
+        if (simultaneousDetected) {
+          return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad. Utiliza el asistente virtual para reactivarla." }, 403);
+        }
+      }
 
       if (lic.hwid_lock && hwid && lic.used_by) {
         const prev = await store.getAppUserById(lic.used_by);

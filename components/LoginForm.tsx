@@ -224,6 +224,57 @@ export function LoginForm() {
             Resetear keys con nuestro asistente
           </Link>
         </div>
+
+        <div className="mt-6 pt-4 border-t border-border/60">
+          <p className="text-[10px] text-center font-bold uppercase tracking-wider text-text-muted mb-3">
+            O continuar con
+          </p>
+          <div className="flex justify-center gap-3">
+            {/* Discord */}
+            <a
+              href="/api/auth/discord"
+              className="w-10 h-10 rounded-xl bg-bg-secondary hover:bg-[#5865F2]/20 border border-border hover:border-[#5865F2]/50 flex items-center justify-center text-text-muted hover:text-white transition-all duration-200"
+              title="Discord"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z" />
+              </svg>
+            </a>
+
+            {/* Apple */}
+            <a
+              href="/api/auth/apple"
+              className="w-10 h-10 rounded-xl bg-bg-secondary hover:bg-white/10 border border-border hover:border-text/50 flex items-center justify-center text-text-muted hover:text-text transition-all duration-200"
+              title="Apple"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.49-.6.69-1.12 1.83-.98 2.94 1.1.09 2.22-.55 2.91-1.37z" />
+              </svg>
+            </a>
+
+            {/* Google */}
+            <a
+              href="/api/auth/google"
+              className="w-10 h-10 rounded-xl bg-bg-secondary hover:bg-[#4285F4]/20 border border-border hover:border-[#4285F4]/50 flex items-center justify-center text-text-muted hover:text-text transition-all duration-200"
+              title="Google"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.13-5.136 4.13A5.86 5.86 0 0 1 8.1 12.67a5.86 5.86 0 0 1 5.89-5.86c1.64 0 3.13.67 4.22 1.76l3.13-3.13A10.15 10.15 0 0 0 13.99 2c-5.65 0-10.23 4.58-10.23 10.23s4.58 10.23 10.23 10.23c5.44 0 9.87-4.14 10.12-9.5h-11.87v-2.675z" />
+              </svg>
+            </a>
+
+            {/* Telegram */}
+            <a
+              href="/api/auth/telegram"
+              className="w-10 h-10 rounded-xl bg-bg-secondary hover:bg-[#0088cc]/20 border border-border hover:border-[#0088cc]/50 flex items-center justify-center text-text-muted hover:text-text transition-all duration-200"
+              title="Telegram"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z" />
+              </svg>
+            </a>
+          </div>
+        </div>
       </form>
     </div>
   );

@@ -173,7 +173,7 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
 
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 z-50 w-60 border-r border-emerald-900/10 bg-[#030604] flex flex-col h-screen text-zinc-300 transition-transform duration-300 lg:translate-x-0 lg:shrink-0",
+          "fixed lg:sticky top-0 left-0 z-50 w-60 border-r border-border bg-bg-secondary flex flex-col h-screen text-text transition-transform duration-300 lg:translate-x-0 lg:shrink-0",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
@@ -231,11 +231,11 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
       </nav>
 
       {/* Bottom Profile Details */}
-      <div className="p-4 border-t border-emerald-900/10 bg-[#030604]/60">
-        <div className="rounded-xl bg-[#040c06]/60 border border-emerald-500/15 p-3.5 space-y-3 shadow-inner">
+      <div className="p-4 border-t border-border bg-bg-secondary/60">
+        <div className="rounded-xl bg-bg-card border border-border p-3.5 space-y-3 shadow-inner">
           <div className="min-w-0">
-            <div className="font-semibold text-sm text-zinc-100 truncate">{capitalizedUsername}</div>
-            <div className="text-[11px] text-zinc-500 truncate font-mono uppercase tracking-wider">
+            <div className="font-semibold text-sm text-text truncate">{capitalizedUsername}</div>
+            <div className="text-[11px] text-text-muted truncate font-mono uppercase tracking-wider">
               {role === "admin" ? "Administrador" : role === "developer" ? "Desarrollador" : "Revendedor"}
             </div>
           </div>
@@ -283,10 +283,10 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
             );
           })()}
 
-          <div className="flex items-center justify-between pt-2 border-t border-zinc-850">
+          <div className="flex items-center justify-between pt-2 border-t border-border">
             <button
               onClick={toggleTheme}
-              className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+              className="p-1.5 rounded-md hover:bg-bg-hover text-text-muted hover:text-text transition"
               title={dark ? "Modo Claro" : "Modo Oscuro"}
             >
               {dark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}

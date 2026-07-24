@@ -1,17 +1,14 @@
 import { NextRequest } from "next/server";
 import { json, requireAdmin, safeRoute } from "@/lib/api-helpers";
-import fs from "fs/promises";
-import path from "path";
+import { store } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-const MUSIC_CONFIG_PATH = path.join(process.cwd(), "data", "music-config.json");
-
 interface MusicConfig {
   enabled: boolean;
-  url: string; // URL to mp3 or audio file
-  volume: number; // 0.0 to 1.0
-  title: string; // Display name
+  url: string;
+  volume: number;
+  title: string;
 }
 
 const DEFAULT_CONFIG: MusicConfig = {
@@ -21,26 +18,36 @@ const DEFAULT_CONFIG: MusicConfig = {
   title: "",
 };
 
-async function readConfig(): Promise<MusicConfig> {
+async function getMusicConfig(): Promise<MusicConfig> {
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
   try {
-    const raw = await fs.readFile(MUSIC_CONFIG_PATH, "utf-8");
-    return { ...DEFAULT_CONFIG, ...JSON.parse(raw) };
-  } catch {
-    return DEFAULT_CONFIG;
+    const admin = await store.getAdminByEmail(bootstrapEmail);
+    if (admin && admin.seller_label && admin.seller_label.startsWith("{")) {
+      return { ...DEFAULT_CONFIG, ...JSON.parse(admin.seller_label) };
+    }
+  } catch (e) {
+    console.error("Error reading music config from DB:", e);
   }
+  return DEFAULT_CONFIG;
 }
 
-async function writeConfig(config: MusicConfig) {
-  const dir = path.dirname(MUSIC_CONFIG_PATH);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(MUSIC_CONFIG_PATH, JSON.stringify(config, null, 2));
+async function saveMusicConfig(config: MusicConfig) {
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const admin = await store.getAdminByEmail(bootstrapEmail);
+  if (!admin) {
+    throw new Error("Super admin user not found in database.");
+  }
+  await store.updateAdmin(admin.id, {
+    ...admin,
+    seller_label: JSON.stringify(config),
+  });
 }
 
 // GET: anyone logged in can read the current music config
 export async function GET() {
   return safeRoute(async () => {
     await requireAdmin();
-    const config = await readConfig();
+    const config = await getMusicConfig();
     return { data: { success: true, config } };
   });
 }
@@ -63,7 +70,7 @@ export async function POST(req: NextRequest) {
       title: String(body.title || "").trim(),
     };
 
-    await writeConfig(config);
+    await saveMusicConfig(config);
     return { data: { success: true, message: "Configuración de música actualizada.", config } };
   });
 }

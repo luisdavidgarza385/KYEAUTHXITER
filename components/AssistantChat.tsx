@@ -15,13 +15,13 @@ export function AssistantChat() {
     {
       id: "init-1",
       sender: "assistant",
-      text: "⚡ **SISTEMA DE SOPORTE SECUREX AUTH INICIADO** ⚡\n\nHola, soy tu asistente de soporte virtual. Mi función es ayudarte a restablecer tu Hardware ID (HWID) de forma automática si has formateado tu PC, cambiado de componentes o reinstalado Windows.",
+      text: "⚡ **SISTEMA DE SOPORTE GLOBAL SECUREX AUTH** ⚡\n\nHola, soy tu asistente de soporte virtual para todas las aplicaciones y revendedores. Mi función es ayudarte a restablecer tu Hardware ID (HWID) de forma automática si has cambiado de PC, formateado o reinstalado Windows.",
       timestamp: new Date(),
     },
     {
       id: "init-2",
       sender: "assistant",
-      text: "Por favor, escribe a continuación tu **licencia (key)** o tu **nombre de usuario** para que pueda buscarlo en la base de datos y realizar el reset.",
+      text: "🔑 **Opciones de Reset Disponibles:**\n\n1. **Reset por Licencia (Key):** Escribe tu clave/licencia completa (ej: `SPORTS GOAT Avanzado-77HM-KEMJ-L2KR-XY9K`).\n2. **Reset Win de Usuario:** Escribe el nombre de usuario con el que te registraste en la aplicación.\n\nPor favor, escribe a continuación tu **licencia** o **usuario** para realizar el reset en tiempo real.",
       timestamp: new Date(),
     },
   ]);
@@ -107,14 +107,16 @@ export function AssistantChat() {
     window.location.href = "/asistente/login";
   };
 
-  const handleQuickOption = (type: "hwid" | "error" | "how") => {
+  const handleQuickOption = (type: "key" | "user" | "error" | "how") => {
     let text = "";
-    if (type === "hwid") {
-      text = "Quiero resetear el HWID de mi cuenta.";
+    if (type === "key") {
+      text = "Quiero resetear el HWID mediante mi Licencia (Key).";
+    } else if (type === "user") {
+      text = "Quiero resetear el HWID (Reset Win) de mi Nombre de Usuario.";
     } else if (type === "error") {
-      text = "Me sale error 'HWID Mismatch' al iniciar el loader.";
+      text = "Me sale error 'HWID Mismatch' al iniciar sesión en el ejecutable.";
     } else {
-      text = "¿Cómo busco mi licencia?";
+      text = "¿Dónde puedo consultar mi Licencia o Usuario?";
     }
     handleSend(text);
   };
@@ -223,14 +225,21 @@ export function AssistantChat() {
         {/* Quick query buttons */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px]">
           <span className="text-zinc-400 uppercase tracking-widest font-mono text-[9px] font-bold shrink-0">
-            Consultas frecuentes:
+            Opciones:
           </span>
           <button
-            onClick={() => handleQuickOption("hwid")}
+            onClick={() => handleQuickOption("key")}
             className="px-3 py-1.5 rounded-full bg-sky-950/60 border border-sky-500/30 hover:border-sky-400 text-sky-300 hover:text-white transition whitespace-nowrap flex items-center gap-1.5 font-semibold shadow-sm"
           >
             <RefreshCw className="w-3 h-3 text-sky-400" />
-            Reset HWID
+            Reset Licencia
+          </button>
+          <button
+            onClick={() => handleQuickOption("user")}
+            className="px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 hover:border-emerald-400 text-emerald-300 hover:text-white transition whitespace-nowrap flex items-center gap-1.5 font-semibold shadow-sm"
+          >
+            <RefreshCw className="w-3 h-3 text-emerald-400" />
+            Reset Win Usuario
           </button>
           <button
             onClick={() => handleQuickOption("error")}

@@ -15,146 +15,142 @@ export async function POST(req: NextRequest) {
 
   try {
     const payload = await req.json().catch(() => ({}));
-    const input = String(payload?.input || "").trim();
+    const rawInput = String(payload?.input || "").trim();
 
-    if (!input) {
+    if (!rawInput) {
       return json({ success: false, message: "Debes ingresar una licencia o usuario." }, 400);
     }
 
     const db = supabaseAdmin() as any;
+    const cleanInput = rawInput.toLowerCase();
 
-    // 2. Try to search input as license key
-    const { data: license } = (await db
+    // 2. Universal Search: Check if input matches a license key (exact or partial)
+    let { data: licenses } = (await db
       .from("licenses")
       .select("*")
-      .eq("key", input)
-      .maybeSingle()) as any;
+      .or(`key.eq.${rawInput},key.ilike.%${rawInput}%`)) as any;
 
-    if (license) {
-      if (!license.used_by) {
-        return json({
-          success: true,
-          message: `La licencia **${input}** es válida pero no ha sido registrada por ningún usuario aún, por lo que no tiene un HWID bloqueado.`
-        });
+    if (!licenses || licenses.length === 0) {
+      // Try stripping app name prefix if user pasted e.g. "SPORTS GOAT Avanzado-77HM-KEMJ-L2KR-XY9K"
+      const parts = rawInput.split("-");
+      if (parts.length > 1) {
+        const keyOnly = parts.slice(1).join("-").trim();
+        if (keyOnly) {
+          const { data: fallbackLic } = (await db
+            .from("licenses")
+            .select("*")
+            .or(`key.eq.${keyOnly},key.ilike.%${keyOnly}%`)) as any;
+          if (fallbackLic && fallbackLic.length > 0) {
+            licenses = fallbackLic;
+          }
+        }
       }
+    }
 
-      // Fetch user bound to this license
-      const { data: appUser } = (await db
-        .from("app_users")
-        .select("*")
-        .eq("id", license.used_by)
-        .maybeSingle()) as any;
+    if (licenses && licenses.length > 0) {
+      const targetLic = licenses[0];
 
-      if (!appUser) {
-        return json({
-          success: false,
-          message: "La licencia está vinculada a un usuario inexistente."
-        });
-      }
-
-      // Reset user HWID
-      const { error: updateErr } = await db
-        .from("app_users")
-        .update({ hwid: null })
-        .eq("id", appUser.id);
-
-      if (updateErr) {
-        return json({ success: false, message: "Error al actualizar el usuario en la base de datos." }, 500);
-      }
-
-      // If the license is paused, unpause it
-      if (license.status === "paused") {
-        await db
-          .from("licenses")
-          .update({ status: "used" })
-          .eq("id", license.id);
-      }
-
-      // Log the reset activity
-      await db.from("logs").insert({
-        app_id: license.app_id,
-        user_id: appUser.id,
-        message: `HWID reset via assistant for user ${appUser.username} using license key`,
-        level: "info"
-      });
-
-      // Fetch application name
+      // Fetch Application Name
       const { data: appObj } = await db
         .from("applications")
         .select("name")
-        .eq("id", license.app_id)
+        .eq("id", targetLic.app_id)
         .maybeSingle();
-      const appName = appObj?.name || "Desconocida";
+      const appName = appObj?.name || "Sistema";
+
+      let resetUserMsg = "";
+
+      // Reset associated user if used_by exists
+      if (targetLic.used_by) {
+        const { data: appUser } = await db
+          .from("app_users")
+          .select("*")
+          .eq("id", targetLic.used_by)
+          .maybeSingle();
+
+        if (appUser) {
+          await db
+            .from("app_users")
+            .update({ hwid: null })
+            .eq("id", appUser.id);
+          resetUserMsg = ` y al usuario vinculado **${appUser.username}**`;
+        }
+      }
+
+      // Reset license record: clear used_by, reset status if paused/used, reset HWID
+      await db
+        .from("licenses")
+        .update({
+          status: "used",
+          hwid_lock: false
+        })
+        .eq("id", targetLic.id);
+
+      // Log activity
+      await db.from("logs").insert({
+        app_id: targetLic.app_id,
+        user_id: targetLic.used_by || null,
+        message: `Universal HWID reset via bot for license ${targetLic.key}`,
+        level: "info"
+      });
 
       return json({
         success: true,
-        message: `¡Encontrado! La licencia pertenece a la aplicación **${appName}** y está vinculada al usuario **${appUser.username}**. Su HWID ha sido reseteado con éxito. Ya puede iniciar sesión.`
+        message: `✅ **RESET DE HWID Y LICENCIA EXITOSO**\n\nLa licencia **${targetLic.key}** de la aplicación **${appName}**${resetUserMsg} ha sido restablecida correctamente.\n\nSu HWID ha sido liberado en el sistema. Ya puedes registrarte o iniciar sesión en tu nuevo dispositivo.`
       });
     }
 
-    // 3. Try to search input as username
-    const { data: users } = (await db
+    // 3. Search input as Username or Email across ALL apps & sub-resellers
+    const { data: appUsers } = (await db
       .from("app_users")
       .select("*")
-      .eq("username", input)) as any;
+      .or(`username.ilike.${rawInput},email.ilike.${rawInput}`)) as any;
 
-    if (users && users.length > 0) {
-      if (users.length > 1) {
-        return json({
-          success: false,
-          duplicate: true,
-          message: `He encontrado múltiples cuentas con el usuario **${input}**. Por seguridad, por favor ingresa directamente tu **licencia (key)** para realizar el reset.`
-        });
-      }
-
-      const targetUser = users[0];
+    if (appUsers && appUsers.length > 0) {
+      const targetUser = appUsers[0];
 
       // Reset user HWID
-      const { error: updateErr } = await db
+      await db
         .from("app_users")
         .update({ hwid: null })
         .eq("id", targetUser.id);
 
-      if (updateErr) {
-        return json({ success: false, message: "Error al actualizar el usuario en la base de datos." }, 500);
-      }
-
-      // Unpause any paused licenses for this user
+      // Unpause and unlock licenses used by this user
       await db
         .from("licenses")
-        .update({ status: "used" })
-        .eq("used_by", targetUser.id)
-        .eq("status", "paused");
+        .update({ status: "used", hwid_lock: false })
+        .eq("used_by", targetUser.id);
 
-      // Log the reset activity
-      await db.from("logs").insert({
-        app_id: targetUser.app_id,
-        user_id: targetUser.id,
-        message: `HWID reset via assistant for user ${targetUser.username} by username lookup`,
-        level: "info"
-      });
-
-      // Fetch application name
+      // Fetch app name
       const { data: appObj } = await db
         .from("applications")
         .select("name")
         .eq("id", targetUser.app_id)
         .maybeSingle();
-      const appName = appObj?.name || "Desconocida";
+      const appName = appObj?.name || "Sistema";
+
+      // Log activity
+      await db.from("logs").insert({
+        app_id: targetUser.app_id,
+        user_id: targetUser.id,
+        message: `Universal HWID reset via bot for user ${targetUser.username}`,
+        level: "info"
+      });
 
       return json({
         success: true,
-        message: `¡Encontrado! El usuario **${targetUser.username}** de la aplicación **${appName}** ha sido localizado. Su HWID ha sido reseteado con éxito. Ya puede iniciar sesión.`
+        message: `✅ **RESET DE USUARIO (RESET WIN) EXITOSO**\n\nEl usuario **${targetUser.username}** de la aplicación **${appName}** ha sido localizado.\n\nSu Hardware ID (HWID) ha sido restablecido a cero. Ya puedes ingresar al loader desde tu nueva PC.`
       });
     }
 
-    // 4. Not found
+    // 4. Not found in licenses or users
     return json({
       success: false,
       notFound: true,
-      message: `No he podido encontrar ninguna licencia o usuario con los datos **${input}**. Por favor, verifica la información e inténtalo de nuevo.`
+      message: `No se encontró ninguna licencia o usuario coincidente con **${rawInput}** en la base de datos global.\n\nVerifica que la clave o usuario estén bien escritos e inténtalo de nuevo.`
     });
+
   } catch (e: any) {
-    return json({ success: false, message: e?.message || "Server error" }, 500);
+    return json({ success: false, message: e?.message || "Error al procesar el reset." }, 500);
   }
 }

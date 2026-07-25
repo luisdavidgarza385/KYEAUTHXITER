@@ -199,15 +199,13 @@ export function ApplicationRow({ app, userCount, isSelected, role }: { app: any;
             {app.status === "paused" ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
             {app.status === "paused" ? "Resume" : "Pause"}
           </button>
-          {role !== "seller" && (
-            <button
-              onClick={() => setDeleting(true)}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs border bg-danger/15 text-danger border-danger/30 hover:bg-danger/25 transition"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Delete
-            </button>
-          )}
+          <button
+            onClick={() => setDeleting(true)}
+            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs border bg-danger/15 text-danger border-danger/30 hover:bg-danger/25 transition"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Delete
+          </button>
         </div>
       </div>
     );

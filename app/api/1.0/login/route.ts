@@ -42,11 +42,6 @@ export async function POST(req: NextRequest) {
     const valid = await bcrypt.compare(String(password), user.password_hash);
     if (!valid) return json({ success: false, message: "Invalid credentials" }, 401);
 
-    // Strict 1-PC HWID Lock check
-    if (user.hwid && hwid && user.hwid !== hwid) {
-      return json({ success: false, message: "HWID mismatch: Esta cuenta está vinculada a otra PC. Contacta al administrador para resetear tu HWID." }, 403);
-    }
-
     const ip = getClientIp(req);
 
     // Buscar la licencia activa del usuario para determinar su nivel de suscripción
@@ -59,6 +54,13 @@ export async function POST(req: NextRequest) {
         lic.expires_at &&
         new Date(lic.expires_at) > now
     );
+
+    const isMultiPcLicense = allLicenses.some(l => l.used_by === user.id && (l.hwid_lock === false || (l.max_uses && l.max_uses > 1)));
+
+    // Strict 1-PC HWID Lock check (skipped for Multi-PC licenses)
+    if (!isMultiPcLicense && user.hwid && hwid && user.hwid !== hwid) {
+      return json({ success: false, message: "HWID mismatch: Esta cuenta está vinculada a otra PC. Contacta al administrador para resetear tu HWID." }, 403);
+    }
 
     // Construir lista de suscripciones según la licencia activa del usuario.
     // El loader Lunarx busca { name: "VIP" } para dar acceso.

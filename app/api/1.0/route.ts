@@ -311,20 +311,22 @@ export async function POST(req: NextRequest) {
         return json({ success: false, message: "Invalid credentials" }, 401);
       }
 
-      // Strict 1-PC HWID Lock check
-      if (user.hwid && hwid && user.hwid !== hwid) {
+      // Check user licenses for Multi-PC / HWID lock status
+      const userLicenses = await store.listLicenses({ appId: app.id });
+      const myLicenses = userLicenses.filter(l => l.used_by === user.id);
+      const isMultiPcLicense = myLicenses.some(l => l.hwid_lock === false || (l.max_uses && l.max_uses > 1));
+
+      // Strict 1-PC HWID Lock check (skipped if user has a Multi-PC license)
+      if (!isMultiPcLicense && user.hwid && hwid && user.hwid !== hwid) {
         return json({ success: false, message: "HWID mismatch: Esta cuenta está autorizada para 1 sola PC. Pide un reset de HWID a tu administrador para cambiar de PC." }, 403);
       }
 
       // Check for simultaneous sessions
       const simultaneousDetected = await checkForSimultaneousSessions(user.id, hwid || "");
-      if (simultaneousDetected) {
+      if (simultaneousDetected && !isMultiPcLicense) {
         return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad." }, 403);
       }
 
-      // Cualquier usuario autenticado correctamente tiene acceso
-      const userLicenses = await store.listLicenses({ appId: app.id });
-      const myLicenses = userLicenses.filter(l => l.used_by === user.id);
       const activeLicenses = myLicenses.filter(l => l.status === "used" && (!l.expires_at || new Date(l.expires_at) > new Date()));
 
       const geoIp = await getGeoInfo(ip);

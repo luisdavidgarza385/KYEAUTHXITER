@@ -302,7 +302,9 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
       setPrefix(forcePrefix ? "KEYAUTHPRO" : (selectedApp?.name || "SecureX Auth"));
     }
   }, [level, forcePrefix, selectedApp]);
-  const [hwidLock, setHwidLock] = useState(false);
+  const [maxUses, setMaxUses] = useState(1);
+  const [isMultiPc, setIsMultiPc] = useState(false);
+  const [hwidLock, setHwidLock] = useState(true);
   const [ipLock, setIpLock] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -321,6 +323,9 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
     else if (unit === "years") durationDays = duration * 365;
     else if (unit === "lifetime") durationDays = 36500;
     
+    const finalMaxUses = isMultiPc ? 999999 : Math.max(1, maxUses);
+    const finalHwidLock = isMultiPc ? false : hwidLock;
+
     const res = await fetch("/api/admin/licenses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -329,8 +334,8 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
         count,
         durationDays,
         level,
-        maxUses: 1,
-        hwidLock,
+        maxUses: finalMaxUses,
+        hwidLock: finalHwidLock,
         ipLock,
         prefix,
         suffix,
@@ -465,15 +470,38 @@ function CreateLicenseModal({ apps, onClose, defaultAppId, forcePrefix }: { apps
             </code>
           </div>
 
-          <div className="flex items-center gap-4 text-xs pt-1">
-            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-400 hover:text-zinc-200">
-              <input type="checkbox" checked={hwidLock} onChange={(e) => setHwidLock(e.target.checked)} className="accent-emerald-500 w-4 h-4 rounded cursor-pointer" />
-              <span>Bloqueo HWID</span>
+          {/* Multi-PC and HWID Lock controls */}
+          <div className="p-3 rounded-xl bg-sky-950/20 border border-sky-500/20 space-y-3">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-sky-300 select-none">
+              <input 
+                type="checkbox" 
+                checked={isMultiPc} 
+                onChange={(e) => {
+                  setIsMultiPc(e.target.checked);
+                  if (e.target.checked) setHwidLock(false);
+                  else setHwidLock(true);
+                }} 
+                className="accent-sky-400 w-4 h-4 rounded cursor-pointer" 
+              />
+              <span>💻 Permitir Multi-PC (Varias computadoras / Sin límite HWID)</span>
             </label>
-            <label className="flex items-center gap-1.5 cursor-pointer text-zinc-400 hover:text-zinc-200">
-              <input type="checkbox" checked={ipLock} onChange={(e) => setIpLock(e.target.checked)} className="accent-emerald-500 w-4 h-4 rounded cursor-pointer" />
-              <span>Bloqueo IP</span>
-            </label>
+
+            {!isMultiPc ? (
+              <div className="flex items-center gap-4 text-xs pt-1">
+                <label className="flex items-center gap-1.5 cursor-pointer text-zinc-400 hover:text-zinc-200">
+                  <input type="checkbox" checked={hwidLock} onChange={(e) => setHwidLock(e.target.checked)} className="accent-emerald-500 w-4 h-4 rounded cursor-pointer" />
+                  <span>Bloqueo 1-PC (HWID Lock)</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer text-zinc-400 hover:text-zinc-200">
+                  <input type="checkbox" checked={ipLock} onChange={(e) => setIpLock(e.target.checked)} className="accent-emerald-500 w-4 h-4 rounded cursor-pointer" />
+                  <span>Bloqueo IP</span>
+                </label>
+              </div>
+            ) : (
+              <p className="text-[11px] text-emerald-400">
+                ✅ Esta licencia podrá usarse en múltiples computadoras sin restricción de HWID.
+              </p>
+            )}
           </div>
 
           {err && <div className="text-xs text-red-400 bg-red-950/20 border border-red-900/30 rounded-lg px-3 py-2">{err}</div>}

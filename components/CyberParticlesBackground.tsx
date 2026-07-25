@@ -35,8 +35,9 @@ export function CyberParticlesBackground() {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseleave", handleMouseLeave);
 
-    // Create 75 Cyber Starfield Particles
-    const numParticles = 75;
+    // Create Cyber Starfield Particles (optimized 20 for mobile, 75 for desktop)
+    const isMobile = window.innerWidth < 768;
+    const numParticles = isMobile ? 20 : 75;
     const particles = Array.from({ length: numParticles }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,

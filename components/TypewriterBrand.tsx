@@ -8,7 +8,7 @@ export function TypewriterBrand() {
   const [cursorVisible, setCursorVisible] = useState(true);
 
   const titleWord = "SecureX Auth";
-  const subWord = "developer ~ x Dav";
+  const subWord = "developer ~ xDavid";
 
   useEffect(() => {
     let mode: "typingTitle" | "typingSubtitle" | "pausingAll" | "erasingSubtitle" | "erasingTitle" = "typingTitle";

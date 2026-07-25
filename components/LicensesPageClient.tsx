@@ -193,10 +193,15 @@ export function LicensesPageClient({
         </div>
 
         {/* Right Total Licencias Stat Card with Line Chart (Imagen 3) */}
-        <div className="bg-[#050b16] border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between gap-6 shadow-xl shadow-sky-500/5 min-w-[240px]">
+        <div className="bg-[#050b16]/90 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between gap-6 shadow-xl shadow-sky-500/10 min-w-[260px] backdrop-blur-md">
           <div>
-            <p className="text-3xl font-black text-sky-400 font-mono tracking-tight">{licenses.length}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">TOTAL LICENCIAS</p>
+            <p className="text-3xl font-black text-sky-400 font-mono tracking-tight animate-pulse">
+              {selectedAppId === "all" ? licenses.length : licenses.filter((l) => l.app_id === selectedAppId).length}
+            </p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+              {selectedAppId === "all" ? "TOTAL LICENCIAS (TODAS)" : `LICENCIAS (${apps.find((a) => a.id === selectedAppId)?.name || "APP"})`}
+            </p>
           </div>
           <div className="w-24 h-10 relative">
             <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible">

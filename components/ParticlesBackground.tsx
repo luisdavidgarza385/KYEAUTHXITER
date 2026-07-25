@@ -16,8 +16,8 @@ export function ParticlesBackground() {
     let height = (canvas.height = window.innerHeight);
 
     const particles: Particle[] = [];
-    const count = 60;
-    const mouse = { x: -1000, y: -1000, radius: 120 };
+    const count = 180;
+    const mouse = { x: -1000, y: -1000, radius: 150 };
 
     let accentRgb = "139, 92, 246";
     const updateAccent = () => {
@@ -42,10 +42,10 @@ export function ParticlesBackground() {
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.4;
-        this.vy = (Math.random() - 0.5) * 0.4;
-        this.radius = Math.random() * 2.5 + 1;
-        this.baseAlpha = Math.random() * 0.3 + 0.1;
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.radius = Math.random() * 3.5 + 1.5;
+        this.baseAlpha = Math.random() * 0.5 + 0.25;
         this.alpha = this.baseAlpha;
       }
 

@@ -70,12 +70,8 @@ export default function Home() {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#010408]/70 border-b border-sky-500/10">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-sky-950/40 border border-sky-500/30 flex items-center justify-center relative overflow-hidden group-hover:border-sky-400 transition-colors">
-              <svg viewBox="0 0 100 100" className="w-5 h-5 filter drop-shadow-[0_0_4px_rgba(0,191,255,0.8)]">
-                <path d="M50 35 L40 58 L50 82 L60 58 Z" fill="#0c1724" stroke="#00bfff" strokeWidth="3" />
-                <path d="M38 42 C20 30, 26 5, 41 12 C30 18, 30 35, 40 46" fill="#0c1724" stroke="#00bfff" strokeWidth="3" />
-                <path d="M62 42 C80 30, 74 5, 59 12 C70 18, 70 35, 60 46" fill="#0c1724" stroke="#00bfff" strokeWidth="3" />
-              </svg>
+            <div className="w-8 h-8 rounded-lg overflow-hidden ring-1 ring-sky-500/40 group-hover:ring-sky-400 transition-colors shadow-lg shadow-sky-500/20">
+              <img src="/logo.png" alt="SecureX Auth" className="w-full h-full object-cover" />
             </div>
             <span className="font-extrabold tracking-wider text-lg bg-gradient-to-r from-white to-sky-300 bg-clip-text text-transparent uppercase">
               SecureX Auth
@@ -158,12 +154,8 @@ export default function Home() {
               {/* Top Header of Preview */}
               <div className="h-12 bg-[#0a1322] border-b border-sky-500/20 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-sky-950 border border-sky-500/30 flex items-center justify-center">
-                    <svg viewBox="0 0 100 100" className="w-3.5 h-3.5 filter drop-shadow-[0_0_2px_rgba(0,191,255,0.8)]">
-                      <path d="M50 35 L40 58 L50 82 L60 58 Z" fill="#0c1724" stroke="#00bfff" strokeWidth="4" />
-                      <path d="M38 42 C20 30, 26 5, 41 12 C30 18, 30 35, 40 46" fill="#0c1724" stroke="#00bfff" strokeWidth="4" />
-                      <path d="M62 42 C80 30, 74 5, 59 12 C70 18, 70 35, 60 46" fill="#0c1724" stroke="#00bfff" strokeWidth="4" />
-                    </svg>
+                  <div className="w-6 h-6 rounded overflow-hidden">
+                    <img src="/logo.png" alt="SX" className="w-full h-full object-cover" />
                   </div>
                   <span className="text-xs font-black tracking-wider text-white uppercase">SecureX Auth</span>
                 </div>

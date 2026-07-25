@@ -173,7 +173,7 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
 
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 z-50 w-60 border-r border-border bg-bg-secondary flex flex-col h-screen text-text transition-transform duration-300 lg:translate-x-0 lg:shrink-0",
+          "fixed lg:sticky top-0 left-0 z-50 w-64 border-r border-sky-500/20 bg-gradient-to-b from-[#030914] via-[#020610] to-[#010307] flex flex-col h-screen text-text transition-transform duration-300 lg:translate-x-0 lg:shrink-0 shadow-2xl shadow-sky-950/50 backdrop-blur-xl",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
@@ -188,11 +188,11 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
           </button>
         </div>
 
-        <div className="p-5 flex items-center justify-center border-b border-sky-500/10 min-h-[77px] bg-[#040912]/40">
+        <div className="p-4 flex items-center justify-center border-b border-sky-500/15 min-h-[77px] bg-[#040c1a]/60">
           <TypewriterBrand />
         </div>
 
-      <nav className="flex-1 overflow-y-auto py-5 px-3">
+      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6 scrollbar-thin scrollbar-thumb-sky-500/20">
         {SECTIONS.map((section) => {
           const items = section.items.filter((i) => {
             if (i.adminOnly && !isAdmin) return false;
@@ -200,11 +200,12 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
           });
           if (items.length === 0) return null;
           return (
-            <div key={section.label} className="mb-5">
-              <div className="px-3 py-1.5 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+            <div key={section.label} className="space-y-1">
+              <div className="px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-sky-400/70 flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-sky-400 shadow-[0_0_6px_#00bfff]" />
                 {section.label}
               </div>
-              <div className="mt-1.5 space-y-0.5">
+              <div className="space-y-1 pt-1">
                 {items.map((n) => {
                   const active = pathname === n.href || (n.href !== "/dashboard" && pathname.startsWith(n.href));
                   return (
@@ -213,14 +214,17 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
                       href={n.href}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        "flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-150",
+                        "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold transition-all duration-200 group relative",
                         active
-                          ? "bg-sky-950/40 text-sky-400 border-l-2 border-sky-400 pl-2.5 shadow-sm shadow-sky-500/10 font-bold"
-                          : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 border-l-2 border-transparent"
+                          ? "bg-gradient-to-r from-sky-500/20 via-sky-500/10 to-transparent text-sky-300 border-l-2 border-sky-400 shadow-[0_0_15px_rgba(0,191,255,0.15)] font-bold"
+                          : "text-zinc-400 hover:bg-sky-500/5 hover:text-zinc-100 border-l-2 border-transparent"
                       )}
                     >
-                      <n.icon className={cn("w-4 h-4 shrink-0", active ? "text-sky-400" : "text-zinc-500")} />
-                      <span className="truncate">{n.label}</span>
+                      <n.icon className={cn("w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110", active ? "text-sky-400 filter drop-shadow-[0_0_5px_#00bfff]" : "text-zinc-500 group-hover:text-sky-300")} />
+                      <span className="truncate tracking-wide">{n.label}</span>
+                      {active && (
+                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_8px_#00bfff]" />
+                      )}
                     </Link>
                   );
                 })}
@@ -231,12 +235,17 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
       </nav>
 
       {/* Bottom Profile Details */}
-      <div className="p-4 border-t border-border bg-bg-secondary/60">
-        <div className="rounded-xl bg-bg-card border border-border p-3.5 space-y-3 shadow-inner">
-          <div className="min-w-0">
-            <div className="font-semibold text-sm text-text truncate">{capitalizedUsername}</div>
-            <div className="text-[11px] text-text-muted truncate font-mono uppercase tracking-wider">
-              {role === "admin" ? "Administrador" : role === "developer" ? "Desarrollador" : "Revendedor"}
+      <div className="p-4 border-t border-sky-500/15 bg-[#020712]/80">
+        <div className="rounded-2xl bg-[#050e1f]/80 border border-sky-500/20 p-3.5 space-y-3 shadow-xl backdrop-blur-md">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-sky-500/40 shadow-md shadow-sky-500/20 shrink-0">
+              <img src="/logo.png" alt="Sukuna" className="w-full h-full object-cover" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-bold text-sm text-white truncate tracking-wide">{capitalizedUsername}</div>
+              <div className="text-[10px] text-sky-400/80 font-mono uppercase tracking-wider font-semibold">
+                {role === "admin" ? "ADMINISTRADOR" : role === "developer" ? "DESARROLLADOR" : "REVENDEDOR"}
+              </div>
             </div>
           </div>
 

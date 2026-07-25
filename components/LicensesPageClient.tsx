@@ -382,7 +382,7 @@ export function LicensesPageClient({
               </thead>
               <tbody className="divide-y divide-sky-500/10">
                 {paged.map((l, index) => {
-                  const creatorName = l.created_by && adminsById[l.created_by] ? adminsById[l.created_by] : "sportgoat";
+                  const creatorName = l.created_by && adminsById[l.created_by] ? adminsById[l.created_by] : "securex";
                   return (
                     <tr key={l.id} className="hover:bg-sky-500/5 transition-colors group">
                       <td className="p-4 text-center text-zinc-500 font-mono">{startIndex + index + 1}</td>
@@ -450,7 +450,7 @@ export function LicensesPageClient({
       {/* Footer Branding matching Imagen 3 */}
       <div className="text-center pt-8 border-t border-sky-500/10 text-[11px] text-zinc-500 font-mono flex items-center justify-center gap-2">
         <div className="w-4 h-4 rounded bg-sky-950 border border-sky-500/30 flex items-center justify-center text-[9px] font-bold text-sky-400">SG</div>
-        <span>&copy; {new Date().getFullYear()} SPORT Goat. Todos los derechos reservados.</span>
+        <span>&copy; {new Date().getFullYear()} SecureX Auth. Todos los derechos reservados.</span>
       </div>
 
     </div>

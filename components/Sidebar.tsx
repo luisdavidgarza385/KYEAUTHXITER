@@ -245,8 +245,8 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
             if (!subscriptionEnd) {
               return (
                 <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800/60">
-                  <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="text-[11px] text-emerald-400 font-bold">∞ Ilimitado</span>
+                  <Clock className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  <span className="text-[11px] text-sky-400 font-bold">∞ Ilimitado</span>
                 </div>
               );
             }
@@ -262,16 +262,16 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
                   ? "bg-red-950/30 border-red-500/30"
                   : isWarning
                     ? "bg-yellow-950/30 border-yellow-500/30"
-                    : "bg-emerald-950/20 border-emerald-500/20"
+                    : "bg-sky-950/20 border-sky-500/20"
               }`}>
                 {isExpired ? (
                   <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
                 ) : (
-                  <Clock className={`w-3.5 h-3.5 shrink-0 ${isWarning ? "text-yellow-400" : "text-emerald-400"}`} />
+                  <Clock className={`w-3.5 h-3.5 shrink-0 ${isWarning ? "text-yellow-400" : "text-sky-400"}`} />
                 )}
                 <div className="min-w-0">
                   <p className={`text-[11px] font-bold ${
-                    isExpired ? "text-red-400" : isWarning ? "text-yellow-400" : "text-emerald-400"
+                    isExpired ? "text-red-400" : isWarning ? "text-yellow-400" : "text-sky-400"
                   }`}>
                     {isExpired ? "Expirado" : `${daysLeft} día${daysLeft !== 1 ? "s" : ""} restante${daysLeft !== 1 ? "s" : ""}`}
                   </p>

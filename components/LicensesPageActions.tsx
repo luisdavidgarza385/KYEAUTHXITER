@@ -54,7 +54,7 @@ export function LicensesPageActions({
 function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { apps: { id: string; name: string }[]; defaultAppId?: string; onClose: () => void; forcePrefix?: boolean }) {
   const [appId, setAppId] = useState(defaultAppId || apps[0]?.id || "");
   const [count, setCount] = useState(1);
-  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "Spectral X");
+  const [prefix, setPrefix] = useState(forcePrefix ? "KEYAUTHPRO" : "SecureX Auth");
   const [mask, setMask] = useState("******_******_******_******_******_******");
   const [lower, setLower] = useState(true);
   const [upper, setUpper] = useState(true);
@@ -163,7 +163,7 @@ function CreateLicenseInline({ apps, defaultAppId, onClose, forcePrefix }: { app
                     className="input font-mono" 
                     value={prefix} 
                     onChange={(e) => setPrefix(e.target.value)} 
-                    placeholder="Ej: Spectral X" 
+                    placeholder="Ej: SecureX Auth" 
                   />
                 </div>
               )}

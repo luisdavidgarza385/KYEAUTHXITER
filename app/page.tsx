@@ -78,7 +78,7 @@ export default function Home() {
               </svg>
             </div>
             <span className="font-extrabold tracking-wider text-lg bg-gradient-to-r from-white to-sky-300 bg-clip-text text-transparent uppercase">
-              SPORTS GOAT
+              SecureX Auth
             </span>
           </Link>
 
@@ -165,13 +165,13 @@ export default function Home() {
                       <path d="M62 42 C80 30, 74 5, 59 12 C70 18, 70 35, 60 46" fill="#0c1724" stroke="#00bfff" strokeWidth="4" />
                     </svg>
                   </div>
-                  <span className="text-xs font-black tracking-wider text-white uppercase">SPORTS GOAT</span>
+                  <span className="text-xs font-black tracking-wider text-white uppercase">SecureX Auth</span>
                 </div>
 
                 <div className="flex items-center gap-2 bg-sky-950/40 border border-sky-500/20 px-2.5 py-1 rounded-lg text-[11px] text-zinc-300">
                   <div className="w-4 h-4 rounded-full bg-sky-500/20 border border-sky-400 flex items-center justify-center text-[9px] font-bold text-sky-400">D</div>
                   <span>Developer</span>
-                  <span className="text-[10px] text-zinc-500">admin@sportsgoat.dev</span>
+                  <span className="text-[10px] text-zinc-500">admin@securex.dev</span>
                 </div>
               </div>
 
@@ -290,7 +290,7 @@ export default function Home() {
                           <div className="flex items-center gap-1.5">
                             <div className="w-4 h-4 rounded bg-sky-500/20 flex items-center justify-center text-[9px] font-bold text-sky-400">S</div>
                             <div>
-                              <p className="font-bold text-white leading-none">Sports Goat Loader</p>
+                              <p className="font-bold text-white leading-none">SecureX Loader</p>
                               <p className="text-[8px] text-zinc-500">v1.4.2</p>
                             </div>
                           </div>
@@ -387,7 +387,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-sky-500/10 bg-[#010408] py-8 text-center text-xs text-zinc-500 font-mono">
-        <p>SPORTS GOAT &copy; {new Date().getFullYear()} — License Authentication Platform</p>
+        <p>SecureX Auth &copy; {new Date().getFullYear()} — License Authentication Platform</p>
       </footer>
 
     </main>

@@ -15,7 +15,7 @@ export function AssistantChat() {
     {
       id: "init-1",
       sender: "assistant",
-      text: "⚡ **SISTEMA DE SOPORTE SPECTRAL X INICIADO** ⚡\n\nHola, soy tu asistente de soporte virtual. Mi función es ayudarte a restablecer tu Hardware ID (HWID) de forma automática si has formateado tu PC, cambiado de componentes o reinstalado Windows.",
+      text: "⚡ **SISTEMA DE SOPORTE SecureX Auth INICIADO** ⚡\n\nHola, soy tu asistente de soporte virtual. Mi función es ayudarte a restablecer tu Hardware ID (HWID) de forma automática si has formateado tu PC, cambiado de componentes o reinstalado Windows.",
       timestamp: new Date(),
     },
     {
@@ -87,7 +87,7 @@ export function AssistantChat() {
           {
             id: (Date.now() + 1).toString(),
             sender: "assistant",
-            text: "❌ Ocurrió un error de red al intentar conectar con el servidor de Spectral X. Por favor, vuelve a intentarlo.",
+            text: "❌ Ocurrió un error de red al intentar conectar con el servidor de SecureX Auth. Por favor, vuelve a intentarlo.",
             timestamp: new Date(),
           },
         ]);

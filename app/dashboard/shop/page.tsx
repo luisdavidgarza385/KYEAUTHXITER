@@ -202,7 +202,7 @@ export default function ShopPage() {
       <div className="text-center space-y-3 max-w-2xl mx-auto my-6">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-xs font-bold text-sky-400 uppercase tracking-wider animate-pulse">
           <Sparkles className="w-3.5 h-3.5" />
-          Tienda SPORT Goat
+          Tienda SecureX Auth
         </span>
         <h1 className="text-4xl font-extrabold text-zinc-150 tracking-tight">Mejora a VIP Ilimitado</h1>
         <p className="text-sm text-zinc-500">

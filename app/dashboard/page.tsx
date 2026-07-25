@@ -92,7 +92,7 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between border-b border-zinc-800/60 pb-5">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 text-zinc-100">
-            <LayoutDashboard className="w-5 h-5 text-emerald-400" />
+            <LayoutDashboard className="w-5 h-5 text-sky-400" />
             Dashboard
           </h1>
           <p className="text-xs text-zinc-500 mt-1">Resumen general y estado de tu cuenta de reseller.</p>
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-1.5 text-xs text-zinc-500">
           <span>Consola</span>
           <ChevronRight className="w-3.5 h-3.5 text-zinc-700" />
-          <span className="text-emerald-400 font-medium">Dashboard</span>
+          <span className="text-sky-400 font-medium">Dashboard</span>
         </div>
       </div>
 
@@ -114,14 +114,14 @@ export default async function DashboardPage() {
       />
 
       {/* Account Info Box (High-fidelity Green Glassmorphism) */}
-      <div className="rounded-2xl border border-emerald-500/15 bg-gradient-to-br from-[#0a150c]/90 to-[#030604]/95 p-6 space-y-6 shadow-2xl relative overflow-hidden premium-card-3d hover:border-emerald-500/35 transition-all duration-300">
-        <div className="absolute top-0 right-0 w-[120px] h-[120px] bg-gradient-radial from-emerald-500/5 to-transparent blur-xl pointer-events-none" />
+      <div className="rounded-2xl border border-sky-500/15 bg-gradient-to-br from-[#06101a]/90 to-[#020408]/95 p-6 space-y-6 shadow-2xl relative overflow-hidden premium-card-3d hover:border-sky-500/35 transition-all duration-300">
+        <div className="absolute top-0 right-0 w-[120px] h-[120px] bg-gradient-radial from-sky-500/5 to-transparent blur-xl pointer-events-none" />
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-400" />
+            <Activity className="w-4 h-4 text-sky-400" />
             Información de la cuenta
           </h2>
-          <span className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
+          <span className="flex items-center gap-1 bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
             Activo
           </span>
         </div>
@@ -161,9 +161,9 @@ export default async function DashboardPage() {
 
         {/* User limit progress bar */}
         <div className="space-y-2 pt-2">
-          <div className="h-2 w-full bg-[#020503] rounded-full overflow-hidden border border-emerald-500/10">
+          <div className="h-2 w-full bg-[#020408] rounded-full overflow-hidden border border-sky-500/10">
             <div 
-              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-green-450 transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+              className="h-full rounded-full bg-gradient-to-r from-sky-500 via-sky-400 to-green-450 transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
               style={{ width: `${usePercentage}%` }}
             />
           </div>
@@ -175,9 +175,9 @@ export default async function DashboardPage() {
 
       {/* Quick Access & Info Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-2xl border border-emerald-500/15 bg-[#040c06]/30 backdrop-blur-md p-6 space-y-4 shadow-xl premium-card-3d hover:border-emerald-500/35 transition-all duration-300">
+        <div className="rounded-2xl border border-sky-500/15 bg-[#040812]/30 backdrop-blur-md p-6 space-y-4 shadow-xl premium-card-3d hover:border-sky-500/35 transition-all duration-300">
           <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-sky-400" />
             Acciones Rápidas
           </h3>
           <p className="text-xs text-zinc-500">Accesos directos a las herramientas de administración frecuentes.</p>
@@ -193,9 +193,9 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-500/15 bg-[#040c06]/30 backdrop-blur-md p-6 space-y-4 shadow-xl premium-card-3d hover:border-emerald-500/35 transition-all duration-300">
+        <div className="rounded-2xl border border-sky-500/15 bg-[#040812]/30 backdrop-blur-md p-6 space-y-4 shadow-xl premium-card-3d hover:border-sky-500/35 transition-all duration-300">
           <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-emerald-400" />
+            <Calendar className="w-4 h-4 text-sky-400" />
             Información del Desarrollador
           </h3>
           <p className="text-xs text-zinc-500">Aplicaciones administradas activas en el sistema.</p>
@@ -206,7 +206,7 @@ export default async function DashboardPage() {
               apps.slice(0, 3).map((app) => (
                 <div key={app.id} className="flex items-center justify-between py-2 first:pt-0 last:pb-0">
                   <div className="text-xs font-medium text-zinc-300">{app.name}</div>
-                  <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono">
+                  <span className="text-[10px] bg-sky-500/10 border border-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-mono">
                     v{app.version}
                   </span>
                 </div>

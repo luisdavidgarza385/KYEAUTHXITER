@@ -74,7 +74,7 @@ export default function LoginPage({ searchParams }: { searchParams: { err?: stri
                 
                 <div className="text-center lg:text-left">
                   <h1 className="text-4xl lg:text-5xl font-black tracking-wider bg-gradient-to-r from-white via-zinc-200 to-sky-400 bg-clip-text text-transparent uppercase font-sans">
-                    SPORT Goat
+                    SecureX Auth
                   </h1>
                   <p className="text-[10px] tracking-[0.25em] font-bold text-sky-400/90 uppercase mt-0.5 font-mono">
                     Performance. Power. Prestige.
@@ -167,7 +167,7 @@ export default function LoginPage({ searchParams }: { searchParams: { err?: stri
                     Iniciar <span className="text-sky-400">Sesión</span>
                   </h2>
                   <p className="text-[11px] text-zinc-500 mt-1">
-                    Accede a tu cuenta de <span className="text-sky-400 font-medium">SPORT Goat</span>
+                    Accede a tu cuenta de <span className="text-sky-400 font-medium">SecureX Auth</span>
                   </p>
                 </div>
 
@@ -193,7 +193,7 @@ export default function LoginPage({ searchParams }: { searchParams: { err?: stri
             <span>Encriptación SSL: Conexión cifrada y segura</span>
           </div>
           <div className="text-center">
-            SPORT GOAT KEYAUTH SYSTEM &copy; {new Date().getFullYear()} SPORT Goat. Todos los derechos reservados.
+            SECUREX AUTH SYSTEM &copy; {new Date().getFullYear()} SecureX Auth. Todos los derechos reservados.
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-sky-400" />

@@ -41,7 +41,7 @@ function StatCard3D({ s }: { s: any }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      className="transition-all duration-200 ease-out rounded-xl p-5 bg-gradient-to-br from-[#0c180f] to-[#040905] border border-emerald-500/15 relative overflow-hidden flex items-center justify-between"
+      className="transition-all duration-200 ease-out rounded-xl p-5 bg-gradient-to-br from-[#0c180f] to-[#040905] border border-sky-500/15 relative overflow-hidden flex items-center justify-between"
       style={{
         transform: `perspective(1000px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale(${isHovered ? 1.03 : 1})`,
         transformStyle: "preserve-3d",
@@ -52,20 +52,20 @@ function StatCard3D({ s }: { s: any }) {
     >
       {/* Glowing Backdrop inside */}
       {isHovered && (
-        <div className="absolute inset-0 bg-gradient-radial from-emerald-500/5 to-transparent pointer-events-none opacity-80" />
+        <div className="absolute inset-0 bg-gradient-radial from-sky-500/5 to-transparent pointer-events-none opacity-80" />
       )}
       
       <div style={{ transform: "translateZ(20px)" }}>
-        <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-450">{s.label}</div>
+        <div className="text-[10px] font-bold uppercase tracking-wider text-sky-450">{s.label}</div>
         <div className="text-3xl font-black mt-2 font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.05)]">{s.value}</div>
         <div className="text-[10px] text-zinc-550 mt-2 font-semibold">{s.sub}</div>
       </div>
       
       <div 
         style={{ transform: "translateZ(30px)" }} 
-        className="p-3 bg-[#081f12] border border-emerald-500/20 rounded-lg text-emerald-450 shrink-0 shadow-inner group-hover:scale-105 transition duration-300"
+        className="p-3 bg-[#081f12] border border-sky-500/20 rounded-lg text-sky-450 shrink-0 shadow-inner group-hover:scale-105 transition duration-300"
       >
-        <s.icon className="w-6 h-6 text-emerald-400" />
+        <s.icon className="w-6 h-6 text-sky-400" />
       </div>
     </div>
   );

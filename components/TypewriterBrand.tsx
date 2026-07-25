@@ -7,7 +7,7 @@ export function TypewriterBrand() {
   const [subText, setSubText] = useState("");
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  const titleWord = "SPORT GOAT";
+  const titleWord = "SecureX Auth";
   const subWord = "developer ~ x Dav";
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function TypewriterBrand() {
   return (
     <div className="flex items-center gap-3 select-none py-1 h-[48px]">
       <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-sky-500/40 shadow-lg shadow-sky-500/20 relative shrink-0">
-        <Image src="/logo.png" alt="Sukuna SPORT Goat Logo" width={36} height={36} className="w-full h-full object-cover" priority />
+        <Image src="/logo.png" alt="Sukuna SecureX Auth Logo" width={36} height={36} className="w-full h-full object-cover" priority />
       </div>
       <div className="flex flex-col text-left">
         <div className="flex items-center">

@@ -17,7 +17,7 @@ function demoHtml(provider: string, state: string): string {
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<title>Autorizar ${title} — SPORT Goat</title>
+<title>Autorizar ${title} — SecureX Auth</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   body { 
@@ -121,11 +121,11 @@ function demoHtml(provider: string, state: string): string {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00bfff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
       <div>
-        <h1>Autenticación ${title} <span class="badge">SPORT Goat</span></h1>
+        <h1>Autenticación ${title} <span class="badge">SecureX Auth</span></h1>
       </div>
     </div>
     <div class="body">
-      <p><strong>SPORT Goat</strong> solicita acceso a tu cuenta de <strong>${title}</strong>.</p>
+      <p><strong>SecureX Auth</strong> solicita acceso a tu cuenta de <strong>${title}</strong>.</p>
       <p>Esto permitirá verificar tu identidad e iniciar sesión inmediatamente.</p>
       
       <div style="margin-top:18px">

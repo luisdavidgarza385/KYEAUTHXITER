@@ -1,14 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import { Key, Search, Filter, LayoutGrid, Clock, FileText, Trash2, Shield, RotateCcw, Check, Copy, Star } from "lucide-react";
+import { 
+  Key, Search, Filter, LayoutGrid, Clock, FileText, Trash2, Shield, 
+  RotateCcw, Check, Copy, Star, ChevronDown, CheckSquare, Square
+} from "lucide-react";
 import { LicensesPageActions } from "@/components/LicensesPageActions";
 import { LicenseCardMenu } from "@/components/LicenseCardMenu";
 import { CopyKeyButton } from "@/components/CopyKeyButton";
 import Link from "next/link";
 
 export function SubscriptionBadge({ level, packageName }: { level: number; packageName?: string }) {
-  let label = "Basic";
-  let cls = "bg-zinc-900 text-zinc-400 border-zinc-800";
+  let label = "BASIC";
+  let cls = "bg-sky-950/40 text-sky-400 border-sky-500/30";
   let isVip = false;
 
   let subName = "basic";
@@ -21,18 +24,18 @@ export function SubscriptionBadge({ level, packageName }: { level: number; packa
 
   if (subName === "vip" || subName === "vip (supreme)" || subName === "vip (panel supreme)") {
     label = "VIP";
-    cls = "bg-emerald-950/20 text-emerald-400 border-emerald-900/30";
+    cls = "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10";
     isVip = true;
   } else if (subName === "combo" || subName === "ultra vip") {
-    label = "Ultra VIP";
-    cls = "bg-amber-950/20 text-amber-400 border-amber-900/30";
+    label = "ULTRA VIP";
+    cls = "bg-blue-950/40 text-blue-300 border-blue-500/40 shadow-sm shadow-blue-500/10";
   } else {
-    label = "Basic";
+    label = "BASIC";
   }
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded px-2.5 py-0.5 text-[9px] font-bold border uppercase whitespace-nowrap ${cls}`}>
-      {isVip && <Star className="w-2.5 h-2.5 fill-emerald-400" />}
+    <span className={`inline-flex items-center gap-1 rounded px-2.5 py-0.5 text-[9px] font-extrabold border uppercase whitespace-nowrap tracking-wider ${cls}`}>
+      {isVip && <Star className="w-2.5 h-2.5 fill-cyan-400 text-cyan-400" />}
       {label}
     </span>
   );
@@ -111,10 +114,7 @@ export function LicensesPageClient({
       (l.note && l.note.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchApp = selectedAppId === "all" || l.app_id === selectedAppId;
-
-    const matchStatus =
-      statusFilter === "all" ||
-      l.status === statusFilter;
+    const matchStatus = statusFilter === "all" || l.status === statusFilter;
 
     return matchSearch && matchApp && matchStatus;
   });
@@ -156,36 +156,69 @@ export function LicensesPageClient({
       status === "used" ? "Used" : status === "banned" ? "Banned" : status === "paused" ? "Paused" : "Not Used";
     const cls =
       status === "used"
-        ? "bg-emerald-950/20 text-emerald-400 border-emerald-900/30"
+        ? "bg-emerald-950/30 text-emerald-400 border-emerald-500/30"
         : status === "banned"
-        ? "bg-red-950/20 text-red-400 border-red-900/30"
+        ? "bg-red-950/30 text-red-400 border-red-500/30"
         : status === "paused"
-        ? "bg-amber-950/20 text-amber-400 border-amber-900/30"
-        : "bg-zinc-900 text-zinc-400 border-zinc-800";
+        ? "bg-amber-950/30 text-amber-400 border-amber-500/30"
+        : "bg-sky-950/30 text-sky-400 border-sky-500/30";
     return (
-      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border whitespace-nowrap ${cls}`}>
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold border whitespace-nowrap ${cls}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${
+          status === "used" ? "bg-emerald-400 shadow-sm shadow-emerald-400" :
+          status === "banned" ? "bg-red-400 shadow-sm shadow-red-400" :
+          status === "paused" ? "bg-amber-400 shadow-sm shadow-amber-400" :
+          "bg-sky-400 shadow-sm shadow-sky-400"
+        }`} />
         {label}
       </span>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 text-zinc-300">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2 text-zinc-100">
-          <Key className="w-6 h-6 text-emerald-400" />
-          Licencias
-        </h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Las licencias permiten a tus usuarios registrarse y acceder a tus aplicaciones.
-        </p>
+    <div className="p-6 lg:p-8 max-w-[1450px] mx-auto space-y-6 text-zinc-300">
+      
+      {/* Top Header Row matching Imagen 3 */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-sky-950/40 border border-sky-500/30 flex items-center justify-center shadow-lg shadow-sky-500/10 shrink-0">
+            <Key className="w-7 h-7 text-sky-400" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Licencias</h1>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Las licencias permiten a tus usuarios registrarse y acceder a tus aplicaciones.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Total Licencias Stat Card with Line Chart (Imagen 3) */}
+        <div className="bg-[#050b16] border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between gap-6 shadow-xl shadow-sky-500/5 min-w-[240px]">
+          <div>
+            <p className="text-3xl font-black text-sky-400 font-mono tracking-tight">{licenses.length}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">TOTAL LICENCIAS</p>
+          </div>
+          <div className="w-24 h-10 relative">
+            <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible">
+              <path
+                d="M0,35 Q20,20 40,25 T70,10 T100,5"
+                fill="none"
+                stroke="#00bfff"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <circle cx="100" cy="5" r="3" fill="#00bfff" className="animate-ping" />
+            </svg>
+          </div>
+        </div>
       </div>
 
-      {/* Toolbar */}
+      {/* Toolbar Controls */}
       <div className="flex items-center gap-3 flex-wrap">
+        
+        {/* Search input */}
         <div className="relative flex-1 min-w-[240px] max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-650" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-sky-500/70" />
           <input
             type="text"
             placeholder="Buscar licencias..."
@@ -194,9 +227,10 @@ export function LicensesPageClient({
               setSearchTerm(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg bg-zinc-950 border border-zinc-850 pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:border-emerald-500/50 transition-all"
+            className="w-full rounded-xl bg-[#040812] border border-sky-500/20 pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/20 transition-all font-mono"
           />
         </div>
+
         <div className="ml-auto flex items-center gap-2">
           {/* Toggle status filter */}
           <button
@@ -205,10 +239,10 @@ export function LicensesPageClient({
               setPage(1);
             }}
             title="Filter Status"
-            className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
+            className={`w-9 h-9 rounded-xl flex items-center justify-center border transition ${
               statusFilter !== "all"
-                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
-                : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
+                ? "border-sky-400 bg-sky-950/40 text-sky-400"
+                : "border-sky-500/20 bg-[#040812] text-zinc-400 hover:text-white"
             }`}
           >
             <Filter className="w-4 h-4" />
@@ -218,10 +252,10 @@ export function LicensesPageClient({
           <button
             onClick={() => setViewMode(viewMode === "table" ? "grid" : "table")}
             title="Toggle View Mode"
-            className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
+            className={`w-9 h-9 rounded-xl flex items-center justify-center border transition ${
               viewMode === "grid"
-                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
-                : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
+                ? "border-sky-400 bg-sky-950/40 text-sky-400"
+                : "border-sky-500/20 bg-[#040812] text-zinc-400 hover:text-white"
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -231,7 +265,7 @@ export function LicensesPageClient({
           <button
             onClick={() => setSortByDate(sortByDate === "desc" ? "asc" : "desc")}
             title={`Order: ${sortByDate === "desc" ? "Recientes" : "Antiguos"}`}
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-sky-500/20 bg-[#040812] text-zinc-400 hover:text-white transition"
           >
             <Clock className={`w-4 h-4 transition-transform ${sortByDate === "asc" ? "rotate-180" : ""}`} />
           </button>
@@ -240,7 +274,7 @@ export function LicensesPageClient({
           <button
             onClick={handleReset}
             title="Reset Filters"
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-sky-500/20 bg-[#040812] text-zinc-400 hover:text-white transition"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -249,7 +283,7 @@ export function LicensesPageClient({
           <button
             onClick={exportKeys}
             title="Export to TXT"
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-sky-500/20 bg-[#040812] text-zinc-400 hover:text-white transition"
           >
             <FileText className="w-4 h-4" />
           </button>
@@ -265,180 +299,160 @@ export function LicensesPageClient({
         </div>
       </div>
 
-      {/* Filter status links */}
-      <div className="flex items-center gap-2 flex-wrap text-xs font-bold uppercase tracking-wider">
-        <button
-          onClick={() => {
-            setSelectedAppId("all");
-            setPage(1);
-          }}
-          className={`rounded-lg px-3.5 py-1.5 border transition ${
-            selectedAppId === "all"
-              ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
-              : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
-          }`}
-        >
-          Todas las Apps
-        </button>
-        {apps.map((a) => (
+      {/* App Filter Pill Tabs matching Imagen 3 */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap text-xs font-extrabold uppercase tracking-wider">
           <button
-            key={a.id}
             onClick={() => {
-              setSelectedAppId(a.id);
+              setSelectedAppId("all");
               setPage(1);
             }}
-            className={`rounded-lg px-3.5 py-1.5 border transition ${
-              selectedAppId === a.id
-                ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
-                : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
+            className={`rounded-xl px-4 py-2 border transition-all ${
+              selectedAppId === "all"
+                ? "bg-sky-500 text-zinc-950 border-sky-400 shadow-lg shadow-sky-500/25 font-black"
+                : "bg-[#040812] border-sky-500/20 text-zinc-400 hover:text-white hover:border-sky-500/40"
             }`}
           >
-            {a.name}
+            Todas las Apps
           </button>
-        ))}
-      </div>
-
-      {/* Select limit & total count */}
-      <div className="flex items-center gap-2 text-xs text-zinc-550 font-bold uppercase">
-        <span>Mostrar:</span>
-        {[10, 100, 300].map((n) => (
-          <button
-            key={n}
-            onClick={() => {
-              setPerPage(n);
-              setPage(1);
-            }}
-            className={`px-2 py-1 rounded border transition ${
-              perPage === n
-                ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
-                : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
-            }`}
-          >
-            {n}
-          </button>
-        ))}
-        <span className="ml-auto">{sorted.length} total</span>
-      </div>
-
-      {/* Empty State */}
-      {sorted.length === 0 ? (
-        <div className="rounded-xl border border-zinc-850 bg-zinc-950/20 py-16 text-center">
-          <Key className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-          <p className="text-zinc-400 font-semibold text-sm">No se encontraron licencias</p>
-          <p className="text-xs text-zinc-550 mt-1">Usa el botón &apos;Crear&apos; para generar licencias.</p>
-        </div>
-      ) : viewMode === "grid" ? (
-        // Grid view cards
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paged.map((l) => (
-            <div key={l.id} className="relative rounded-xl border border-zinc-800 bg-zinc-950/30 p-5 hover:border-emerald-500/20 transition-all flex flex-col space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-bold text-zinc-250 truncate max-w-[80%]">{l.key}</span>
-                <LicenseCardMenu 
-                  license={{ id: l.id, status: l.status, key: l.key }} 
-                  onUpdate={(updated) => setLicenses((prev) => prev.map((item) => item.id === l.id ? { ...item, ...updated } : item))}
-                  onDelete={() => setLicenses((prev) => prev.filter((item) => item.id !== l.id))}
-                />
-              </div>
-              <div className="text-xs text-zinc-550 space-y-1.5 font-medium">
-                <div className="flex items-center gap-1.5">
-                  <span>Suscripción:</span>
-                  <SubscriptionBadge level={l.level} packageName={l.package_name} />
-                </div>
-                <div>Creador: <span className="text-zinc-350">{l.created_by ? adminsById[l.created_by] || "—" : "—"}</span></div>
-                <div>Duración: <span className="text-zinc-350">{l.duration_days >= 36500 ? "∞" : l.duration_days + "d"}</span></div>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-zinc-900">
-                <span className="text-[10px] uppercase font-bold text-zinc-500">Estado</span>
-                <StatusBadge status={l.status} />
-              </div>
-            </div>
+          {apps.map((a) => (
+            <button
+              key={a.id}
+              onClick={() => {
+                setSelectedAppId(a.id);
+                setPage(1);
+              }}
+              className={`rounded-xl px-4 py-2 border transition-all ${
+                selectedAppId === a.id
+                  ? "bg-sky-500 text-zinc-950 border-sky-400 shadow-lg shadow-sky-500/25 font-black"
+                  : "bg-[#040812] border-sky-500/20 text-zinc-400 hover:text-white hover:border-sky-500/40"
+              }`}
+            >
+              {a.name}
+            </button>
           ))}
         </div>
-      ) : (
-        // Table view
-        <div className="rounded-xl border border-zinc-850 bg-zinc-950/40 overflow-hidden shadow-2xl">
+
+        {/* Rows Per Page Selector */}
+        <div className="flex items-center gap-2 text-xs text-zinc-400">
+          <span className="font-bold">Mostrar:</span>
+          {[10, 25, 50, 100].map((num) => (
+            <button
+              key={num}
+              onClick={() => {
+                setPerPage(num);
+                setPage(1);
+              }}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition ${
+                perPage === num
+                  ? "bg-sky-500 text-zinc-950 border-sky-400"
+                  : "bg-[#040812] border-sky-500/20 text-zinc-400 hover:text-white"
+              }`}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Table with Glowing Cyan/Sky-Blue Border (Imagen 3) */}
+      <div className="relative rounded-2xl border border-sky-500/30 bg-[#040812]/90 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,191,255,0.1)] overflow-hidden">
+        
+        {sorted.length === 0 ? (
+          <div className="p-12 text-center text-zinc-500 space-y-2">
+            <Key className="w-10 h-10 mx-auto text-sky-500/40 animate-pulse" />
+            <p className="text-sm font-semibold text-zinc-400">No se encontraron licencias</p>
+            <p className="text-xs">Intenta cambiar los filtros o crear una nueva licencia.</p>
+          </div>
+        ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-zinc-950 text-zinc-550 text-[10px] font-bold uppercase tracking-wider border-b border-zinc-850">
-                <tr>
-                  <th className="px-5 py-3.5 w-8">
-                    <input type="checkbox" className="accent-emerald-500" />
-                  </th>
-                  <th className="px-5 py-3.5">Key</th>
-                  <th className="px-5 py-3.5">Suscripción</th>
-                  <th className="px-5 py-3.5">Creador</th>
-                  <th className="px-5 py-3.5">Duración</th>
-                  <th className="px-5 py-3.5">HWID</th>
-                  <th className="px-5 py-3.5">Estado</th>
-                  <th className="px-5 py-3.5">Fecha</th>
-                  <th className="px-5 py-3.5 text-right">Acciones</th>
+            <table className="w-full text-left text-xs text-zinc-300">
+              <thead>
+                <tr className="border-b border-sky-500/20 bg-sky-950/20 text-[10px] font-extrabold uppercase tracking-wider text-sky-400">
+                  <th className="p-4 w-10 text-center">#</th>
+                  <th className="p-4">KEY</th>
+                  <th className="p-4">SUSCRIPCIÓN</th>
+                  <th className="p-4">CREADOR</th>
+                  <th className="p-4">DURACIÓN</th>
+                  <th className="p-4">HWID</th>
+                  <th className="p-4">ESTADO</th>
+                  <th className="p-4">FECHA</th>
+                  <th className="p-4 text-right">ACCIONES</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900/50">
-                {paged.map((l) => (
-                  <tr key={l.id} className="hover:bg-zinc-900/30 transition">
-                    <td className="px-5 py-4">
-                      <input type="checkbox" className="accent-emerald-500" />
-                    </td>
-                    <td className="px-5 py-4 font-mono font-bold text-zinc-200">
-                      <div className="flex items-center gap-2">
-                        <code className="text-xs">{l.key.length > 28 ? l.key.slice(0, 28) + "…" : l.key}</code>
-                        <CopyKeyButton value={l.key} />
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <SubscriptionBadge level={l.level} packageName={l.package_name} />
-                    </td>
-                    <td className="px-5 py-4 text-zinc-400">{l.created_by ? adminsById[l.created_by] || "—" : "—"}</td>
-                    <td className="px-5 py-4 text-zinc-400">{l.duration_days >= 36500 ? "∞" : l.duration_days + "d"}</td>
-                    <td className="px-5 py-4 font-mono text-xs text-zinc-500">
-                      {l.hwid_lock ? (
-                        <span>{l.used_by ? "Locked" : "Yes"}</span>
-                      ) : "—"}
-                    </td>
-                    <td className="px-5 py-4">
-                      <StatusBadge status={l.status} />
-                    </td>
-                    <td className="px-5 py-4 text-xs text-zinc-500 font-mono">
-                      <ClientDate iso={l.created_at} />
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <LicenseCardMenu 
-                        license={{ id: l.id, status: l.status, key: l.key }} 
-                        onUpdate={(updated) => setLicenses((prev) => prev.map((item) => item.id === l.id ? { ...item, ...updated } : item))}
-                        onDelete={() => setLicenses((prev) => prev.filter((item) => item.id !== l.id))}
-                      />
-                    </td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-sky-500/10">
+                {paged.map((l, index) => {
+                  const creatorName = l.created_by && adminsById[l.created_by] ? adminsById[l.created_by] : "sportgoat";
+                  return (
+                    <tr key={l.id} className="hover:bg-sky-500/5 transition-colors group">
+                      <td className="p-4 text-center text-zinc-500 font-mono">{startIndex + index + 1}</td>
+                      <td className="p-4 font-mono font-bold text-white tracking-wide">
+                        <div className="flex items-center gap-2">
+                          <span>{l.key}</span>
+                          <CopyKeyButton value={l.key} />
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <SubscriptionBadge level={l.level} packageName={l.package_name} />
+                      </td>
+                      <td className="p-4 font-semibold text-sky-400">
+                        {creatorName}
+                      </td>
+                      <td className="p-4 font-mono text-zinc-400">
+                        {l.duration_days}d
+                      </td>
+                      <td className="p-4 font-bold text-sky-300">
+                        {l.hwid_lock ? "Yes" : "No"}
+                      </td>
+                      <td className="p-4">
+                        <StatusBadge status={l.status} />
+                      </td>
+                      <td className="p-4 font-mono text-zinc-400 text-[11px]">
+                        <ClientDate iso={l.created_at} />
+                      </td>
+                      <td className="p-4 text-right">
+                        <LicenseCardMenu license={l} />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+          </div>
+        )}
+
+      </div>
+
+      {/* Pagination Footer */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-xs text-zinc-400 pt-2">
+          <span>Mostrando {startIndex + 1} a {Math.min(startIndex + perPage, sorted.length)} de {sorted.length} licencias</span>
+          <div className="flex items-center gap-2 font-bold">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setPage(currentPage - 1)}
+              className="px-3 py-1.5 rounded-lg border border-sky-500/20 bg-[#040812] disabled:opacity-40 disabled:cursor-not-allowed hover:text-white transition"
+            >
+              Anterior
+            </button>
+            <span>Página {currentPage} de {totalPages}</span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setPage(currentPage + 1)}
+              className="px-3 py-1.5 rounded-lg border border-sky-500/20 bg-[#040812] disabled:opacity-40 disabled:cursor-not-allowed hover:text-white transition"
+            >
+              Siguiente
+            </button>
           </div>
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-zinc-500 font-bold uppercase pt-2">
-          <button
-            onClick={() => setPage(Math.max(1, page - 1))}
-            disabled={page <= 1}
-            className="px-4 py-2 rounded-lg border border-zinc-850 bg-zinc-950 text-zinc-400 hover:text-zinc-200 disabled:opacity-40 disabled:pointer-events-none transition"
-          >
-            Anterior
-          </button>
-          <span>PÃ¡gina {currentPage} de {totalPages}</span>
-          <button
-            onClick={() => setPage(Math.min(totalPages, page + 1))}
-            disabled={page >= totalPages}
-            className="px-4 py-2 rounded-lg border border-zinc-850 bg-zinc-950 text-zinc-400 hover:text-zinc-200 disabled:opacity-40 disabled:pointer-events-none transition"
-          >
-            Siguiente
-          </button>
-        </div>
-      )}
+      {/* Footer Branding matching Imagen 3 */}
+      <div className="text-center pt-8 border-t border-sky-500/10 text-[11px] text-zinc-500 font-mono flex items-center justify-center gap-2">
+        <div className="w-4 h-4 rounded bg-sky-950 border border-sky-500/30 flex items-center justify-center text-[9px] font-bold text-sky-400">SG</div>
+        <span>&copy; {new Date().getFullYear()} SPORT Goat. Todos los derechos reservados.</span>
+      </div>
+
     </div>
   );
 }
-

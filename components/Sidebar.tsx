@@ -188,7 +188,7 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
           </button>
         </div>
 
-        <div className="p-5 flex items-center justify-center border-b border-emerald-500/10 min-h-[77px] bg-[#040e07]/10">
+        <div className="p-5 flex items-center justify-center border-b border-sky-500/10 min-h-[77px] bg-[#040912]/40">
           <TypewriterBrand />
         </div>
 
@@ -215,11 +215,11 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
                       className={cn(
                         "flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-150",
                         active
-                          ? "bg-emerald-950/30 text-emerald-400 border-l-2 border-emerald-500 pl-2.5"
+                          ? "bg-sky-950/40 text-sky-400 border-l-2 border-sky-400 pl-2.5 shadow-sm shadow-sky-500/10 font-bold"
                           : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 border-l-2 border-transparent"
                       )}
                     >
-                      <n.icon className={cn("w-4 h-4 shrink-0", active ? "text-emerald-400" : "text-zinc-500")} />
+                      <n.icon className={cn("w-4 h-4 shrink-0", active ? "text-sky-400" : "text-zinc-500")} />
                       <span className="truncate">{n.label}</span>
                     </Link>
                   );

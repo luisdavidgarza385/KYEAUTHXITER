@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export function TypewriterBrand() {
   const [titleText, setTitleText] = useState("");
   const [subText, setSubText] = useState("");
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  const titleWord = "SPECTRAL X";
-  const subWord = "developer. X David";
+  const titleWord = "SPORT GOAT";
+  const subWord = "developer ~ x Dav";
 
   useEffect(() => {
     let mode: "typingTitle" | "typingSubtitle" | "pausingAll" | "erasingSubtitle" | "erasingTitle" = "typingTitle";
@@ -64,22 +65,27 @@ export function TypewriterBrand() {
   const showSubCursor = subText.length > 0 || (titleText === titleWord && subText.length < subWord.length);
 
   return (
-    <div className="flex flex-col items-center justify-center text-center select-none py-1 h-[48px]">
-      <div className="flex items-center">
-        <span className="font-extrabold text-xl tracking-widest bg-gradient-to-r from-emerald-400 via-teal-500 to-green-500 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-          {titleText || "\u00A0"}
-        </span>
-        {!showSubCursor && titleText.length < titleWord.length && (
-          <span className={`w-[3px] h-5 ml-1 bg-emerald-500 ${cursorVisible ? "opacity-100" : "opacity-0"} transition-opacity duration-100`} />
-        )}
+    <div className="flex items-center gap-3 select-none py-1 h-[48px]">
+      <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-sky-500/40 shadow-lg shadow-sky-500/20 relative shrink-0">
+        <Image src="/logo.png" alt="Sukuna SPORT Goat Logo" width={36} height={36} className="w-full h-full object-cover" priority />
       </div>
-      <div className="flex items-center mt-1.5 h-[14px]">
-        <span className="font-mono text-[10px] text-zinc-500 tracking-wider">
-          {subText || "\u00A0"}
-        </span>
-        {showSubCursor && (
-          <span className={`w-[2px] h-3 ml-0.5 bg-zinc-500 ${cursorVisible ? "opacity-100" : "opacity-0"} transition-opacity duration-100`} />
-        )}
+      <div className="flex flex-col text-left">
+        <div className="flex items-center">
+          <span className="font-extrabold text-lg tracking-wider bg-gradient-to-r from-white via-sky-200 to-sky-400 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(0,191,255,0.4)]">
+            {titleText || "\u00A0"}
+          </span>
+          {!showSubCursor && titleText.length < titleWord.length && (
+            <span className={`w-[2.5px] h-4 ml-1 bg-sky-400 ${cursorVisible ? "opacity-100" : "opacity-0"} transition-opacity duration-100`} />
+          )}
+        </div>
+        <div className="flex items-center h-[14px]">
+          <span className="font-mono text-[10px] text-sky-400/80 tracking-wider">
+            {subText || "\u00A0"}
+          </span>
+          {showSubCursor && (
+            <span className={`w-[2px] h-3 ml-0.5 bg-sky-400 ${cursorVisible ? "opacity-100" : "opacity-0"} transition-opacity duration-100`} />
+          )}
+        </div>
       </div>
     </div>
   );

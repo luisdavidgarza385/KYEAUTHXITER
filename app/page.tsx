@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useState, useRef } from "react";
-import { Zap, Key, Users, Server, BarChart3, Lock, Globe, Sparkles, ArrowRight, ShieldCheck, Check, Terminal, Play, Cpu, ShieldAlert } from "lucide-react";
-import Image from "next/image";
+import { 
+  Zap, Key, Users, Server, BarChart3, Lock, Globe, Sparkles, 
+  ArrowRight, ShieldCheck, Check, Terminal, Play, Cpu, ShieldAlert,
+  Shield, Code2, Layers, RefreshCw, FileText, ChevronRight, Activity
+} from "lucide-react";
 import { ParticlesBackground } from "@/components/ParticlesBackground";
 
-// Interactive 3D tilt wrapper component
+// Interactive 3D tilt wrapper component for dashboard preview
 function Card3D({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -19,9 +22,8 @@ function Card3D({ children, className = "" }: { children: React.ReactNode; class
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
     
-    // Max rotation 12 degrees
-    const rotateX = -(y / (rect.height / 2)) * 12;
-    const rotateY = (x / (rect.width / 2)) * 12;
+    const rotateX = -(y / (rect.height / 2)) * 8;
+    const rotateY = (x / (rect.width / 2)) * 8;
     
     setRotate({ x: rotateX, y: rotateY });
   };
@@ -37,58 +39,14 @@ function Card3D({ children, className = "" }: { children: React.ReactNode; class
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      className={`transition-all duration-200 ease-out ${className}`}
+      className={`transition-all duration-300 ease-out ${className}`}
       style={{
-        transform: `perspective(1000px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale(${isHovered ? 1.02 : 1})`,
+        transform: `perspective(1200px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale(${isHovered ? 1.01 : 1})`,
         transformStyle: "preserve-3d",
-        boxShadow: isHovered 
-          ? "0 25px 50px -12px rgba(16, 185, 129, 0.3), 0 0 30px rgba(16, 185, 129, 0.15)" 
-          : "0 10px 30px -10px rgba(0, 0, 0, 0.7)"
       }}
     >
-      <div style={{ transform: "translateZ(30px)" }} className="h-full">
+      <div style={{ transform: "translateZ(20px)" }} className="h-full">
         {children}
-      </div>
-    </div>
-  );
-}
-
-// Spotlight feature card that glows on mouse hover
-function FeatureCard({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setCoords({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  };
-
-  return (
-    <div
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative rounded-xl border border-border/40 bg-bg-card/30 backdrop-blur-md p-6 overflow-hidden transition-all duration-300 hover:border-sky-500/40 hover:bg-bg-card/50"
-    >
-      {/* Radial Spotlight Overlay */}
-      {isHovered && (
-        <div
-          className="pointer-events-none absolute -inset-px rounded-xl transition duration-300 opacity-100"
-          style={{
-            background: `radial-gradient(400px circle at ${coords.x}px ${coords.y}px, rgba(16, 185, 129, 0.15), transparent 80%)`,
-          }}
-        />
-      )}
-      
-      <div className="relative z-10">
-        <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-sky-500/10 to-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-4 group-hover:from-sky-500/20 group-hover:to-sky-500/20 group-hover:border-sky-500/40 transition-all duration-350">
-          <Icon className="w-5 h-5 text-sky-400 group-hover:scale-110 transition-transform" />
-        </div>
-        <h3 className="font-semibold text-lg text-white mb-2 group-hover:text-sky-300 transition-colors">{title}</h3>
-        <p className="text-sm text-text-muted leading-relaxed group-hover:text-zinc-300 transition-colors">{desc}</p>
       </div>
     </div>
   );
@@ -96,375 +54,342 @@ function FeatureCard({ icon: Icon, title, desc }: { icon: any; title: string; de
 
 export default function Home() {
   return (
-    <main className="min-h-screen relative overflow-hidden bg-[#020503] text-zinc-150">
+    <main className="min-h-screen relative overflow-hidden bg-[#010408] text-zinc-100 font-sans">
       <ParticlesBackground />
       
-      {/* Premium Sci-Fi Grid Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
+      {/* Sci-Fi Grid Overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,191,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,191,255,0.03)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
 
-      {/* Advanced 3D Glowing Ambient Spheres */}
+      {/* 3D Glowing Background Orbs */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-[-25%] left-1/2 -translate-x-1/2 w-[1200px] h-[900px] rounded-full bg-gradient-radial from-sky-600/12 via-sky-650/4 to-transparent blur-3xl" />
-        <div className="absolute top-[35%] left-[-15%] w-[700px] h-[700px] rounded-full bg-gradient-radial from-sky-500/8 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute top-[60%] right-[-15%] w-[700px] h-[700px] rounded-full bg-gradient-radial from-sky-500/6 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '10s' }} />
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[1200px] h-[800px] rounded-full bg-gradient-radial from-sky-500/15 via-sky-600/5 to-transparent blur-3xl" />
+        <div className="absolute top-[40%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-radial from-cyan-500/10 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
       </div>
 
       {/* Navigation Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-bg/50 border-b border-border/30">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#010408]/70 border-b border-sky-500/10">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-sky-500/40 group-hover:ring-sky-500/70 transition shadow-lg shadow-sky-500/10 relative">
-              <Image src="/logo.png" alt="SPORT Goat" width={36} height={36} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" priority />
-              <div className="absolute inset-0 bg-gradient-to-t from-sky-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-8 h-8 rounded-lg bg-sky-950/40 border border-sky-500/30 flex items-center justify-center relative overflow-hidden group-hover:border-sky-400 transition-colors">
+              <svg viewBox="0 0 100 100" className="w-5 h-5 filter drop-shadow-[0_0_4px_rgba(0,191,255,0.8)]">
+                <path d="M50 35 L40 58 L50 82 L60 58 Z" fill="#0c1724" stroke="#00bfff" strokeWidth="3" />
+                <path d="M38 42 C20 30, 26 5, 41 12 C30 18, 30 35, 40 46" fill="#0c1724" stroke="#00bfff" strokeWidth="3" />
+                <path d="M62 42 C80 30, 74 5, 59 12 C70 18, 70 35, 60 46" fill="#0c1724" stroke="#00bfff" strokeWidth="3" />
+              </svg>
             </div>
-            <span className="font-bold tracking-wider text-[16px] bg-gradient-to-r from-white via-zinc-200 to-sky-400 bg-clip-text text-transparent group-hover:text-sky-300 transition-colors">SPORT Goat</span>
+            <span className="font-extrabold tracking-wider text-lg bg-gradient-to-r from-white to-sky-300 bg-clip-text text-transparent uppercase">
+              SPORTS GOAT
+            </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-text-muted">
-            <a href="#features" className="hover:text-sky-400 transition-all hover:translate-y-[-1px]">Features</a>
-            <a href="#api" className="hover:text-sky-400 transition-all hover:translate-y-[-1px]">API</a>
-            <a href="#docs" className="hover:text-sky-400 transition-all hover:translate-y-[-1px]">Docs</a>
-            <a href="#pricing" className="hover:text-sky-400 transition-all hover:translate-y-[-1px]">Pricing</a>
-            <Link href="/docs" className="hover:text-sky-400 transition-all hover:translate-y-[-1px]">Support</Link>
+
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
+            <a href="#features" className="hover:text-sky-400 transition-colors">Features</a>
+            <a href="#api" className="hover:text-sky-400 transition-colors">API</a>
+            <a href="#docs" className="hover:text-sky-400 transition-colors">Docs</a>
+            <a href="#pricing" className="hover:text-sky-400 transition-colors">Pricing</a>
+            <Link href="/docs" className="hover:text-sky-400 transition-colors">Support</Link>
           </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-text-muted hover:text-white px-4 py-2 transition-all">Log in</Link>
+
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-sm font-semibold text-zinc-300 hover:text-white px-3 py-2 transition-colors">
+              Log in
+            </Link>
             <Link
               href="/register"
-              className="text-sm font-semibold relative group overflow-hidden bg-gradient-to-r from-sky-600 to-sky-600 hover:from-sky-500 hover:to-sky-500 text-white px-5 py-2 rounded-lg shadow-lg shadow-sky-900/30 hover:shadow-sky-500/35 transition-all duration-300 hover:scale-[1.03]"
+              className="text-sm font-bold bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-white px-4 py-2 rounded-lg shadow-lg shadow-sky-500/25 transition-all flex items-center gap-1.5"
             >
-              <span className="relative z-10">Sign up</span>
-              <span className="absolute inset-0 -translate-x-full group-hover:translate-x-0 bg-gradient-to-r from-sky-500 to-sky-500 transition-transform duration-500" />
+              Sign up <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-6 pt-24 pb-16 grid lg:grid-cols-12 gap-12 items-center relative">
-        <div className="lg:col-span-7 flex flex-col items-start text-left">
-          {/* Futuristic Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-950/20 backdrop-blur px-4 py-1.5 text-xs text-sky-300 mb-8 shadow-lg shadow-sky-500/5 hover:border-sky-500/50 transition-colors group">
-            <Sparkles className="w-3.5 h-3.5 text-sky-400 animate-spin" style={{ animationDuration: '4s' }} /> 
-            <span className="font-semibold uppercase tracking-wider text-[10px]">SPORT Goat Next-Gen Authentication</span>
+      <section className="max-w-7xl mx-auto px-6 pt-16 pb-20 grid lg:grid-cols-12 gap-12 items-center">
+        
+        {/* Hero Text Left */}
+        <div className="lg:col-span-5 space-y-6 text-left">
+          <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-950/30 px-3.5 py-1 text-xs font-semibold text-sky-400 backdrop-blur">
+            <Zap className="w-3.5 h-3.5 text-sky-400 fill-sky-400" />
+            <span className="uppercase tracking-widest text-[10px]">NEXT-GEN AUTHENTICATION</span>
           </div>
-          
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-[1.08] text-white">
-            Authentication
-            <br />
-            made for
-            <br />
-            <span className="relative inline-block mt-1">
-              <span className="bg-gradient-to-r from-sky-400 via-sky-300 to-cyan-300 bg-clip-text text-transparent drop-shadow-sm">everyone!</span>
-              <span className="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-sky-500 via-sky-500 to-cyan-400 rounded-full opacity-60" />
+
+          <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-white">
+            Authentication <br />
+            built for <br />
+            <span className="bg-gradient-to-r from-sky-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
+              everyone.
             </span>
           </h1>
-          
-          <p className="text-base md:text-lg text-text-muted max-w-xl mb-10 leading-relaxed font-medium">
-            Secure, scalable, and battle-tested license management. Integrate our robust APIs and ready-to-use SDKs to launch your digital products in minutes.
+
+          <p className="text-base text-zinc-400 leading-relaxed max-w-lg font-medium">
+            Secure, scalable, and developer-friendly. Integrate powerful authentication in minutes with our APIs and SDKs.
           </p>
-          
-          <div className="flex items-center gap-4 flex-wrap">
+
+          <div className="flex flex-wrap items-center gap-4 pt-2">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2.5 font-bold bg-gradient-to-r from-sky-600 to-sky-600 hover:from-sky-500 hover:to-sky-500 text-white px-7 py-3.5 rounded-lg shadow-xl shadow-sky-900/30 hover:shadow-sky-500/40 hover:scale-[1.02] transition-all duration-300 group"
+              className="text-sm font-bold bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-white px-6 py-3.5 rounded-xl shadow-xl shadow-sky-500/25 transition-all flex items-center gap-2"
             >
-              Start for free <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Get started for free <ArrowRight className="w-4 h-4" />
             </Link>
+            
             <Link
               href="/docs"
-              className="inline-flex items-center font-bold bg-bg-card/40 hover:bg-bg-card border border-border/50 text-white px-7 py-3.5 rounded-lg backdrop-blur-md transition-all hover:scale-[1.02] hover:border-sky-500/30 shadow-lg"
+              className="text-sm font-semibold bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 px-5 py-3.5 rounded-xl transition-colors flex items-center gap-2 backdrop-blur"
             >
-              View Documentation
+              <FileText className="w-4 h-4 text-zinc-400" /> View documentation
             </Link>
           </div>
-          
-          <div className="mt-12 flex items-center gap-8 text-xs text-text-dim font-semibold tracking-wide">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(52,211,153,0.5)] animate-pulse" />
-              99.9% Uptime
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-sky-450 shadow-[0_0_10px_rgba(45,212,191,0.5)] animate-pulse" />
-              Free Forever
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)] animate-pulse" />
-              Open Source
-            </div>
+
+          {/* Badges under buttons */}
+          <div className="flex items-center gap-6 pt-4 text-xs font-mono text-zinc-400 border-t border-zinc-800/40">
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-sky-400" /> 99.99% Uptime</span>
+            <span className="flex items-center gap-1.5"><span className="text-sky-400 font-bold text-sm">∞</span> Free forever</span>
+            <span className="flex items-center gap-1.5"><Code2 className="w-4 h-4 text-sky-400" /> Open source</span>
           </div>
         </div>
 
-        {/* 3D Dashboard Preview Mockup Card */}
-        <div className="lg:col-span-5 relative w-full flex justify-center mt-8 lg:mt-0">
-          <div className="absolute -inset-10 bg-gradient-to-tr from-sky-600/20 via-sky-600/15 to-cyan-500/10 blur-3xl rounded-full animate-pulse opacity-70 pointer-events-none" style={{ animationDuration: '6s' }} />
-          
-          <Card3D className="w-full max-w-[460px]">
-            <div className="rounded-2xl border border-sky-500/30 bg-[#040c06]/90 backdrop-blur-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.8)] relative group">
-              {/* Outer light glow border highlight */}
-              <div className="absolute inset-0 bg-gradient-to-b from-sky-500/15 via-transparent to-transparent pointer-events-none" />
+        {/* Hero Right: 3D SPORTS GOAT Dashboard Preview */}
+        <div className="lg:col-span-7 flex justify-center relative">
+          <Card3D className="w-full">
+            <div className="relative rounded-2xl border border-sky-500/30 bg-[#070d17]/90 backdrop-blur-2xl shadow-[0_25px_70px_rgba(0,191,255,0.15)] overflow-hidden">
               
-              {/* Card Titlebar */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-sky-500/10 bg-sky-950/20">
+              {/* Top Header of Preview */}
+              <div className="h-12 bg-[#0a1322] border-b border-sky-500/20 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#ff5f57] shadow-lg shadow-[#ff5f57]/30" />
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#febc2e] shadow-lg shadow-[#febc2e]/30" />
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#28c840] shadow-lg shadow-[#28c840]/30" />
-                </div>
-                <div className="text-[11px] text-sky-300/60 font-mono tracking-wider bg-sky-950/60 border border-sky-500/10 px-3 py-1 rounded-md">
-                  spectral-x.cc/dashboard
-                </div>
-              </div>
-              
-              {/* Card Dashboard Body */}
-              <div className="p-6 space-y-5">
-                {/* Tabs Mockup */}
-                <div className="grid grid-cols-4 gap-2 bg-zinc-950/60 p-1 rounded-lg border border-sky-500/5">
-                  {[
-                    { label: "Overview", active: true },
-                    { label: "Apps", active: false },
-                    { label: "Licenses", active: false },
-                    { label: "Users", active: false },
-                  ].map((t) => (
-                    <div
-                      key={t.label}
-                      className={`rounded-md py-2 text-[10px] font-bold text-center uppercase tracking-wider transition-all duration-350 cursor-default ${
-                        t.active
-                          ? "bg-sky-900/30 text-sky-400 border border-sky-500/20 shadow-inner"
-                          : "text-zinc-500 hover:text-zinc-350"
-                      }`}
-                    >
-                      {t.label}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Total Apps", value: "8", accent: "from-sky-500/10 to-sky-500/5 border-sky-500/20", glow: "text-sky-400" },
-                    { label: "Active Keys", value: "3,842", accent: "from-sky-500/10 to-sky-500/5 border-sky-500/20", glow: "text-sky-400" },
-                    { label: "HWID Resets", value: "192", accent: "from-amber-500/10 to-orange-500/5 border-amber-500/20", glow: "text-amber-400" },
-                    { label: "Active Sessions", value: "512", accent: "from-cyan-500/10 to-blue-500/5 border-cyan-500/20", glow: "text-cyan-400" },
-                  ].map((s) => (
-                    <div key={s.label} className={`rounded-xl border bg-gradient-to-br ${s.accent} p-3.5 hover:scale-[1.03] transition-transform`}>
-                      <div className="text-[9px] uppercase tracking-widest font-bold text-zinc-550">{s.label}</div>
-                      <div className={`text-2xl font-black font-mono mt-1 ${s.glow}`}>{s.value}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Applications list Mockup */}
-                <div className="rounded-xl border border-sky-500/15 bg-zinc-950/40 p-4 space-y-3">
-                  <div className="text-[10px] uppercase tracking-widest font-bold text-sky-400 mb-1 flex items-center justify-between">
-                    <span>APPLICATIONS</span>
-                    <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
+                  <div className="w-6 h-6 rounded bg-sky-950 border border-sky-500/30 flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" className="w-3.5 h-3.5 filter drop-shadow-[0_0_2px_rgba(0,191,255,0.8)]">
+                      <path d="M50 35 L40 58 L50 82 L60 58 Z" fill="#0c1724" stroke="#00bfff" strokeWidth="4" />
+                      <path d="M38 42 C20 30, 26 5, 41 12 C30 18, 30 35, 40 46" fill="#0c1724" stroke="#00bfff" strokeWidth="4" />
+                      <path d="M62 42 C80 30, 74 5, 59 12 C70 18, 70 35, 60 46" fill="#0c1724" stroke="#00bfff" strokeWidth="4" />
+                    </svg>
                   </div>
-                  {[
-                    { name: "SPORT Goat Loader", color: "bg-sky-400 text-sky-400", desc: "Ver. 1.2.4" },
-                    { name: "Xiter Free", color: "bg-sky-400 text-sky-400", desc: "Ver. 0.9.1" },
-                    { name: "Premium Xiter", color: "bg-amber-400 text-amber-400", desc: "Ver. 4.3.0" },
-                  ].map((r) => (
-                    <div key={r.name} className="flex items-center justify-between text-xs py-1 border-b border-sky-500/5 last:border-b-0 hover:bg-sky-950/20 rounded px-1 transition-colors">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-zinc-200">{r.name}</span>
-                        <span className="text-[10px] text-zinc-500">{r.desc}</span>
-                      </div>
-                      <span className={`w-2.5 h-2.5 rounded-full ${r.color} shadow-[0_0_8px_currentColor]`} />
-                    </div>
-                  ))}
+                  <span className="text-xs font-black tracking-wider text-white uppercase">SPORTS GOAT</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-sky-950/40 border border-sky-500/20 px-2.5 py-1 rounded-lg text-[11px] text-zinc-300">
+                  <div className="w-4 h-4 rounded-full bg-sky-500/20 border border-sky-400 flex items-center justify-center text-[9px] font-bold text-sky-400">D</div>
+                  <span>Developer</span>
+                  <span className="text-[10px] text-zinc-500">admin@sportsgoat.dev</span>
                 </div>
               </div>
+
+              {/* Dashboard Layout Body */}
+              <div className="flex min-h-[380px]">
+                
+                {/* Left Sidebar inside preview */}
+                <div className="w-36 bg-[#040912] border-r border-sky-500/10 p-3 space-y-1.5 hidden sm:block">
+                  <div className="bg-sky-500/15 border border-sky-500/30 text-sky-400 rounded-lg px-2.5 py-1.5 text-[11px] font-bold flex items-center gap-2">
+                    <BarChart3 className="w-3.5 h-3.5" /> Overview
+                  </div>
+                  <div className="text-zinc-400 hover:text-zinc-200 rounded-lg px-2.5 py-1.5 text-[11px] font-medium flex items-center gap-2">
+                    <Layers className="w-3.5 h-3.5" /> Applications
+                  </div>
+                  <div className="text-zinc-400 hover:text-zinc-200 rounded-lg px-2.5 py-1.5 text-[11px] font-medium flex items-center gap-2">
+                    <Key className="w-3.5 h-3.5" /> Keys
+                  </div>
+                  <div className="text-zinc-400 hover:text-zinc-200 rounded-lg px-2.5 py-1.5 text-[11px] font-medium flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5" /> Users
+                  </div>
+                  <div className="text-zinc-400 hover:text-zinc-200 rounded-lg px-2.5 py-1.5 text-[11px] font-medium flex items-center gap-2">
+                    <Activity className="w-3.5 h-3.5" /> Sessions
+                  </div>
+                  <div className="text-zinc-400 hover:text-zinc-200 rounded-lg px-2.5 py-1.5 text-[11px] font-medium flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5" /> Logs
+                  </div>
+                </div>
+
+                {/* Main Content inside preview */}
+                <div className="flex-1 p-4 space-y-4 bg-[#060c17]/60">
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                        Welcome back, Developer! 👋
+                      </h3>
+                      <p className="text-[10px] text-zinc-400">Here&apos;s what&apos;s happening with your projects.</p>
+                    </div>
+                    <div className="bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 px-2 py-0.5 rounded">
+                      This month
+                    </div>
+                  </div>
+
+                  {/* 4 Stat Cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div className="bg-sky-950/20 border border-sky-500/20 p-2.5 rounded-xl">
+                      <p className="text-[9px] text-zinc-400 font-medium">Total Applications</p>
+                      <p className="text-sm font-extrabold text-white">12</p>
+                      <p className="text-[9px] text-emerald-400 font-semibold mt-0.5">↑ 20%</p>
+                    </div>
+                    <div className="bg-sky-950/20 border border-sky-500/20 p-2.5 rounded-xl">
+                      <p className="text-[9px] text-zinc-400 font-medium">Active Keys</p>
+                      <p className="text-sm font-extrabold text-white">4,892</p>
+                      <p className="text-[9px] text-emerald-400 font-semibold mt-0.5">↑ 18%</p>
+                    </div>
+                    <div className="bg-sky-950/20 border border-sky-500/20 p-2.5 rounded-xl">
+                      <p className="text-[9px] text-zinc-400 font-medium">Active Sessions</p>
+                      <p className="text-sm font-extrabold text-white">1,250</p>
+                      <p className="text-[9px] text-emerald-400 font-semibold mt-0.5">↑ 24%</p>
+                    </div>
+                    <div className="bg-sky-950/20 border border-sky-500/20 p-2.5 rounded-xl">
+                      <p className="text-[9px] text-zinc-400 font-medium">HWID Resets</p>
+                      <p className="text-sm font-extrabold text-white">320</p>
+                      <p className="text-[9px] text-red-400 font-semibold mt-0.5">↓ 12%</p>
+                    </div>
+                  </div>
+
+                  {/* Bottom Split Area */}
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    
+                    {/* Line Chart Preview */}
+                    <div className="sm:col-span-7 bg-[#040812] border border-sky-500/15 p-3 rounded-xl flex flex-col justify-between">
+                      <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-2">
+                        <span className="font-bold text-zinc-200">Authentication activity</span>
+                        <span className="text-[9px]">This week</span>
+                      </div>
+                      
+                      {/* SVG Curved Glowing Chart Line */}
+                      <div className="w-full h-24 relative flex items-end">
+                        <svg viewBox="0 0 200 60" className="w-full h-full overflow-visible">
+                          <defs>
+                            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#00bfff" stopOpacity="0.4" />
+                              <stop offset="100%" stopColor="#00bfff" stopOpacity="0.0" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M0,50 Q30,40 60,45 T120,20 T180,25 L200,10 L200,60 L0,60 Z"
+                            fill="url(#chartGrad)"
+                          />
+                          <path
+                            d="M0,50 Q30,40 60,45 T120,20 T180,25 L200,10"
+                            fill="none"
+                            stroke="#00bfff"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                          />
+                          <circle cx="200" cy="10" r="3.5" fill="#00bfff" className="animate-ping" />
+                        </svg>
+                      </div>
+                      
+                      <div className="flex justify-between text-[8px] text-zinc-500 font-mono mt-1">
+                        <span>May 18</span><span>May 19</span><span>May 20</span><span>May 21</span><span>May 22</span><span>May 23</span><span>May 24</span>
+                      </div>
+                    </div>
+
+                    {/* Applications List Preview */}
+                    <div className="sm:col-span-5 bg-[#040812] border border-sky-500/15 p-3 rounded-xl flex flex-col justify-between">
+                      <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-2">
+                        <span className="font-bold text-zinc-200">Recent applications</span>
+                        <span className="text-[9px] text-sky-400 cursor-pointer">View all</span>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px] bg-sky-950/20 p-1.5 rounded border border-sky-500/10">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded bg-sky-500/20 flex items-center justify-center text-[9px] font-bold text-sky-400">S</div>
+                            <div>
+                              <p className="font-bold text-white leading-none">Sports Goat Loader</p>
+                              <p className="text-[8px] text-zinc-500">v1.4.2</p>
+                            </div>
+                          </div>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400" />
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] bg-sky-950/20 p-1.5 rounded border border-sky-500/10">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded bg-cyan-500/20 flex items-center justify-center text-[9px] font-bold text-cyan-400">X</div>
+                            <div>
+                              <p className="font-bold text-white leading-none">Xiter Free</p>
+                              <p className="text-[8px] text-zinc-500">v0.9.1</p>
+                            </div>
+                          </div>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400" />
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] bg-sky-950/20 p-1.5 rounded border border-sky-500/10">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded bg-blue-500/20 flex items-center justify-center text-[9px] font-bold text-blue-400">P</div>
+                            <div>
+                              <p className="font-bold text-white leading-none">Premium Xiter</p>
+                              <p className="text-[8px] text-zinc-500">v4.3.0</p>
+                            </div>
+                          </div>
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400" />
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
           </Card3D>
         </div>
+
       </section>
 
-      {/* Features Grid Section */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-28 relative">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-950/10 px-4 py-1.5 text-xs text-sky-300 mb-4 shadow-lg">
-            <Sparkles className="w-3.5 h-3.5 text-sky-400" /> Features
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black mb-4 text-white">Everything you need to ship</h2>
-          <p className="text-text-muted max-w-xl mx-auto text-base">A comprehensive dashboard and licensing infrastructure built for developers of elite software.</p>
-        </div>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            { icon: Key, title: "License Keys", desc: "Generate, distribute and revoke keys with HWID / IP lock, custom time expirations and level-based access." },
-            { icon: Users, title: "User Management", desc: "Built-in registration, login, banning, HWID tracking and extensive audit logs per application." },
-            { icon: Server, title: "Secure Sessions", desc: "Token-based active sessions with strict IP & HWID enforcement and automatic time expiration." },
-            { icon: BarChart3, title: "Logs & Variables", desc: "Receive real-time diagnostic logs and serve dynamic runtime variables to your app without recompiling." },
-            { icon: Lock, title: "Multi-tenant Isolation", desc: "Manage multiple independent applications, each with its own isolated database, users, and license pools." },
-            { icon: Globe, title: "Ultra-Fast REST API", desc: "Highly optimized HTTP endpoints compatible with standard license authorization flows globally." },
-          ].map((f, i) => (
-            <FeatureCard key={i} icon={f.icon} title={f.title} desc={f.desc} />
-          ))}
-        </div>
-      </section>
-
-      {/* API Integration Section */}
-      <section id="api" className="max-w-6xl mx-auto px-6 py-20 relative">
-        <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-950/10 px-4 py-1.5 text-xs text-sky-300 mb-5">
-              <Zap className="w-3.5 h-3.5 text-sky-400 fill-sky-400" /> Multi-Platform API
-            </div>
-            <h2 className="text-4xl font-extrabold mb-5 text-white leading-tight">Integrate in under 5 minutes</h2>
-            <p className="text-text-muted mb-8 leading-relaxed text-sm font-medium">
-              We provide clean HTTP/HTTPS REST endpoints. No SDK lock-in. Drop integration calls into C++, C#, Python, Rust, Go, or any runtime capable of making network requests.
-            </p>
-            <div className="space-y-3 text-xs font-mono">
-              {["/api/1.0/init", "/api/1.0/login", "/api/1.0/register", "/api/1.0/license", "/api/1.0/var", "/api/1.0/log"].map((p) => (
-                <div key={p} className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-[#030a05]/60 border border-sky-500/10 hover:border-sky-500/25 hover:bg-[#040e07] transition-all">
-                  <span className="text-[9px] font-extrabold text-sky-400 bg-sky-950/50 border border-sky-500/30 rounded px-2.5 py-0.5">POST</span>
-                  <span className="text-zinc-300 font-bold">{p}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Bottom Features Row (4 Cards matching Imagen 5) */}
+      <section className="max-w-7xl mx-auto px-6 pb-24 pt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
-          <div className="lg:col-span-7 rounded-2xl border border-sky-500/20 bg-[#030a05]/95 backdrop-blur overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-            {/* Terminal Window Header */}
-            <div className="flex items-center gap-2 px-5 py-3.5 border-b border-sky-500/10 bg-[#04120a]">
-              <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-              <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
-              <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-              <div className="flex items-center gap-1.5 ml-3">
-                <Terminal className="w-3.5 h-3.5 text-sky-400" />
-                <span className="text-[11px] text-sky-300/80 font-mono font-semibold">terminal.sh</span>
-              </div>
+          {/* Card 1 */}
+          <div className="bg-[#050b14]/70 border border-sky-500/20 rounded-2xl p-6 backdrop-blur-md hover:border-sky-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-sky-950/60 border border-sky-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Shield className="w-6 h-6 text-sky-400" />
             </div>
-            {/* Code editor body */}
-            <pre className="p-6 text-xs font-mono text-zinc-405 overflow-x-auto leading-relaxed bg-zinc-950/50">
-{`# 1) Inicializar sesión del loader
-curl -X POST https://spectral-x.vercel.app/api/1.0/init \\
-  -H "Content-Type: application/json" \\
-  -d '{"appid":"YOUR_APP_ID","secret":"APP_SECRET","hwid":"CLIENT_HWID"}'
-
-# 2) Registro del usuario con licencia
-curl -X POST https://spectral-x.vercel.app/api/1.0/register \\
-  -d '{"appid":"YOUR_APP_ID","secret":"APP_SECRET",
-       "sessionid":"ACTIVE_SESSION_ID","username":"usuario_premium",
-       "password":"password123","key":"SPORT Goat-XXXX-XXXX-XXXX-XXXX"}'
-
-# 3) Inicio de sesión
-curl -X POST https://spectral-x.vercel.app/api/1.0/login \\
-  -d '{"appid":"YOUR_APP_ID","secret":"APP_SECRET",
-       "sessionid":"ACTIVE_SESSION_ID","username":"usuario_premium",
-       "password":"password123"}'`}
-            </pre>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing / Subscriptions Section */}
-      <section id="pricing" className="max-w-6xl mx-auto px-6 py-28 relative">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-950/15 px-4 py-1.5 text-xs text-sky-300 mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-sky-400" /> Planes y Suscripciones
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black mb-4 text-white">Escoge el nivel que necesites</h2>
-          <p className="text-text-muted max-w-xl mx-auto text-sm font-semibold">Ofrecemos opciones adaptadas a tus necesidades de distribución de software y cheats.</p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto items-stretch">
-          {/* Basic Plan (NEW) */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 backdrop-blur-xl p-8 hover:border-sky-500/20 transition-all duration-350 flex flex-col justify-between shadow-2xl relative group overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <div>
-              <div className="text-sm font-bold text-zinc-400 mb-2">NEW (Basic - Nivel 1)</div>
-              <div className="flex items-baseline gap-1.5 mb-4">
-                <span className="text-5xl font-black text-white font-mono">$4.00</span>
-                <span className="text-xs text-zinc-500 font-semibold">/ mensual</span>
-              </div>
-              <div className="text-[10px] text-zinc-500 mb-8 font-extrabold uppercase tracking-widest bg-zinc-900 border border-zinc-800/80 rounded-md px-3 py-1 inline-block">
-                Perfecto para empezar
-              </div>
-              <ul className="text-sm text-zinc-400 space-y-4 font-medium">
-                {["Acceso básico al panel", "Crea licencias nivel 1", "Asignación simple de aplicaciones", "Límites estándar de HWID resets", "Soporte básico por ticket"].map((t) => (
-                  <li key={t} className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-sky-400 shrink-0" />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <Link
-              href="/login"
-              className="mt-10 block text-center w-full py-3.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs font-bold uppercase tracking-wider text-zinc-200 transition-all shadow-inner"
-            >
-              Comenzar con NEW
-            </Link>
+            <h3 className="font-bold text-base text-white mb-2">Enterprise-grade security</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+              Your data is protected with the highest standards and end-to-end encryption.
+            </p>
           </div>
 
-          {/* Panel Supreme (VIP - Premium) */}
-          <div className="rounded-2xl border-2 border-sky-500 bg-gradient-to-b from-[#04190c] to-[#010603] p-8 relative overflow-hidden flex flex-col justify-between shadow-2xl shadow-sky-500/10 group">
-            {/* VIP Rotating Ambient Lights */}
-            <div className="absolute top-0 right-0 w-[150px] h-[150px] bg-gradient-radial from-sky-500/20 to-transparent blur-2xl pointer-events-none" />
-            
-            <div className="absolute top-4 right-4">
-              <span className="text-[9px] font-extrabold uppercase tracking-widest text-sky-300 bg-sky-950/70 border border-sky-500/40 rounded-full px-3 py-1.5 shadow-lg shadow-sky-500/10">
-                Recomendado
-              </span>
+          {/* Card 2 */}
+          <div className="bg-[#050b14]/70 border border-sky-500/20 rounded-2xl p-6 backdrop-blur-md hover:border-sky-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-sky-950/60 border border-sky-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Zap className="w-6 h-6 text-sky-400" />
             </div>
-            
-            <div>
-              <div className="text-sm font-bold text-sky-400 mb-2 flex items-center gap-1.5">
-                <Cpu className="w-4 h-4 text-sky-400 animate-pulse" />
-                Panel Supreme (VIP - Nivel 2)
-              </div>
-              <div className="flex items-baseline gap-1.5 mb-4">
-                <span className="text-5xl font-black text-white font-mono">$15.00</span>
-                <span className="text-xs text-sky-300/70 font-semibold">/ anual</span>
-              </div>
-              <div className="text-[10px] text-sky-350 mb-8 font-extrabold uppercase tracking-widest bg-sky-950/40 border border-sky-500/25 rounded-md px-3 py-1 inline-block">
-                Máxima potencia & branding
-              </div>
-              
-              <ul className="text-sm text-zinc-200 space-y-4 font-semibold">
-                {[
-                  "Creación de licencias nivel 2 / VIP",
-                  "Eliminación de prefijos fijos",
-                  "Acceso premium para tus sub-resellers",
-                  "Resets de HWID ilimitados",
-                  "Personalización completa del loader",
-                  "Soporte VIP prioritario"
-                ].map((t) => (
-                  <li key={t} className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-sky-400 shrink-0" />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <Link
-              href="/login"
-              className="mt-10 block text-center w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-650 to-sky-650 hover:from-sky-550 hover:to-sky-550 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.01] transition-all"
-            >
-              Obtener Panel Supreme
-            </Link>
+            <h3 className="font-bold text-base text-white mb-2">Blazing fast</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+              Global infrastructure built for performance and scale.
+            </p>
           </div>
+
+          {/* Card 3 */}
+          <div className="bg-[#050b14]/70 border border-sky-500/20 rounded-2xl p-6 backdrop-blur-md hover:border-sky-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-sky-950/60 border border-sky-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Code2 className="w-6 h-6 text-sky-400" />
+            </div>
+            <h3 className="font-bold text-base text-white mb-2">Developer first</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+              Beautiful APIs, SDKs, and docs that make integration simple.
+            </p>
+          </div>
+
+          {/* Card 4 */}
+          <div className="bg-[#050b14]/70 border border-sky-500/20 rounded-2xl p-6 backdrop-blur-md hover:border-sky-500/50 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-sky-950/60 border border-sky-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Globe className="w-6 h-6 text-sky-400" />
+            </div>
+            <h3 className="font-bold text-base text-white mb-2">Global infrastructure</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+              Low latency, high availability, anywhere in the world.
+            </p>
+          </div>
+
         </div>
       </section>
 
       {/* Footer */}
-      <footer id="docs" className="border-t border-sky-500/10 py-12 mt-16 bg-bg-card/25 backdrop-blur-xl relative z-10">
-        <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-6 text-xs text-text-dim font-medium">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-md overflow-hidden ring-1 ring-sky-500/20">
-              <Image src="/logo.png" alt="SPORT Goat" width={28} height={28} className="w-full h-full object-cover" />
-            </div>
-            <span className="text-zinc-300 font-semibold">© 2026 SPORT Goat — Self-hosted license auth</span>
-          </div>
-          <div className="flex items-center gap-6 font-semibold">
-            <Link href="/docs" className="hover:text-sky-400 transition-colors">Docs</Link>
-            <Link href="/login" className="hover:text-sky-400 transition-colors">Admin</Link>
-            <span className="font-mono text-sky-400/80 bg-sky-950/20 border border-sky-500/10 px-2 py-0.5 rounded">v1.0.0</span>
-          </div>
-        </div>
+      <footer className="border-t border-sky-500/10 bg-[#010408] py-8 text-center text-xs text-zinc-500 font-mono">
+        <p>SPORTS GOAT &copy; {new Date().getFullYear()} — License Authentication Platform</p>
       </footer>
+
     </main>
   );
 }

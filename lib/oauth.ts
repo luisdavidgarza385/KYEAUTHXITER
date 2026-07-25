@@ -88,7 +88,16 @@ function isDemoModeFor(_provider: string): boolean {
 }
 
 export function isProviderConfigured(provider: OAuthProvider): boolean {
-  return true;
+  switch (provider) {
+    case "discord":
+      return !!process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_ID !== "demo_discord_id";
+    case "google":
+      return !!process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_ID !== "demo_google_id";
+    case "apple":
+      return !!process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_ID !== "demo_apple_id";
+    case "telegram":
+      return !!process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_TOKEN !== "demo_telegram_token";
+  }
 }
 
 export function buildAuthorizeUrl(provider: OAuthProvider, state: string): string | null {

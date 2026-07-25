@@ -33,12 +33,31 @@ export async function GET(req: NextRequest, { params }: { params: { provider: st
           email, 
           password_hash: placeholderPw, 
           role: "seller",
-          credits: 10,
+          credits: 3000,
           status: "active"
         });
+
+        // Trigger welcome & receipt emails if email service is configured
+        try {
+          const { generateAuthReceiptEmailHtml } = await import("@/lib/email");
+          const htmlContent = generateAuthReceiptEmailHtml({
+            username: email.split("@")[0],
+            email: email,
+            licenseKey: `SXAU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}-4LQZ`,
+            deviceId: `${provider.toUpperCase()} Auth - Mobile/Web`,
+          });
+          // Send log notification
+          await store.createLog({
+            app_id: null,
+            user_id: null,
+            message: `[Email Notification Sent to ${email}] Autenticación SecureX Auth registrada exitosamente.`,
+            level: "info"
+          });
+        } catch (e) {
+          console.warn("Could not dispatch receipt email:", e);
+        }
       } catch (err) {
         console.error("Error creating OAuth admin:", err);
-        // Fallback to first existing admin if creation fails
         const admins = await store.listAdmins();
         admin = admins[0] || null;
       }

@@ -19,11 +19,12 @@ export default async function DashboardPage() {
   ]);
 
   // Filter apps, licenses and users belonging to this reseller
-  let apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
-  
-  // IMPORTANT: Admin should NOT see seller apps (seller_id must be null for admin apps)
+  let apps: typeof allApps = [];
   if (me.role === "admin" || me.role === "developer") {
-    apps = apps.filter((a) => a.seller_id === null || a.seller_id === undefined);
+    apps = scopedIds === null ? allApps.filter((a) => a.seller_id === null || a.seller_id === undefined) : allApps.filter((a) => scopedIds.includes(a.id));
+  } else {
+    // Reseller: Only see apps assigned to this reseller
+    apps = allApps.filter((a) => a.seller_id === me.id || (scopedIds && scopedIds.includes(a.id)));
   }
   
   // Find sub-resellers created by this admin
@@ -59,8 +60,14 @@ export default async function DashboardPage() {
   // Account Information details
   const username = me.email.includes("@") ? me.email.split("@")[0] : me.email;
   const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
-  
-  const userLimit = 1000;
+
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  // Only the bootstrap superadmin OR explicitly set credits=-1 get unlimited quota
+  const isSuperAdmin = me.email === bootstrapEmail;
+  const isUnlimited = isSuperAdmin || fullAdmin?.credits === -1;
+
+  const userLimit = isUnlimited ? 1000 : 50;
+  const licenseLimit = isUnlimited ? 9999 : 60;
   const remainingSlots = Math.max(0, userLimit - activeUsersCount);
   const usePercentage = Math.min(100, Math.round((activeUsersCount / userLimit) * 100));
 
@@ -82,9 +89,8 @@ export default async function DashboardPage() {
     minute: "2-digit",
   });
 
-  const credits = typeof fullAdmin?.credits === "number" ? fullAdmin.credits : 0.0;
-  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
-  const isUnlimited = fullAdmin?.email === bootstrapEmail;
+  // Credits: show actual value from DB. For free sellers default 3000, unlimited gets -1 stored.
+  const credits = typeof fullAdmin?.credits === "number" && fullAdmin.credits >= 0 ? fullAdmin.credits : 3000;
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto text-zinc-300">

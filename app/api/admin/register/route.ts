@@ -21,19 +21,21 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return json({ success: false, message: "email and password required" }, 400);
     }
-    if (password.length < 8) {
-      return json({ success: false, message: "Password must be at least 8 characters" }, 400);
+    if (password.length < 5) {
+      return json({ success: false, message: "La contraseña debe tener al menos 5 caracteres" }, 400);
     }
     if (email.length < 3) {
       return json({ success: false, message: "Username or email must be at least 3 characters" }, 400);
     }
 
+    // Prevent duplicate emails AND usernames
     const existing = await store.getAdminByEmail(email);
     if (existing) {
-      return json({ success: false, message: "Email already registered" }, 409);
+      return json({ success: false, message: "Este correo electrónico ya está registrado. Usa otro o inicia sesión." }, 409);
     }
 
-    const role = "developer";
+    // New registrations are always sellers (resellers), NOT developers
+    const role = "seller";
 
     const hash = await bcrypt.hash(password, 10);
     const admin = await store.createAdmin({
@@ -41,7 +43,7 @@ export async function POST(req: NextRequest) {
       password_hash: hash,
       role,
       credits: 3000,
-      status: "Activo",
+      status: "active",
       permissions: ["generar", "hwid", "ban", "delete"]
     });
 

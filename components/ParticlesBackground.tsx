@@ -16,10 +16,10 @@ export function ParticlesBackground() {
     let height = (canvas.height = window.innerHeight);
 
     const particles: Particle[] = [];
-    const count = 180;
-    const mouse = { x: -1000, y: -1000, radius: 150 };
+    const count = 80;
+    const mouse = { x: -1000, y: -1000, radius: 120 };
 
-    let accentRgb = "139, 92, 246";
+    let accentRgb = "0, 191, 255";
     const updateAccent = () => {
       const style = getComputedStyle(document.documentElement);
       const val = style.getPropertyValue("--accent-rgb").trim();
@@ -42,10 +42,10 @@ export function ParticlesBackground() {
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.6;
-        this.vy = (Math.random() - 0.5) * 0.6;
-        this.radius = Math.random() * 3.5 + 1.5;
-        this.baseAlpha = Math.random() * 0.5 + 0.25;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.radius = Math.random() * 2.5 + 1;
+        this.baseAlpha = Math.random() * 0.4 + 0.2;
         this.alpha = this.baseAlpha;
       }
 
@@ -69,9 +69,9 @@ export function ParticlesBackground() {
 
         if (dist < mouse.radius) {
           const force = (mouse.radius - dist) / mouse.radius;
-          this.alpha = Math.min(0.8, this.baseAlpha + force * 0.5);
-          this.x -= (dx / dist) * force * 0.6;
-          this.y -= (dy / dist) * force * 0.6;
+          this.alpha = Math.min(0.8, this.baseAlpha + force * 0.4);
+          this.x -= (dx / dist) * force * 0.5;
+          this.y -= (dy / dist) * force * 0.5;
         } else {
           if (this.alpha > this.baseAlpha) {
             this.alpha -= 0.01;
@@ -92,13 +92,13 @@ export function ParticlesBackground() {
           const p1 = particles[i];
           const p2 = particles[j];
           const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-          if (dist < 100) {
-            const alpha = ((100 - dist) / 100) * 0.08;
+          if (dist < 85) {
+            const alpha = ((85 - dist) / 85) * 0.15;
             ctx!.beginPath();
             ctx!.moveTo(p1.x, p1.y);
             ctx!.lineTo(p2.x, p2.y);
             ctx!.strokeStyle = `rgba(${accentRgb}, ${alpha})`;
-            ctx!.lineWidth = 0.5;
+            ctx!.lineWidth = 0.6;
             ctx!.stroke();
           }
         }

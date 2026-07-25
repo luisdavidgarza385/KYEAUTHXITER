@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { User, Shield, Camera, Key, CheckCircle2, AlertCircle, Save, Sparkles, Image as ImageIcon, Check } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { User, Shield, Camera, Key, CheckCircle2, AlertCircle, Save, Sparkles, Image as ImageIcon, Upload, Trash2 } from "lucide-react";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -13,6 +13,8 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [status, setStatus] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Preset Avatars
   const AVATAR_PRESETS = [
@@ -40,7 +42,14 @@ export default function ProfilePage() {
         if (json.success && json.data) {
           setUserEmail(json.data.email);
           setUserRole(json.data.role);
-          setSellerLabel(json.data.seller_label || json.data.email.split("@")[0]);
+
+          const rawLabel = json.data.seller_label;
+          if (typeof rawLabel === "string" && rawLabel && !rawLabel.startsWith("{")) {
+            setSellerLabel(rawLabel);
+          } else {
+            setSellerLabel(json.data.email.split("@")[0]);
+          }
+
           if (json.data.avatar_url && !storedAvatar) {
             setAvatarUrl(json.data.avatar_url);
           }
@@ -51,6 +60,34 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Handle local file selection from PC or Mobile
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setStatus({ type: "error", msg: "Por favor selecciona un archivo de imagen válido (PNG, JPG, WEBP, GIF)." });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setStatus({ type: "error", msg: "La imagen debe pesar menos de 5MB." });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        setAvatarUrl(result);
+        localStorage.setItem("spectral_x_avatar", result);
+        window.dispatchEvent(new CustomEvent("spectral-avatar-updated"));
+        setStatus({ type: "success", msg: "📸 Foto cargada correctamente desde tu dispositivo." });
+      }
+    };
+    reader.readAsDataURL(file);
   }
 
   async function handleSaveProfile(e: React.FormEvent) {
@@ -69,7 +106,6 @@ export default function ProfilePage() {
 
     setSaving(true);
     try {
-      // Save locally to localStorage for instant UI responsiveness
       if (avatarUrl) {
         localStorage.setItem("spectral_x_avatar", avatarUrl);
         window.dispatchEvent(new CustomEvent("spectral-avatar-updated"));
@@ -87,7 +123,7 @@ export default function ProfilePage() {
 
       const json = await res.json();
       if (res.ok && json.success) {
-        setStatus({ type: "success", msg: "✅ Perfil y avatar actualizados exitosamente." });
+        setStatus({ type: "success", msg: "✅ Perfil y foto actualizados exitosamente." });
         setNewPassword("");
         setConfirmPassword("");
       } else {
@@ -98,6 +134,13 @@ export default function ProfilePage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleRemoveAvatar() {
+    setAvatarUrl("/logo.png");
+    localStorage.removeItem("spectral_x_avatar");
+    window.dispatchEvent(new CustomEvent("spectral-avatar-updated"));
+    setStatus({ type: "success", msg: "Foto de perfil restablecida al logo por defecto." });
   }
 
   if (loading) {
@@ -119,35 +162,66 @@ export default function ProfilePage() {
           Perfil y Foto de Usuario
         </h1>
         <p className="text-sm text-zinc-400">
-          Personaliza tu foto de perfil, nombre visible y contraseña de acceso en SecureX Auth.
+          Sube tu propia foto desde tu ordenador o teléfono, personaliza tu nombre visible y actualiza tu contraseña.
         </p>
       </div>
 
       <form onSubmit={handleSaveProfile} className="space-y-6">
+        {/* Hidden File Input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          className="hidden"
+        />
+
         {/* Main Card */}
         <div className="glassmorphism p-6 rounded-2xl border border-sky-500/20 bg-[#030914]/80 backdrop-blur-xl shadow-2xl space-y-6">
           
-          {/* Avatar Preview Section */}
+          {/* Avatar Preview Section & File Upload Button */}
           <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-sky-950/20 border border-sky-500/20">
             <div className="relative group shrink-0">
               <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-sky-500/40 shadow-xl shadow-sky-500/20 bg-[#050e20] flex items-center justify-center">
                 <img src={currentDisplayAvatar} alt="Foto de Perfil" className="w-full h-full object-cover" />
               </div>
-              <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-sky-400 text-xs font-bold"
+              >
                 <Camera className="w-6 h-6 text-sky-400" />
-              </div>
+              </button>
             </div>
 
-            <div className="space-y-1 text-center sm:text-left min-w-0 flex-1">
+            <div className="space-y-2 text-center sm:text-left min-w-0 flex-1">
               <h3 className="text-lg font-bold text-white flex items-center justify-center sm:justify-start gap-2">
                 {sellerLabel || userEmail}
                 <Sparkles className="w-4 h-4 text-sky-400" />
               </h3>
               <p className="text-xs text-zinc-400 font-mono">{userEmail}</p>
-              <div className="pt-1">
-                <span className="inline-block text-[10px] font-extrabold uppercase font-mono tracking-wider bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2.5 py-0.5 rounded-md">
-                  {userRole === "admin" ? "ADMINISTRADOR" : userRole === "developer" ? "DESARROLLADOR" : "REVENDEDOR"}
-                </span>
+
+              {/* Upload Buttons */}
+              <div className="flex items-center gap-2 pt-1 flex-wrap justify-center sm:justify-start">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold shadow-md shadow-sky-500/20 transition active:scale-95"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  Subir Imagen (PC / Móvil)
+                </button>
+
+                {avatarUrl && avatarUrl !== "/logo.png" && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-950/30 border border-red-500/30 text-red-400 hover:bg-red-950/50 text-xs font-bold transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Quitar Foto
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -183,7 +257,7 @@ export default function ProfilePage() {
           {/* Custom Avatar URL */}
           <div>
             <label className="text-[11px] font-bold uppercase tracking-wider text-sky-400/80 mb-1.5 block">
-              O Pega una URL de Imagen Personalizada (Foto de tu ordenador o internet)
+              O Pega una URL de Imagen Directa
             </label>
             <input
               type="text"
@@ -268,7 +342,7 @@ export default function ProfilePage() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {saving ? "Guardando Cambios..." : "Guardar Perfil y Avatar"}
+            {saving ? "Guardando Cambios..." : "Guardar Perfil y Foto"}
           </button>
         </div>
       </form>

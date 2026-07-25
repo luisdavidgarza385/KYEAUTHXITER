@@ -65,14 +65,15 @@ export const supabaseStore: Store = {
   },
 
   async updateAdmin(id, data) {
+    const { avatar_url, ...updatePayload } = data;
     const { data: row, error } = await db()
       .from("admin_users")
-      .update(data)
+      .update(updatePayload)
       .eq("id", id)
       .select()
       .maybeSingle();
     if (error) throw error;
-    return (row as Admin) || null;
+    return row ? ({ ...(row as Admin), avatar_url } as Admin) : null;
   },
 
   async deleteAdmin(id) {

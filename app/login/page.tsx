@@ -44,32 +44,9 @@ export default function LoginPage({ searchParams }: { searchParams: { err?: stri
             <div className="space-y-4">
               <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4">
                 
-                {/* Custom SVG Glowing Cyber Goat Mascot Logo */}
-                <div className="w-24 h-24 relative overflow-hidden group flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 100 100" className="w-full h-full filter drop-shadow-[0_0_12px_rgba(0,191,255,0.8)]">
-                    {/* Glowing outer aura */}
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0, 191, 255, 0.15)" strokeWidth="2" />
-                    
-                    {/* Goat Snout/Face */}
-                    <path d="M50 35 L40 58 L50 82 L60 58 Z" fill="#0c1724" stroke="#00bfff" strokeWidth="2.5" strokeLinejoin="round" />
-                    <path d="M50 50 L45 58 L50 78 L55 58 Z" fill="#03080e" stroke="rgba(0, 191, 255, 0.5)" strokeWidth="1.5" />
-                    
-                    {/* Eyes (Glowing Celeste) */}
-                    <polygon points="43,50 48,51 47,54 42,52" fill="#00bfff" className="animate-pulse" />
-                    <polygon points="57,50 52,51 53,54 58,52" fill="#00bfff" className="animate-pulse" />
-                    
-                    {/* Left Horn */}
-                    <path d="M38 42 C20 30, 26 5, 41 12 C30 18, 30 35, 40 46" fill="#0c1724" stroke="#00bfff" strokeWidth="2.5" strokeLinejoin="round" />
-                    <path d="M34 32 C26 24, 28 12, 36 16" fill="none" stroke="rgba(0, 191, 255, 0.6)" strokeWidth="1.5" />
-                    
-                    {/* Right Horn */}
-                    <path d="M62 42 C80 30, 74 5, 59 12 C70 18, 70 35, 60 46" fill="#0c1724" stroke="#00bfff" strokeWidth="2.5" strokeLinejoin="round" />
-                    <path d="M66 32 C74 24, 72 12, 64 16" fill="none" stroke="rgba(0, 191, 255, 0.6)" strokeWidth="1.5" />
-
-                    {/* Ears */}
-                    <path d="M36 50 L18 56 L33 60 Z" fill="#0c1724" stroke="#00bfff" strokeWidth="2" strokeLinejoin="round" />
-                    <path d="M64 50 L82 56 L67 60 Z" fill="#0c1724" stroke="#00bfff" strokeWidth="2" strokeLinejoin="round" />
-                  </svg>
+                {/* Glowing Cyber Sukuna Mascot Logo */}
+                <div className="w-24 h-24 relative overflow-hidden rounded-2xl ring-2 ring-sky-500/50 shadow-[0_0_30px_rgba(0,191,255,0.4)] group shrink-0">
+                  <img src="/logo.png" alt="Sukuna SecureX Auth Logo" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
                 
                 <div className="text-center lg:text-left">

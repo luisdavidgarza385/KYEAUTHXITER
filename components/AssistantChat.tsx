@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Cpu, Send, Bot, User, Loader2, Sparkles, LogOut, RefreshCw, HelpCircle, ShieldAlert } from "lucide-react";
+import { Cpu, Send, Bot, User, Loader2, Sparkles, LogOut, RefreshCw, HelpCircle, ShieldAlert, CheckCircle } from "lucide-react";
 
 interface Message {
   id: string;
@@ -120,64 +120,74 @@ export function AssistantChat() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[680px] w-full max-w-4xl rounded-2xl border border-sky-500/30 bg-[#030914]/95 backdrop-blur-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] relative">
+    <div className="flex flex-col h-[calc(100vh-3rem)] md:h-[720px] w-full max-w-5xl rounded-3xl border border-sky-500/35 bg-[#030a18]/95 backdrop-blur-2xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.95)] relative">
+      {/* Top Cyber Line */}
+      <div className="h-1 bg-gradient-to-r from-sky-400 via-blue-500 to-sky-400 animate-pulse" />
+
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-sky-500/20 bg-[#061224]/80">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-sky-500/20 bg-[#06142a]/90">
+        <div className="flex items-center gap-3.5">
           <div className="relative">
-            <div className="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-sky-500/40 shadow-md shadow-sky-500/20">
+            <div className="w-11 h-11 rounded-2xl overflow-hidden ring-2 ring-sky-500/50 shadow-md shadow-sky-500/30">
               <img src="/logo.png" alt="SecureX Bot" className="w-full h-full object-cover" />
             </div>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-sky-400 border-2 border-[#030914] animate-pulse" />
+            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-sky-400 border-2 border-[#030a18] animate-ping" />
           </div>
           <div>
-            <div className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-1.5">
-              SecureX Bot
-              <Sparkles className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
+            <div className="font-black text-base text-white uppercase tracking-wider flex items-center gap-2">
+              SECUREX BOT
+              <Sparkles className="w-4 h-4 text-sky-400 animate-pulse" />
             </div>
-            <div className="text-[10px] text-sky-400/90 font-bold uppercase tracking-widest font-mono">
-              Asistente de Soporte Virtual
+            <div className="text-[10px] text-sky-400/90 font-bold uppercase tracking-widest font-mono flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              SOPORTE INTELIGENTE EN TIEMPO REAL
             </div>
           </div>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-950/40 border border-sky-500/20 text-zinc-400 hover:text-white hover:border-sky-500/40 text-xs font-semibold transition-all"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Salir</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full font-bold">
+            <CheckCircle className="w-3 h-3" />
+            SISTEMA OPERATIVO
+          </span>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sky-950/50 border border-sky-500/30 text-zinc-300 hover:text-white hover:border-sky-400 text-xs font-bold transition-all"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Salir</span>
+          </button>
+        </div>
       </div>
 
       {/* Message Chat List */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-thin scrollbar-thumb-sky-500/20">
+      <div className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-thin scrollbar-thumb-sky-500/20 bg-[linear-gradient(to_bottom,rgba(0,191,255,0.02),transparent)]">
         {messages.map((m) => {
           const isAsst = m.sender === "assistant";
           return (
             <div
               key={m.id}
-              className={`flex gap-3 max-w-[85%] ${isAsst ? "self-start" : "self-end flex-row-reverse"}`}
+              className={`flex gap-3.5 max-w-[88%] ${isAsst ? "self-start" : "self-end flex-row-reverse"}`}
             >
               <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold ${
+                className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 text-xs font-bold ${
                   isAsst
-                    ? "bg-sky-950 border border-sky-500/30 text-sky-400 overflow-hidden"
-                    : "bg-gradient-to-br from-sky-500 to-blue-600 text-white"
+                    ? "bg-sky-950 border border-sky-500/40 text-sky-400 overflow-hidden shadow-lg shadow-sky-500/15"
+                    : "bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30"
                 }`}
               >
                 {isAsst ? (
                   <img src="/logo.png" alt="Bot" className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-4 h-4" />
+                  <User className="w-4.5 h-4.5" />
                 )}
               </div>
 
               <div
-                className={`rounded-2xl p-4 text-xs leading-relaxed font-sans shadow-lg ${
+                className={`rounded-2xl p-4 text-xs leading-relaxed font-sans shadow-xl ${
                   isAsst
-                    ? "bg-[#061224]/80 border border-sky-500/20 text-zinc-200"
-                    : "bg-gradient-to-r from-sky-500 to-blue-600 text-white font-medium shadow-sky-500/15"
+                    ? "bg-[#06142a]/90 border border-sky-500/25 text-zinc-200"
+                    : "bg-gradient-to-r from-sky-500 to-blue-600 text-white font-medium shadow-sky-500/20"
                 }`}
               >
                 <div className="whitespace-pre-wrap">{m.text}</div>
@@ -194,13 +204,13 @@ export function AssistantChat() {
         })}
 
         {loading && (
-          <div className="flex gap-3 max-w-[85%] self-start">
-            <div className="w-8 h-8 rounded-xl bg-sky-950 border border-sky-500/30 overflow-hidden shrink-0">
+          <div className="flex gap-3.5 max-w-[88%] self-start">
+            <div className="w-9 h-9 rounded-2xl bg-sky-950 border border-sky-500/40 overflow-hidden shrink-0">
               <img src="/logo.png" alt="Bot" className="w-full h-full object-cover animate-pulse" />
             </div>
-            <div className="rounded-2xl p-4 bg-[#061224]/80 border border-sky-500/20 text-zinc-400 text-xs flex items-center gap-2">
+            <div className="rounded-2xl p-4 bg-[#06142a]/90 border border-sky-500/25 text-zinc-300 text-xs flex items-center gap-2">
               <Loader2 className="w-4 h-4 text-sky-400 animate-spin" />
-              <span>Procesando consulta...</span>
+              <span>Analizando base de datos de licencias...</span>
             </div>
           </div>
         )}
@@ -209,29 +219,29 @@ export function AssistantChat() {
       </div>
 
       {/* Quick Queries & Input Footer */}
-      <div className="p-4 border-t border-sky-500/20 bg-[#020712]/90 space-y-3">
+      <div className="p-5 border-t border-sky-500/20 bg-[#020714]/95 space-y-3.5">
         {/* Quick query buttons */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px]">
-          <span className="text-zinc-500 uppercase tracking-widest font-mono text-[9px] font-bold shrink-0">
-            Consultas rápidas:
+          <span className="text-zinc-400 uppercase tracking-widest font-mono text-[9px] font-bold shrink-0">
+            Consultas frecuentes:
           </span>
           <button
             onClick={() => handleQuickOption("hwid")}
-            className="px-2.5 py-1 rounded-full bg-sky-950/40 border border-sky-500/20 hover:border-sky-400 text-sky-300 hover:text-white transition whitespace-nowrap flex items-center gap-1 font-medium"
+            className="px-3 py-1.5 rounded-full bg-sky-950/60 border border-sky-500/30 hover:border-sky-400 text-sky-300 hover:text-white transition whitespace-nowrap flex items-center gap-1.5 font-semibold shadow-sm"
           >
             <RefreshCw className="w-3 h-3 text-sky-400" />
             Reset HWID
           </button>
           <button
             onClick={() => handleQuickOption("error")}
-            className="px-2.5 py-1 rounded-full bg-sky-950/40 border border-sky-500/20 hover:border-sky-400 text-sky-300 hover:text-white transition whitespace-nowrap flex items-center gap-1 font-medium"
+            className="px-3 py-1.5 rounded-full bg-sky-950/60 border border-sky-500/30 hover:border-sky-400 text-sky-300 hover:text-white transition whitespace-nowrap flex items-center gap-1.5 font-semibold shadow-sm"
           >
             <ShieldAlert className="w-3 h-3 text-sky-400" />
             HWID Mismatch
           </button>
           <button
             onClick={() => handleQuickOption("how")}
-            className="px-2.5 py-1 rounded-full bg-sky-950/40 border border-sky-500/20 hover:border-sky-400 text-sky-300 hover:text-white transition whitespace-nowrap flex items-center gap-1 font-medium"
+            className="px-3 py-1.5 rounded-full bg-sky-950/60 border border-sky-500/30 hover:border-sky-400 text-sky-300 hover:text-white transition whitespace-nowrap flex items-center gap-1.5 font-semibold shadow-sm"
           >
             <HelpCircle className="w-3 h-3 text-sky-400" />
             ¿Dónde busco la Key?
@@ -247,12 +257,12 @@ export function AssistantChat() {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyPress}
             disabled={loading}
-            className="w-full h-12 bg-black/80 border border-sky-500/30 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 text-white placeholder-zinc-500 rounded-xl pl-4 pr-12 text-xs font-medium outline-none transition-all"
+            className="w-full h-13 bg-black/90 border border-sky-500/35 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 text-white placeholder-zinc-500 rounded-2xl pl-5 pr-14 text-xs font-semibold outline-none transition-all"
           />
           <button
             onClick={() => handleSend()}
             disabled={loading || !inputValue.trim()}
-            className="absolute right-2 w-8 h-8 rounded-lg bg-sky-500 hover:bg-sky-400 text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:pointer-events-none shadow-md shadow-sky-500/30"
+            className="absolute right-2.5 w-9 h-9 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:pointer-events-none shadow-md shadow-sky-500/40"
           >
             <Send className="w-4 h-4" />
           </button>

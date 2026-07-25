@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, Key, User, ShieldAlert, Mail, UserPlus, LogIn, CheckCircle2, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2, Key, User, ShieldAlert, Mail, UserPlus, LogIn, CheckCircle2, Sparkles, Shield, Copy, Check } from "lucide-react";
 import styles from "@/app/login/auth.module.css";
 
 export function LoginForm() {
@@ -11,6 +11,7 @@ export function LoginForm() {
   const [roleMode, setRoleMode] = useState<"admin" | "reseller">("admin");
   
   // Form fields
+  const [usernameInput, setUsernameInput] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,9 +20,10 @@ export function LoginForm() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
 
   // Success Receipt Modal state (Matching Image 3)
-  const [receiptData, setReceiptData] = useState<{ email: string; credits: number } | null>(null);
+  const [receiptData, setReceiptData] = useState<{ email: string; username: string; key: string } | null>(null);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("ka_remember_email");
@@ -113,13 +115,19 @@ export function LoginForm() {
       setError("La contraseña debe tener al menos 5 caracteres");
       return;
     }
+    if (!email || !email.includes("@")) {
+      setError("Por favor ingresa un correo electrónico válido");
+      return;
+    }
 
     setLoading(true);
     try {
+      const regEmail = email.trim().toLowerCase();
+      const regUser = usernameInput.trim() || regEmail.split("@")[0];
       const res = await fetch("/api/admin/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: regEmail, password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -127,8 +135,10 @@ export function LoginForm() {
         return;
       }
 
-      // Show Receipt Modal matching Image 3 layout
-      setReceiptData({ email, credits: 3000 });
+      const generatedKey = `SXAU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}-4LQZ`;
+
+      // Show Receipt Modal matching Image 3 (Right Card)
+      setReceiptData({ email: regEmail, username: regUser, key: generatedKey });
     } catch (err: any) {
       setError(err.message || "Error al conectar con el servidor");
     } finally {
@@ -136,44 +146,89 @@ export function LoginForm() {
     }
   }
 
-  // If receipt modal is active after register
+  // If receipt modal is active after register (Matching Image 3 Right Card Design)
   if (receiptData) {
     return (
-      <div className="space-y-6 text-center animate-fade-in">
-        {/* Receipt Header Container matching Image 3 */}
-        <div className="bg-[#030914] border border-sky-500/30 rounded-2xl p-6 shadow-2xl space-y-4">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-sky-500/40 shadow-lg shadow-sky-500/30 mx-auto">
-            <img src="/logo.png" alt="Sukuna Logo" className="w-full h-full object-cover" />
+      <div className="space-y-5 text-left animate-fade-in font-sans">
+        {/* Receipt Container matching Image 3 Right Card */}
+        <div className="bg-white text-zinc-900 rounded-3xl p-6 shadow-2xl space-y-4 border border-purple-100">
+          
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-extrabold text-zinc-900 tracking-tight">
+                Autenticación SecureX Auth
+              </h2>
+              <p className="text-xs text-zinc-500 mt-1">
+                Tu Keyau ha sido autenticada correctamente.
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/30">
+              <Shield className="w-5 h-5" />
+            </div>
           </div>
 
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-sky-400 font-mono bg-sky-950/60 px-3 py-1 rounded-full border border-sky-500/30">
-              REGISTRO EXITOSO
-            </span>
-            <h3 className="text-xl font-extrabold text-white mt-2">
-              Hola <span className="text-sky-400">{receiptData.email.split("@")[0].toUpperCase()}</span>,
-            </h3>
-            <p className="text-xs text-zinc-400 mt-1">
-              Tu cuenta ha sido creada exitosamente en <strong className="text-sky-300">SecureX Auth</strong>.
-            </p>
+          {/* Keyau Autenticada Badge Box */}
+          <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 flex items-start gap-3">
+            <div className="w-7 h-7 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
+              ✓
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-purple-900">Keyau autenticada</h4>
+              <p className="text-[11px] text-purple-700 mt-0.5 leading-relaxed">
+                La licencia SecureX Auth está activa y funcionando correctamente.
+              </p>
+            </div>
           </div>
 
-          <div className="bg-black/60 border border-sky-500/20 rounded-xl p-4 text-left space-y-2 text-xs font-mono">
-            <div className="flex justify-between items-center text-zinc-300">
-              <span className="text-zinc-500">CORREO:</span>
-              <span className="text-sky-400 font-bold">{receiptData.email}</span>
+          {/* Details List */}
+          <div className="space-y-2.5 text-xs pt-2">
+            <div className="flex justify-between items-center py-1.5 border-b border-zinc-100">
+              <span className="text-zinc-500 font-medium">Producto</span>
+              <span className="font-semibold text-zinc-800">SecureX Auth - Keyau (Licencia Premium)</span>
             </div>
-            <div className="flex justify-between items-center text-zinc-300">
-              <span className="text-zinc-500">SALDO ASIGNADO:</span>
-              <span className="text-emerald-400 font-bold">+$3,000 CRÉDITOS</span>
+            <div className="flex justify-between items-center py-1.5 border-b border-zinc-100">
+              <span className="text-zinc-500 font-medium">Estado</span>
+              <span className="bg-emerald-100 text-emerald-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">Activa</span>
             </div>
-            <div className="flex justify-between items-center text-zinc-300">
-              <span className="text-zinc-500">LÍMITES PLAN GRATUITO:</span>
-              <span className="text-sky-300 font-bold">60 LICENCIAS / 50 USUARIOS</span>
+            <div className="flex justify-between items-center py-1.5 border-b border-zinc-100">
+              <span className="text-zinc-500 font-medium">Usuario</span>
+              <span className="font-bold text-zinc-900">{receiptData.username}</span>
             </div>
-            <div className="flex justify-between items-center text-zinc-300 pt-1 border-t border-zinc-800">
-              <span className="text-zinc-500">ESTADO:</span>
-              <span className="text-emerald-400 font-bold uppercase">OPERATIVO Y ACTIVO</span>
+            <div className="flex justify-between items-center py-1.5 border-b border-zinc-100">
+              <span className="text-zinc-500 font-medium">Fecha de autenticación</span>
+              <span className="font-mono text-[11px] text-zinc-700">{new Date().toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center py-1.5 border-b border-zinc-100">
+              <span className="text-zinc-500 font-medium">Correo Electrónico</span>
+              <span className="font-bold text-purple-700 font-mono text-[11px]">{receiptData.email}</span>
+            </div>
+            <div className="flex justify-between items-center py-1.5">
+              <span className="text-zinc-500 font-medium">Clave de licencia (Keyau)</span>
+              <div className="flex items-center gap-1.5 bg-purple-50 border border-purple-100 rounded-lg px-2.5 py-1">
+                <span className="font-mono text-[11px] font-bold text-purple-800">{receiptData.key}</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(receiptData.key);
+                    setCopiedKey(true);
+                    setTimeout(() => setCopiedKey(false), 2000);
+                  }}
+                  className="text-purple-600 hover:text-purple-900 p-0.5"
+                >
+                  {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Protection Box */}
+          <div className="bg-purple-50/70 border border-purple-100 rounded-2xl p-4 flex items-start gap-3">
+            <Shield className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+            <div>
+              <h5 className="text-xs font-bold text-purple-900">Tu Keyau está protegida</h5>
+              <p className="text-[11px] text-purple-700 mt-0.5">
+                No compartas tu clave de licencia con nadie. SecureX Auth protege tu acceso.
+              </p>
             </div>
           </div>
 
@@ -182,7 +237,7 @@ export function LoginForm() {
               router.push("/dashboard");
               router.refresh();
             }}
-            className="w-full h-11 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-sky-500/30 transition-all flex items-center justify-center gap-2"
+            className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold uppercase tracking-wider rounded-2xl shadow-lg shadow-purple-500/25 transition-all flex items-center justify-center gap-2"
           >
             <Sparkles className="w-4 h-4" />
             Entrar al Panel de Control
@@ -351,28 +406,35 @@ export function LoginForm() {
           </form>
         </>
       ) : (
-        /* Manual Register Form */
+        /* Manual Register Form with Exact Ordered Fields requested in Image 5:
+           1. USUARIO
+           2. CONTRASEÑA
+           3. CONFIRMAR CONTRASEÑA
+           4. CORREO ELECTRÓNICO
+        */
         <form onSubmit={onSubmitRegister} className="space-y-4 animate-fade-in">
+          {/* 1. USUARIO */}
           <div>
-            <label className={styles.inputLabel}>Correo Electrónico</label>
+            <label className={styles.inputLabel}>USUARIO</label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">
-                <Mail className="w-4 h-4 text-zinc-400" />
+                <User className="w-4 h-4 text-zinc-400" />
               </span>
               <input
-                type="email"
+                type="text"
                 className={`${styles.premiumInput} pl-10`}
                 style={{ paddingLeft: "42px" }}
-                placeholder="ejemplo@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ingresa tu nombre de usuario"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
                 required
               />
             </div>
           </div>
 
+          {/* 2. CONTRASEÑA */}
           <div>
-            <label className={styles.inputLabel}>Contraseña</label>
+            <label className={styles.inputLabel}>CONTRASEÑA</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -392,8 +454,9 @@ export function LoginForm() {
             </div>
           </div>
 
+          {/* 3. CONFIRMAR CONTRASEÑA */}
           <div>
-            <label className={styles.inputLabel}>Confirmar Contraseña</label>
+            <label className={styles.inputLabel}>CONFIRMAR CONTRASEÑA</label>
             <input
               type="password"
               className={styles.premiumInput}
@@ -402,6 +465,25 @@ export function LoginForm() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
+          </div>
+
+          {/* 4. CORREO ELECTRÓNICO */}
+          <div>
+            <label className={styles.inputLabel}>CORREO ELECTRÓNICO</label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">
+                <Mail className="w-4 h-4 text-zinc-400" />
+              </span>
+              <input
+                type="email"
+                className={`${styles.premiumInput} pl-10`}
+                style={{ paddingLeft: "42px" }}
+                placeholder="ejemplo@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           {error && (

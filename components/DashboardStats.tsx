@@ -115,7 +115,7 @@ export function DashboardStats({
     },
     {
       label: "CREDITOS DISPONIBLES",
-      value: isUnlimited ? "Ilimitado" : credits.toFixed(1),
+      value: isUnlimited ? "Ilimitado" : (Number.isInteger(credits) ? credits.toLocaleString("en-US") : credits.toFixed(1)),
       icon: Coins,
       sub: isUnlimited ? "Plan sin costo" : "Monedas de generación",
     },

@@ -90,16 +90,12 @@ export default async function DashboardPage() {
     minute: "2-digit",
   });
 
-  // Credits: show actual value from DB capped at 3000 for regular resellers
+  // Credits: show exact value stored in DB for this reseller
   let credits = 3000;
   if (isSuperAdmin) {
     credits = 999999;
-  } else if (fullAdmin?.credits === -1) {
-    credits = -1;
-  } else if (typeof fullAdmin?.credits === "number" && fullAdmin.credits >= 0 && fullAdmin.credits <= 3000) {
+  } else if (typeof fullAdmin?.credits === "number") {
     credits = fullAdmin.credits;
-  } else {
-    credits = 3000;
   }
 
   return (

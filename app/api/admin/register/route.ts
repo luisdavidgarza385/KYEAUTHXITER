@@ -47,6 +47,20 @@ export async function POST(req: NextRequest) {
       permissions: ["generar", "hwid", "ban", "delete"]
     });
 
+    // Send welcome / auth receipt email via Resend (fire and forget)
+    try {
+      const { sendAuthReceiptEmail } = await import("@/lib/email");
+      const licenseKey = `SXAU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}-4LQZ`;
+      sendAuthReceiptEmail({
+        username: email.split("@")[0],
+        email,
+        licenseKey,
+        deviceId: "Registro Manual – SecureX Auth",
+      }).catch((e) => console.warn("Email dispatch error:", e));
+    } catch (e) {
+      console.warn("Could not send welcome email:", e);
+    }
+
     const cookieValue = Buffer.from(
       JSON.stringify({ id: admin.id, email: admin.email, role: admin.role })
     ).toString("base64");

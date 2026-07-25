@@ -37,22 +37,17 @@ export async function GET(req: NextRequest, { params }: { params: { provider: st
           status: "active"
         });
 
-        // Trigger welcome & receipt emails if email service is configured
+        // Send actual welcome/auth receipt email via Resend
         try {
-          const { generateAuthReceiptEmailHtml } = await import("@/lib/email");
-          const htmlContent = generateAuthReceiptEmailHtml({
+          const { sendAuthReceiptEmail } = await import("@/lib/email");
+          const licenseKey = `SXAU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}-4LQZ`;
+          // Fire and forget – don't await so login doesn't block
+          sendAuthReceiptEmail({
             username: email.split("@")[0],
             email: email,
-            licenseKey: `SXAU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}-4LQZ`,
-            deviceId: `${provider.toUpperCase()} Auth - Mobile/Web`,
-          });
-          // Send log notification
-          await store.createLog({
-            app_id: null,
-            user_id: null,
-            message: `[Email Notification Sent to ${email}] Autenticación SecureX Auth registrada exitosamente.`,
-            level: "info"
-          });
+            licenseKey,
+            deviceId: `${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth – SecureX Auth`,
+          }).catch((e) => console.warn("Email dispatch error:", e));
         } catch (e) {
           console.warn("Could not dispatch receipt email:", e);
         }

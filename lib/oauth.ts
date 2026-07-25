@@ -28,12 +28,10 @@ function getRedirectUri(provider: string): string {
 
 export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
   const base = getBaseUrl();
-  const demo = process.env.OAUTH_DEMO_MODE === "1" || isDemoModeFor(provider);
   switch (provider) {
     case "discord": {
       const clientId = process.env.DISCORD_CLIENT_ID || "demo_discord_id";
       const clientSecret = process.env.DISCORD_CLIENT_SECRET || "demo_discord_secret";
-      if (!process.env.DISCORD_CLIENT_ID && !demo) return null;
       return {
         clientId,
         clientSecret,
@@ -47,7 +45,6 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
     case "google": {
       const clientId = process.env.GOOGLE_CLIENT_ID || "demo_google_id";
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET || "demo_google_secret";
-      if (!process.env.GOOGLE_CLIENT_ID && !demo) return null;
       return {
         clientId,
         clientSecret,
@@ -61,7 +58,6 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
     case "apple": {
       const clientId = process.env.APPLE_CLIENT_ID || "demo_apple_id";
       const clientSecret = process.env.APPLE_CLIENT_SECRET || "demo_apple_secret";
-      if (!process.env.APPLE_CLIENT_ID && !demo) return null;
       return {
         clientId,
         clientSecret,
@@ -74,7 +70,6 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
     }
     case "telegram": {
       const botToken = process.env.TELEGRAM_BOT_TOKEN || "demo_telegram_token";
-      if (!process.env.TELEGRAM_BOT_TOKEN && !demo) return null;
       return {
         clientId: botToken,
         clientSecret: botToken,
@@ -89,20 +84,11 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
 }
 
 function isDemoModeFor(_provider: string): boolean {
-  return process.env.OAUTH_DEMO_MODE === "1";
+  return false;
 }
 
 export function isProviderConfigured(provider: OAuthProvider): boolean {
-  switch (provider) {
-    case "discord":
-      return !!process.env.DISCORD_CLIENT_ID || process.env.OAUTH_DEMO_MODE === "1";
-    case "google":
-      return !!process.env.GOOGLE_CLIENT_ID || process.env.OAUTH_DEMO_MODE === "1";
-    case "apple":
-      return !!process.env.APPLE_CLIENT_ID || process.env.OAUTH_DEMO_MODE === "1";
-    case "telegram":
-      return !!process.env.TELEGRAM_BOT_TOKEN || process.env.OAUTH_DEMO_MODE === "1";
-  }
+  return true;
 }
 
 export function buildAuthorizeUrl(provider: OAuthProvider, state: string): string | null {

@@ -35,9 +35,27 @@ export function GlobalMusicPlayer() {
     }
   }, []);
 
-  // Fetch music config
+  // Fetch music config (checks personal localStorage music first, falls back to global API)
   useEffect(() => {
-    async function fetchConfig() {
+    async function updateActiveMusic() {
+      if (typeof window !== "undefined") {
+        const personal = localStorage.getItem("spectral_x_personal_music");
+        if (personal) {
+          try {
+            const pConfig = JSON.parse(personal);
+            if (pConfig && pConfig.url && pConfig.enabled !== false) {
+              setConfig({
+                enabled: true,
+                url: pConfig.url,
+                volume: pConfig.volume ?? 0.15,
+                title: pConfig.title || "Personal Track",
+              });
+              return;
+            }
+          } catch {}
+        }
+      }
+
       try {
         const res = await fetch("/api/admin/music");
         if (!res.ok) return;
@@ -47,9 +65,16 @@ export function GlobalMusicPlayer() {
         }
       } catch {}
     }
-    fetchConfig();
-    const interval = setInterval(fetchConfig, 15000); // Check faster (15s) for quick sync
-    return () => clearInterval(interval);
+
+    updateActiveMusic();
+    const interval = setInterval(updateActiveMusic, 15000);
+    const handlePersonalUpdate = () => updateActiveMusic();
+    window.addEventListener("spectral-personal-music-updated", handlePersonalUpdate);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("spectral-personal-music-updated", handlePersonalUpdate);
+    };
   }, []);
 
   // Load YouTube Iframe Player API if url is YouTube

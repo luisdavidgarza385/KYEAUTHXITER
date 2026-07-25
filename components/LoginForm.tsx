@@ -98,7 +98,7 @@ export function LoginForm() {
   return (
     <div className="space-y-6">
       {/* Role Toggle Selector - 2 tabs */}
-      <div className="flex bg-[#040c06] p-1.5 rounded-xl border border-emerald-500/10">
+      <div className="flex bg-[#040810] p-1.5 rounded-xl border border-sky-500/10">
         <button
           type="button"
           onClick={() => {
@@ -107,7 +107,7 @@ export function LoginForm() {
           }}
           className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${
             roleMode === "admin"
-              ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/40 shadow-sm"
+              ? "bg-sky-950/30 text-sky-400 border border-sky-900/40 shadow-sm"
               : "text-zinc-500 hover:text-zinc-350"
           }`}
         >
@@ -122,7 +122,7 @@ export function LoginForm() {
           }}
           className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${
             roleMode === "reseller"
-              ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/40 shadow-sm"
+              ? "bg-sky-950/30 text-sky-400 border border-sky-900/40 shadow-sm"
               : "text-zinc-500 hover:text-zinc-350"
           }`}
         >
@@ -195,7 +195,7 @@ export function LoginForm() {
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
-              className="w-4 h-4 rounded accent-emerald-500 cursor-pointer border border-zinc-850"
+              className="w-4 h-4 rounded accent-sky-500 cursor-pointer border border-zinc-850"
             />
             <span>Recordar en este navegador</span>
           </label>
@@ -219,7 +219,7 @@ export function LoginForm() {
         <div className="text-center pt-2">
           <Link
             href="/asistente/login"
-            className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors hover:underline decoration-dotted underline-offset-4"
+            className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors hover:underline decoration-dotted underline-offset-4"
           >
             Resetear keys con nuestro asistente
           </Link>

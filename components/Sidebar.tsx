@@ -34,13 +34,13 @@ const SECTIONS = [
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
       { href: "/dashboard/apps", label: "Aplicaciones", icon: Shield, adminOnly: false },
-      { href: "/dashboard/builder", label: "Builder", icon: Terminal, adminOnly: true },
+      { href: "/dashboard/builder", label: "Builder", icon: Terminal, adminOnly: false, vipOnly: true },
     ],
   },
   {
     label: "HERRAMIENTAS",
     items: [
-      { href: "/dashboard/hex-converter", label: "Convertidor Hex", icon: Binary, adminOnly: true },
+      { href: "/dashboard/hex-converter", label: "Convertidor Hex", icon: Binary, adminOnly: false },
     ],
   },
   {
@@ -48,7 +48,7 @@ const SECTIONS = [
     items: [
       { href: "/dashboard/licenses", label: "Licencias", icon: Key, adminOnly: false },
       { href: "/dashboard/users", label: "Usuarios", icon: Users, adminOnly: false },
-      { href: "/dashboard/subscriptions", label: "Suscripciones", icon: Layers, adminOnly: true },
+      { href: "/dashboard/subscriptions", label: "Suscripciones", icon: Layers, adminOnly: false, vipOnly: true },
       { href: "/dashboard/sub-resellers", label: "Sub-resellers", icon: Layers, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
       { href: "/dashboard/chat", label: "Chat Global", icon: MessageSquare, adminOnly: false },
@@ -77,7 +77,7 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false, unlimited: false });
 
   useEffect(() => {
-    if (!isSubReseller) return;
+    if (!isSubReseller && !subscriptionEnd) return;
     if (!subscriptionEnd) {
       setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false, unlimited: true });
       return;
@@ -237,8 +237,9 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
 
       <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6 scrollbar-thin scrollbar-thumb-sky-500/20">
         {SECTIONS.map((section) => {
-          const items = section.items.filter((i) => {
+          const items = section.items.filter((i: any) => {
             if (i.adminOnly && !isAdmin) return false;
+            if (i.vipOnly && !isAdmin && !subscriptionEnd) return false;
             return true;
           });
           if (items.length === 0) return null;
@@ -297,8 +298,8 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
             </div>
           </div>
 
-          {/* Subscription Live Countdown for Sub-resellers */}
-          {isSubReseller && (
+          {/* Subscription Live Countdown */}
+          {(isSubReseller || Boolean(subscriptionEnd)) && (
             countdown.unlimited ? (
               <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800/60">
                 <Clock className="w-3.5 h-3.5 text-sky-400 shrink-0" />

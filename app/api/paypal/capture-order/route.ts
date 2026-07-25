@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
     }
 
     const now = Date.now();
-    const durationMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const isYearly = planId === "unlimited";
+    const durationMs = (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000; // 365 days for $7.99, 30 days for $1.99
     const expiresAt = new Date(now + durationMs).toISOString();
 
     const currentSubs: string[] = Array.isArray(admin.subscriptions) ? admin.subscriptions : [];
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
     return {
       data: {
         success: true,
-        message: `¡Pago de $${planId === "unlimited" ? "7.99" : "1.99"} exitoso! Tu suscripción ${planId === "unlimited" ? "Ilimitada" : "VIP"} ha sido activada por 30 días.`,
+        message: `¡Pago de $${isYearly ? "7.99" : "1.99"} exitoso! Tu suscripción ${isYearly ? "Ilimitada (1 Año - 365 días)" : "VIP (1 Mes - 30 días)"} ha sido activada correctamente.`,
       },
     };
   });

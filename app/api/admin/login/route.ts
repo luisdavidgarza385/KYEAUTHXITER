@@ -19,11 +19,9 @@ export async function POST(req: NextRequest) {
     const email: string = String(body?.email || "").trim().toLowerCase();
     const password: string = String(body?.password || "");
     const appId: string = String(body?.appId || "").trim();
-    if (!email || !password) {
-      return json({ success: false, message: "email and password required" }, 400);
-    }
+    const roleMode: string = String(body?.roleMode || "admin").trim();
 
-    console.log("[DEBUG LOGIN] Attempting login for:", email);
+    console.log("[DEBUG LOGIN] Attempting login for:", email, "roleMode:", roleMode);
 
     let admin = null;
     try {
@@ -31,6 +29,27 @@ export async function POST(req: NextRequest) {
       console.log("[DEBUG LOGIN] Found admin in DB:", admin ? "YES" : "NO");
     } catch (dbErr: any) {
       console.error("[DEBUG LOGIN] Error getting admin from DB:", dbErr);
+    }
+
+    // Sub-reseller API key enforcement
+    if (admin && admin.created_by) {
+      // User is a Sub-reseller created by an admin
+      if (roleMode !== "reseller" && !appId) {
+        return json({ success: false, message: "Los revendedores afiliados deben iniciar sesión desde la pestaña 'Revendedor' e ingresar su Clave API / ID de aplicación." }, 401);
+      }
+
+      if (!appId) {
+        return json({ success: false, message: "El ID de Aplicación / Clave API (API Key) es requerido para revendedores afiliados." }, 401);
+      }
+
+      const cleanId = admin.id.slice(0, 15).replace(/-/g, "");
+      const fullId = admin.id;
+      const subs = Array.isArray(admin.subscriptions) ? admin.subscriptions : [];
+      const matchesApp = appId === fullId || appId === cleanId || subs.includes(appId);
+
+      if (!matchesApp) {
+        return json({ success: false, message: "ID de Aplicación / Clave API inválido para este revendedor." }, 401);
+      }
     }
 
     if (!admin) {

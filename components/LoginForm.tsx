@@ -66,7 +66,10 @@ export function LoginForm() {
         localStorage.removeItem("ka_remember_password");
       }
 
-      const payload = { email, password, remember };
+      const payload: Record<string, string | boolean> = { email, password, remember, roleMode };
+      if (roleMode === "reseller") {
+        payload.appId = appId;
+      }
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -278,79 +281,133 @@ export function LoginForm() {
       </div>
 
       {tabMode === "login" ? (
-        <form onSubmit={onSubmitLogin} className="space-y-4">
-          <div>
-            <label className={styles.inputLabel}>Correo o Usuario</label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">
-                <User className="w-4 h-4 text-zinc-400" />
-              </span>
-              <input
-                type="text"
-                className={`${styles.premiumInput} pl-10`}
-                style={{ paddingLeft: "42px" }}
-                placeholder="e.g. tu_usuario o tu_correo@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="username"
-              />
-            </div>
+        <>
+          {/* Sub-Role Selector for Login */}
+          <div className="flex bg-[#040810] p-1 rounded-xl border border-sky-500/20 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setRoleMode("admin");
+                setError(null);
+              }}
+              className={`flex-1 py-1.5 font-bold rounded-lg transition-all ${
+                roleMode === "admin"
+                  ? "bg-sky-500 text-white shadow-md shadow-sky-500/30"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRoleMode("reseller");
+                setError(null);
+              }}
+              className={`flex-1 py-1.5 font-bold rounded-lg transition-all ${
+                roleMode === "reseller"
+                  ? "bg-sky-500 text-white shadow-md shadow-sky-500/30"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Revendedoras
+            </button>
           </div>
 
-          <div>
-            <label className={styles.inputLabel}>Contraseña</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                className={`${styles.premiumInput} pr-10`}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className={styles.eyeBtn}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4 text-zinc-500" /> : <Eye className="w-4 h-4 text-zinc-500" />}
-              </button>
+          <form onSubmit={onSubmitLogin} className="space-y-4">
+            <div>
+              <label className={styles.inputLabel}>Correo o Usuario</label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">
+                  <User className="w-4 h-4 text-zinc-400" />
+                </span>
+                <input
+                  type="text"
+                  className={`${styles.premiumInput} pl-10`}
+                  style={{ paddingLeft: "42px" }}
+                  placeholder="e.g. tu_usuario o tu_correo@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="username"
+                />
+              </div>
             </div>
-          </div>
 
-          {error && (
-            <div className={styles.errorAlert}>
-              <ShieldAlert className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
+            <div>
+              <label className={styles.inputLabel}>Contraseña</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className={`${styles.premiumInput} pr-10`}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className={styles.eyeBtn}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4 text-zinc-500" /> : <Eye className="w-4 h-4 text-zinc-500" />}
+                </button>
+              </div>
             </div>
-          )}
 
-          <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="rounded border-zinc-700 bg-zinc-900 text-sky-500 focus:ring-sky-500/20"
-              />
-              <span>Recordar en este navegador</span>
-            </label>
-          </div>
-
-          <button type="submit" disabled={loading} className={styles.submitBtn}>
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Verificando...
-              </>
-            ) : (
-              "INICIAR SESIÓN"
+            {roleMode === "reseller" && (
+              <div className="animate-fade-in-down">
+                <label className={styles.inputLabel}>ID de aplicación (API Key)</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">
+                    <Key className="w-4 h-4 text-zinc-400" />
+                  </span>
+                  <input
+                    type="text"
+                    className={`${styles.premiumInput} pl-10`}
+                    style={{ paddingLeft: "42px" }}
+                    placeholder="e.g. 4bebaaa8a743-4"
+                    value={appId}
+                    onChange={(e) => setAppId(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
             )}
-          </button>
-        </form>
+
+            {error && (
+              <div className={styles.errorAlert}>
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="rounded border-zinc-700 bg-zinc-900 text-sky-500 focus:ring-sky-500/20"
+                />
+                <span>Recordar en este navegador</span>
+              </label>
+            </div>
+
+            <button type="submit" disabled={loading} className={styles.submitBtn}>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Verificando...
+                </>
+              ) : (
+                "INICIAR SESIÓN"
+              )}
+            </button>
+          </form>
+        </>
       ) : (
         /* Manual Register Form with Exact Ordered Fields requested in Image 5:
            1. USUARIO

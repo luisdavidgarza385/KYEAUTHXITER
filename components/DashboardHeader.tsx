@@ -71,12 +71,16 @@ export function DashboardHeader({ email, role, apps }: { email: string; role: st
         <span className="font-bold text-sm tracking-wide bg-gradient-to-r from-text to-text-muted bg-clip-text">SecureX Auth</span>
       </Link>
 
-      <div className="flex-1 max-w-md mx-auto relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-dim pointer-events-none" />
+      <div 
+        onClick={() => window.dispatchEvent(new CustomEvent("spectral-open-search"))}
+        className="flex-1 max-w-md mx-auto relative cursor-pointer group"
+      >
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-dim group-hover:text-sky-400 transition pointer-events-none" />
         <input
           type="text"
+          readOnly
           placeholder="Search anything..."
-          className="w-full bg-bg/50 border border-border rounded-md pl-9 pr-16 py-1.5 text-sm placeholder:text-text-dim focus:outline-none focus:border-accent/40 focus:bg-bg/80 transition"
+          className="w-full bg-bg/50 border border-border rounded-md pl-9 pr-16 py-1.5 text-sm placeholder:text-text-dim cursor-pointer group-hover:border-accent/40 group-hover:bg-bg/80 transition"
         />
         <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 text-[10px] text-text-dim font-mono bg-bg-secondary border border-border rounded px-1.5 py-0.5">
           Ctrl + K

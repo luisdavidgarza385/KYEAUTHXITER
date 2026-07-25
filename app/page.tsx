@@ -84,10 +84,10 @@ export default function Home() {
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
             <a href="#features" className="hover:text-sky-400 transition-colors">Features</a>
-            <a href="#api" className="hover:text-sky-400 transition-colors">API</a>
-            <a href="#docs" className="hover:text-sky-400 transition-colors">Docs</a>
-            <a href="#pricing" className="hover:text-sky-400 transition-colors">Pricing</a>
-            <Link href="/docs" className="hover:text-sky-400 transition-colors">Support</Link>
+            <Link href="/docs" className="hover:text-sky-400 transition-colors">API</Link>
+            <Link href="/docs" className="hover:text-sky-400 transition-colors">Docs</Link>
+            <Link href="/dashboard/shop" className="hover:text-sky-400 transition-colors">Pricing</Link>
+            <Link href="/asistente/login" className="hover:text-sky-400 transition-colors">Support</Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -335,7 +335,7 @@ export default function Home() {
       </section>
 
       {/* Bottom Features Row (4 Cards matching Imagen 5) */}
-      <section className="max-w-7xl mx-auto px-6 pb-24 pt-8">
+      <section id="features" className="max-w-7xl mx-auto px-6 pb-24 pt-8 scroll-mt-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Card 1 */}

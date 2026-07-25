@@ -42,6 +42,11 @@ export async function POST(req: NextRequest) {
     const valid = await bcrypt.compare(String(password), user.password_hash);
     if (!valid) return json({ success: false, message: "Invalid credentials" }, 401);
 
+    // Strict 1-PC HWID Lock check
+    if (user.hwid && hwid && user.hwid !== hwid) {
+      return json({ success: false, message: "HWID mismatch: Esta cuenta está vinculada a otra PC. Contacta al administrador para resetear tu HWID." }, 403);
+    }
+
     const ip = getClientIp(req);
 
     // Buscar la licencia activa del usuario para determinar su nivel de suscripción

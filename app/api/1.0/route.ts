@@ -311,10 +311,15 @@ export async function POST(req: NextRequest) {
         return json({ success: false, message: "Invalid credentials" }, 401);
       }
 
+      // Strict 1-PC HWID Lock check
+      if (user.hwid && hwid && user.hwid !== hwid) {
+        return json({ success: false, message: "HWID mismatch: Esta cuenta está autorizada para 1 sola PC. Pide un reset de HWID a tu administrador para cambiar de PC." }, 403);
+      }
+
       // Check for simultaneous sessions
       const simultaneousDetected = await checkForSimultaneousSessions(user.id, hwid || "");
       if (simultaneousDetected) {
-        return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad. Utiliza el asistente virtual para reactivarla." }, 403);
+        return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad." }, 403);
       }
 
       // Cualquier usuario autenticado correctamente tiene acceso

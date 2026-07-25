@@ -70,6 +70,35 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
   const [dark, setDark] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Live countdown state
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false, unlimited: false });
+
+  useEffect(() => {
+    if (!isSubReseller) return;
+    if (!subscriptionEnd) {
+      setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false, unlimited: true });
+      return;
+    }
+    const tick = () => {
+      const now = Date.now();
+      const end = new Date(subscriptionEnd).getTime();
+      const diffMs = end - now;
+      if (diffMs <= 0) {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true, unlimited: false });
+        return;
+      }
+      const totalSec = Math.floor(diffMs / 1000);
+      const days = Math.floor(totalSec / 86400);
+      const hours = Math.floor((totalSec % 86400) / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+      setCountdown({ days, hours, minutes, seconds, expired: false, unlimited: false });
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [isSubReseller, subscriptionEnd]);
+
   const [customAvatar, setCustomAvatar] = useState<string | null>(null);
 
   useEffect(() => {
@@ -260,48 +289,39 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
             </div>
           </div>
 
-          {/* Subscription Days for Sub-resellers */}
-          {isSubReseller && (() => {
-            if (!subscriptionEnd) {
-              return (
-                <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800/60">
-                  <Clock className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                  <span className="text-[11px] text-sky-400 font-bold">∞ Ilimitado</span>
-                </div>
-              );
-            }
-            const endDate = new Date(subscriptionEnd);
-            const now = new Date();
-            const diffMs = endDate.getTime() - now.getTime();
-            const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-            const isExpired = daysLeft <= 0;
-            const isWarning = daysLeft > 0 && daysLeft <= 5;
-            return (
-              <div className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border ${
-                isExpired
-                  ? "bg-red-950/30 border-red-500/30"
-                  : isWarning
-                    ? "bg-yellow-950/30 border-yellow-500/30"
-                    : "bg-sky-950/20 border-sky-500/20"
-              }`}>
-                {isExpired ? (
-                  <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                ) : (
-                  <Clock className={`w-3.5 h-3.5 shrink-0 ${isWarning ? "text-yellow-400" : "text-sky-400"}`} />
-                )}
+          {/* Subscription Live Countdown for Sub-resellers */}
+          {isSubReseller && (
+            countdown.unlimited ? (
+              <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800/60">
+                <Clock className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <span className="text-[11px] text-sky-400 font-bold">∞ Ilimitado</span>
+              </div>
+            ) : countdown.expired ? (
+              <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border bg-red-950/30 border-red-500/30">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
                 <div className="min-w-0">
-                  <p className={`text-[11px] font-bold ${
-                    isExpired ? "text-red-400" : isWarning ? "text-yellow-400" : "text-sky-400"
-                  }`}>
-                    {isExpired ? "Expirado" : `${daysLeft} día${daysLeft !== 1 ? "s" : ""} restante${daysLeft !== 1 ? "s" : ""}`}
-                  </p>
-                  {isExpired && (
-                    <p className="text-[9px] text-red-400/70 mt-0.5">Contacta al Developer</p>
-                  )}
+                  <p className="text-[11px] font-bold text-red-400">Expirado</p>
+                  <p className="text-[9px] text-red-400/70 mt-0.5">Contacta al Developer</p>
                 </div>
               </div>
-            );
-          })()}
+            ) : (
+              <div className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border ${
+                countdown.days <= 5
+                  ? "bg-yellow-950/30 border-yellow-500/30"
+                  : "bg-sky-950/20 border-sky-500/20"
+              }`}>
+                <Clock className={`w-3.5 h-3.5 shrink-0 animate-pulse ${countdown.days <= 5 ? "text-yellow-400" : "text-sky-400"}`} />
+                <div className="min-w-0">
+                  <p className={`text-[10px] font-bold font-mono tabular-nums ${
+                    countdown.days <= 5 ? "text-yellow-300" : "text-sky-300"
+                  }`}>
+                    {countdown.days}d {String(countdown.hours).padStart(2, "0")}h {String(countdown.minutes).padStart(2, "0")}m {String(countdown.seconds).padStart(2, "0")}s
+                  </p>
+                  <p className="text-[9px] text-zinc-500 mt-0.5 font-mono">restantes</p>
+                </div>
+              </div>
+            )
+          )}
 
           <div className="flex items-center justify-between pt-2 border-t border-border">
             <button

@@ -3,19 +3,16 @@
 export function playGlobalNotificationChime() {
   if (typeof window === "undefined") return;
 
-  // 1. Try HTML5 Audio playback first
+  // Always play synthesized Web Audio chime bell for guaranteed sound
+  playWebAudioChime();
+
+  // Also attempt playing MP3 audio file
   try {
     const audio = new Audio("/universfield-new-notification-051-494246.mp3");
-    audio.volume = 0.5;
-    const p = audio.play();
-    if (p && typeof p.then === "function") {
-      p.catch(() => {
-        // Autoplay blocked by browser policy, fallback to Web Audio API
-        playWebAudioChime();
-      });
-    }
-  } catch {
-    playWebAudioChime();
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+  } catch (e) {
+    // Ignore html5 audio error as web audio chime already played
   }
 }
 
@@ -39,7 +36,7 @@ export function playWebAudioChime() {
     osc1.type = "sine";
     osc1.frequency.setValueAtTime(880, now); // A5
     osc1.frequency.exponentialRampToValueAtTime(1760, now + 0.15); // A6
-    gain1.gain.setValueAtTime(0.3, now);
+    gain1.gain.setValueAtTime(0.4, now);
     gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
 
     osc1.connect(gain1);
@@ -52,14 +49,14 @@ export function playWebAudioChime() {
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
     osc2.type = "sine";
-    osc2.frequency.setValueAtTime(1318.51, now + 0.1); // E6
-    gain2.gain.setValueAtTime(0.25, now + 0.1);
+    osc2.frequency.setValueAtTime(1318.51, now + 0.12); // E6
+    gain2.gain.setValueAtTime(0.35, now + 0.12);
     gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
 
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
 
-    osc2.start(now + 0.1);
+    osc2.start(now + 0.12);
     osc2.stop(now + 0.7);
   } catch (e) {
     console.warn("Web Audio Chime failed:", e);

@@ -68,6 +68,24 @@ export async function POST(req: NextRequest) {
       await store.updateAdmin(admin.id, admin);
     }
 
+    // Enforce 60 licenses limit for free resellers (non-admin, non-VIP)
+    if (me.role !== "admin" && me.role !== "developer") {
+      const isPaidSub = admin.subscriptions && admin.subscriptions.length > 0;
+      if (!isPaidSub) {
+        const allLic = await store.listLicenses({ limit: 10000 });
+        const myLicCount = allLic.filter((l) => l.created_by === me.id).length;
+        if (myLicCount + count > 60) {
+          return {
+            status: 400,
+            data: {
+              success: false,
+              message: `Límite del Plan Gratuito alcanzado (Máximo 60 licencias por cuenta). Tienes ${myLicCount} licencias y estás intentando crear ${count}. Actualiza a un Plan VIP para licencias ilimitadas.`,
+            },
+          };
+        }
+      }
+    }
+
     const quota = await checkQuota(me, appId);
     if (!quota.ok) {
       return { status: 403, data: { success: false, message: quota.reason } };
@@ -92,8 +110,9 @@ export async function POST(req: NextRequest) {
     }
 
     const keysArray = Array.from(generatedKeys);
-    
-    // Check database to find if any of these keys exist
+    const allSystemLicenses = await store.listLicenses({ limit: 10000 });
+
+    // Check GLOBAL database to find if any of these keys exist in ANY application
     const existingKeys = new Set<string>();
     if (process.env.STORAGE_BACKEND !== "local") {
       try {
@@ -101,7 +120,6 @@ export async function POST(req: NextRequest) {
         const { data } = await supabase
           .from("licenses")
           .select("key")
-          .eq("app_id", appId)
           .in("key", keysArray);
         if (data) {
           data.forEach((l: any) => existingKeys.add(l.key));
@@ -109,15 +127,14 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error("Error checking license key existence in database:", err);
       }
-    } else {
-      // In local mode, check local store
-      for (const k of keysArray) {
-        const check = await store.getLicenseByKey(appId, k);
-        if (check) existingKeys.add(k);
-      }
     }
+    
+    // Also check local/in-memory list across all apps
+    allSystemLicenses.forEach((l) => {
+      if (keysArray.includes(l.key)) existingKeys.add(l.key);
+    });
 
-    // Replace keys that already exist in the database with brand-new random keys
+    // Replace keys that already exist anywhere in system with brand-new random keys
     const finalKeys: string[] = [];
     for (const key of keysArray) {
       if (!existingKeys.has(key)) {
@@ -136,13 +153,13 @@ export async function POST(req: NextRequest) {
             const { data } = await supabaseAdmin()
               .from("licenses")
               .select("key")
-              .eq("app_id", appId)
               .eq("key", candidate)
               .maybeSingle();
             if (data) check = true;
-          } else {
-            const checkObj = await store.getLicenseByKey(appId, candidate);
-            if (checkObj) check = true;
+          }
+          
+          if (allSystemLicenses.some((l) => l.key === candidate)) {
+            check = true;
           }
           
           if (!check && !generatedKeys.has(candidate) && !finalKeys.includes(candidate)) {

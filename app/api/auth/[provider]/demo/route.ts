@@ -140,8 +140,17 @@ function demoHtml(provider: string, state: string): string {
     </div>
   </div>
   <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('ka_saved_oauth_email');
+      if (saved) {
+        document.getElementById('email').value = saved;
+      }
+    });
     function authorize() {
       var email = document.getElementById('email').value.trim();
+      if (email) {
+        localStorage.setItem('ka_saved_oauth_email', email);
+      }
       var params = new URLSearchParams({ state: '${state}' });
       if (email) params.set('email', email);
       window.location.href = '/api/auth/${provider}/demo/finish?' + params.toString();

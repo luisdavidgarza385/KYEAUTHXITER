@@ -107,6 +107,52 @@ html.light .theme-vyper {
   html.light {
     color-scheme: light;
   }
+  html.light body {
+    background-color: #f8fafc !important;
+    background-image: radial-gradient(circle at 50% 0%, rgba(0, 191, 255, 0.08) 0px, transparent 60%) !important;
+    color: #0f172a !important;
+  }
+  html.light aside {
+    background: linear-gradient(to bottom, #ffffff, #f1f5f9, #e2e8f0) !important;
+    border-right-color: rgba(0, 191, 255, 0.3) !important;
+    color: #0f172a !important;
+  }
+  html.light aside nav a {
+    color: #334155 !important;
+  }
+  html.light aside nav a:hover {
+    background-color: rgba(0, 191, 255, 0.1) !important;
+    color: #0284c7 !important;
+  }
+  html.light header {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border-bottom-color: rgba(0, 191, 255, 0.2) !important;
+    color: #0f172a !important;
+  }
+  html.light .bg-\[\#030914\],
+  html.light .bg-\[\#040914\],
+  html.light .bg-\[\#040912\],
+  html.light .bg-\[\#020610\],
+  html.light .bg-\[\#010307\],
+  html.light .bg-\[\#050b16\],
+  html.light .bg-\[\#040c06\],
+  html.light .bg-\[\#030a05\],
+  html.light .bg-zinc-950,
+  html.light .bg-black {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: rgba(0, 191, 255, 0.25) !important;
+  }
+  html.light .text-white,
+  html.light .text-zinc-100,
+  html.light .text-zinc-200,
+  html.light .text-zinc-300 {
+    color: #0f172a !important;
+  }
+  html.light .text-zinc-400,
+  html.light .text-zinc-500 {
+    color: #475569 !important;
+  }
   body {
     @apply bg-bg text-text antialiased;
     background-color: rgb(var(--bg-rgb));

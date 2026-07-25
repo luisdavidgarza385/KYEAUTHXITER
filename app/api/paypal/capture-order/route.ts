@@ -5,8 +5,8 @@ import { store } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 async function getPayPalAccessToken() {
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  const clientId = process.env.PAYPAL_CLIENT_ID || "Acahbaw5KeItx3JVKQxVHi7YqnbGkqMtUwv7VBbgaiPa7vUO2A7QOHdtI3zSZy7TZ6M1Qvnh_4WoIoAj";
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET || "EDQVCgyyHSqpMt_YxVLPUx_WLwysZS6b94YPmRgTakhy6fHsbCBatATHtluGRegl5bX5mm-PtC5HD-Xy";
   const paypalApi = process.env.PAYPAL_API || "https://api-m.paypal.com";
 
   if (!clientId || !clientSecret) {

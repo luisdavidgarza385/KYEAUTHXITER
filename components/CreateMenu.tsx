@@ -40,11 +40,9 @@ export function CreateMenu({ apps, role }: { apps: App[]; role?: string }) {
           <button onClick={() => pick("license")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
             <Key className="w-4 h-4 text-accent-glow" /> Crear Licencia
           </button>
-          {role !== "seller" && (
-            <button onClick={() => pick("app")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
-              <AppWindow className="w-4 h-4 text-accent-glow" /> Crear Aplicación
-            </button>
-          )}
+          <button onClick={() => pick("app")} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left hover:bg-bg-hover transition border-t border-border">
+            <AppWindow className="w-4 h-4 text-accent-glow" /> Crear Aplicación
+          </button>
         </div>
       )}
       {modal === "user" && <CreateUserModal apps={apps} onClose={() => setModal(null)} />}

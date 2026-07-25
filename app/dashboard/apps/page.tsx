@@ -113,7 +113,7 @@ export default async function AppsPage({
                 <p className="text-xs text-zinc-500">Plan Gratuito: puedes crear hasta <span className="text-sky-400 font-bold">2 aplicaciones</span></p>
               )}
             </div>
-            {me.role !== "seller" && <CreateAppInlineButton className="btn-primary text-sm mx-auto" />}
+            <CreateAppInlineButton className="btn-primary text-sm mx-auto" />
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-4">
@@ -152,11 +152,9 @@ export default async function AppsPage({
                   </div>
                 </div>
 
-                {me.role !== "seller" && (
-                  <CreateAppInlineButton
-                    className="w-full mb-3 flex items-center justify-center gap-2 rounded-md bg-accent text-white py-2 text-sm font-medium hover:bg-accent/90 transition"
-                  />
-                )}
+                <CreateAppInlineButton
+                  className="w-full mb-3 flex items-center justify-center gap-2 rounded-md bg-accent text-white py-2 text-sm font-medium hover:bg-accent/90 transition"
+                />
 
                 <div className="space-y-2">
                   {filtered.map((a) => (

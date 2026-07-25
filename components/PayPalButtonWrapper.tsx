@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, CheckCircle2, AlertCircle, ShieldCheck, CreditCard } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, CreditCard } from "lucide-react";
 
 declare global {
   interface Window {
@@ -21,44 +21,16 @@ export function PayPalButtonWrapper({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [btnContainerId] = useState(() => `paypal-container-${planId}-${Math.random().toString(36).substring(2, 7)}`);
+  const [btnContainerId] = useState(() => `paypal-container-${planId}`);
 
   const clientId = "Acahbaw5KeItx3JVKQxVHi7YqnbGkqMtUwv7VBbgaiPa7vUO2A7QOHdtI3zSZy7TZ6M1Qvnh_4WoIoAj";
 
   useEffect(() => {
-    let script: HTMLScriptElement | null = null;
-
-    const loadPayPalScript = () => {
-      const existingScript = document.getElementById("paypal-sdk-script");
-      if (existingScript) {
-        renderButtons();
-        return;
-      }
-
-      script = document.createElement("script");
-      script.id = "paypal-sdk-script";
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&components=buttons`;
-      script.async = true;
-      script.onload = () => {
-        renderButtons();
-      };
-      script.onerror = () => {
-        setError("Error cargando los botones de pago de PayPal.");
-        setLoading(false);
-      };
-      document.body.appendChild(script);
-    };
+    let checkInterval: any = null;
 
     const renderButtons = () => {
-      if (!window.paypal) {
-        setError("PayPal SDK no disponible.");
-        setLoading(false);
-        return;
-      }
-
       const container = document.getElementById(btnContainerId);
       if (!container) return;
-
       container.innerHTML = "";
 
       try {
@@ -109,12 +81,12 @@ export function PayPalButtonWrapper({
             },
             onError: (err: any) => {
               console.error("PayPal Error:", err);
-              setError("Ocurrió un error con la pasarela de PayPal.");
             },
           })
           .render(`#${btnContainerId}`)
           .then(() => {
             setLoading(false);
+            setError(null);
           })
           .catch((e: any) => {
             console.error(e);
@@ -126,10 +98,34 @@ export function PayPalButtonWrapper({
       }
     };
 
-    loadPayPalScript();
+    const initPayPal = () => {
+      let script = document.getElementById("paypal-sdk-script") as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement("script");
+        script.id = "paypal-sdk-script";
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&components=buttons`;
+        script.async = true;
+        document.body.appendChild(script);
+      }
+
+      let attempts = 0;
+      checkInterval = setInterval(() => {
+        attempts++;
+        if (window.paypal) {
+          clearInterval(checkInterval);
+          renderButtons();
+        } else if (attempts > 50) {
+          clearInterval(checkInterval);
+          setError("Error cargando pasarela de pago PayPal.");
+          setLoading(false);
+        }
+      }, 200);
+    };
+
+    initPayPal();
 
     return () => {
-      // cleanup if needed
+      if (checkInterval) clearInterval(checkInterval);
     };
   }, [planId, btnContainerId, clientId]);
 
@@ -154,7 +150,7 @@ export function PayPalButtonWrapper({
       {loading && (
         <div className="flex items-center justify-center gap-2 py-4 text-xs text-sky-400 font-mono">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span>Cargando opciones de pago (PayPal / Tarjeta)...</span>
+          <span>Cargando opciones de pago...</span>
         </div>
       )}
 

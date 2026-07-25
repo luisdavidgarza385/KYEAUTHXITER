@@ -79,13 +79,13 @@ export async function canAccessApp(me: AdminSession, appId: string): Promise<boo
 
 export async function hasUnlimitedQuota(me: AdminSession): Promise<boolean> {
   const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
-  if (me.email === bootstrapEmail) return true;
-  if (me.role === "admin") return true;
-  if (me.role === "seller") {
-    const admin = await store.getAdminById(me.id);
-    return admin?.credits === -1;
-  }
-  return false;
+  if (me.email.toLowerCase() === bootstrapEmail.toLowerCase()) return true;
+  const admin = await store.getAdminById(me.id);
+  if (!admin) return false;
+  if (admin.credits === -1) return true;
+  const hasPaidSub = Array.isArray(admin.subscriptions) && admin.subscriptions.length > 0;
+  const subNotExpired = admin.subscription_end ? new Date(admin.subscription_end).getTime() > Date.now() : false;
+  return hasPaidSub || subNotExpired;
 }
 
 export async function checkSubResellerExpiration(me: AdminSession): Promise<{ expired: boolean; reason?: string }> {

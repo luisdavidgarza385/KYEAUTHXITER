@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { store } from "@/lib/store";
 import { Star, Zap, Check, Lock, Users, Key, AppWindow, Shield, Headphones, Infinity } from "lucide-react";
+import { PayPalButtonWrapper } from "@/components/PayPalButtonWrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -185,23 +186,22 @@ export default async function UpgradePage() {
                 ))}
               </ul>
 
-              {/* CTA */}
-              {plan.ctaHref ? (
-                <a
-                  href={plan.ctaHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`w-full text-center px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${c.cta}`}
-                >
-                  {plan.cta}
-                </a>
-              ) : (
+              {/* CTA / PayPal Buttons */}
+              {plan.id === "free" ? (
                 <button
-                  disabled={plan.ctaDisabled}
+                  disabled
                   className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${c.cta}`}
                 >
-                  {plan.cta}
+                  Plan Gratuito Activo
                 </button>
+              ) : (
+                <div className="pt-2">
+                  <PayPalButtonWrapper
+                    planId={plan.id as "vip" | "unlimited"}
+                    planName={plan.name}
+                    price={plan.price}
+                  />
+                </div>
               )}
             </div>
           );

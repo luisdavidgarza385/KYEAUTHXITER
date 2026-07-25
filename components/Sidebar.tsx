@@ -23,6 +23,8 @@ import {
   AlertTriangle,
   User as UserIcon,
   X as XIcon,
+  Star,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +52,7 @@ const SECTIONS = [
       { href: "/dashboard/sub-resellers", label: "Sub-resellers", icon: Layers, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
       { href: "/dashboard/chat", label: "Chat Global", icon: MessageSquare, adminOnly: false },
+      { href: "/dashboard/upgrade", label: "⚡ Mejorar Plan", icon: Star, adminOnly: false, highlight: true },
     ],
   },
   {
@@ -255,15 +258,20 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
                       onClick={() => setIsOpen(false)}
                       className={cn(
                         "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold transition-all duration-200 group relative",
-                        active
-                          ? "bg-gradient-to-r from-sky-500/20 via-sky-500/10 to-transparent text-sky-300 border-l-2 border-sky-400 shadow-[0_0_15px_rgba(0,191,255,0.15)] font-bold"
-                          : "text-zinc-400 hover:bg-sky-500/5 hover:text-zinc-100 border-l-2 border-transparent"
+                        (n as any).highlight && !active
+                          ? "bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-transparent text-amber-300 border-l-2 border-amber-400/60 hover:border-amber-400 hover:text-amber-200 animate-pulse"
+                          : active
+                            ? "bg-gradient-to-r from-sky-500/20 via-sky-500/10 to-transparent text-sky-300 border-l-2 border-sky-400 shadow-[0_0_15px_rgba(0,191,255,0.15)] font-bold"
+                            : "text-zinc-400 hover:bg-sky-500/5 hover:text-zinc-100 border-l-2 border-transparent"
                       )}
                     >
-                      <n.icon className={cn("w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110", active ? "text-sky-400 filter drop-shadow-[0_0_5px_#00bfff]" : "text-zinc-500 group-hover:text-sky-300")} />
+                      <n.icon className={cn("w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110", active ? "text-sky-400 filter drop-shadow-[0_0_5px_#00bfff]" : (n as any).highlight ? "text-amber-400" : "text-zinc-500 group-hover:text-sky-300")} />
                       <span className="truncate tracking-wide">{n.label}</span>
                       {active && (
                         <span className="ml-auto w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_8px_#00bfff]" />
+                      )}
+                      {(n as any).highlight && !active && (
+                        <span className="ml-auto text-[9px] font-bold font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full">VIP</span>
                       )}
                     </Link>
                   );

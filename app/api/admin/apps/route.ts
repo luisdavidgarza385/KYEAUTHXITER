@@ -21,6 +21,27 @@ export async function POST(req: NextRequest) {
     const existing = await store.getAppByName(name);
     if (existing) return { status: 409, data: { success: false, message: "Application name already exists" } };
 
+    // Free plan: max 2 apps for non-superadmin users
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isSuperAdmin = admin.email.toLowerCase() === bootstrapEmail.toLowerCase();
+    if (!isSuperAdmin && admin.role !== "developer") {
+      const adminData = await store.getAdminById(admin.id);
+      const hasPaidPlan = Array.isArray(adminData?.subscriptions) && (adminData?.subscriptions?.length ?? 0) > 0;
+      if (!hasPaidPlan) {
+        const allApps = await store.listApps();
+        const myApps = allApps.filter((a) => a.owner_id === admin.id);
+        if (myApps.length >= 2) {
+          return {
+            status: 403,
+            data: {
+              success: false,
+              message: "Has alcanzado el límite del Plan Gratuito (máximo 2 aplicaciones). Actualiza a un Plan VIP para crear aplicaciones ilimitadas.",
+            },
+          };
+        }
+      }
+    }
+
     const app = await store.createApp({
       owner_id: admin.id,
       name,

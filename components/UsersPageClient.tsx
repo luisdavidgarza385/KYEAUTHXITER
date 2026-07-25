@@ -169,7 +169,7 @@ export function UsersPageClient({
       {/* Toolbar */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[240px] max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-650" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           <input
             type="text"
             placeholder="Buscar usuarios por nombre, IP..."
@@ -178,21 +178,21 @@ export function UsersPageClient({
               setSearchTerm(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg bg-zinc-950 border border-zinc-850 pl-10 pr-4 py-2 text-sm text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:border-emerald-500/50 transition-all"
+            className="w-full rounded-xl bg-[#020610] border border-sky-500/20 pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-sky-500/50 transition-all font-mono"
           />
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 flex-wrap">
           {/* Toggle Banned filter */}
           <button
             onClick={() => {
               setBannedFilter(bannedFilter === "all" ? "banned" : bannedFilter === "banned" ? "active" : "all");
               setPage(1);
             }}
-            title="Filter Status"
-            className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
+            title="Filtrar Estado"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center border transition ${
               bannedFilter !== "all"
-                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
-                : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
+                ? "border-sky-500/40 bg-sky-950/40 text-sky-300"
+                : "border-sky-500/20 bg-[#020610] text-zinc-400 hover:text-white"
             }`}
           >
             <Filter className="w-4 h-4" />
@@ -201,27 +201,28 @@ export function UsersPageClient({
           {/* Toggle View Mode */}
           <button
             onClick={() => setViewMode(viewMode === "table" ? "grid" : "table")}
-            title="Toggle View Mode"
-            className={`w-9 h-9 rounded-md flex items-center justify-center border transition ${
+            title="Cambiar Vista"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center border transition ${
               viewMode === "grid"
-                ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
-                : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200"
+                ? "border-sky-500/40 bg-sky-950/40 text-sky-300"
+                : "border-sky-500/20 bg-[#020610] text-zinc-400 hover:text-white"
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
 
-          {/* User Inline Creation */}
+          {/* User Inline Creation Button */}
           <CreateUserInlineButton
             apps={apps}
             defaultAppId={selectedAppId !== "all" ? selectedAppId : undefined}
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-emerald-500/40 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-900/30 transition"
+            label="Crear Usuario"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-sky-500/40 bg-sky-950/40 text-sky-300 text-xs font-bold hover:bg-sky-500/20 transition shadow-md shadow-sky-500/10"
           />
 
           {/* Bulk Delete Users Button */}
           <button
             onClick={() => setBulkOpen(true)}
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-danger/40 bg-danger/10 text-danger hover:bg-danger/20 transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-red-500/40 bg-red-950/30 text-red-400 hover:bg-red-950/50 transition"
             title="Eliminar usuarios"
           >
             <Trash2 className="w-4 h-4" />
@@ -230,8 +231,8 @@ export function UsersPageClient({
           {/* Toggle Sort by Date */}
           <button
             onClick={() => setSortByDate(sortByDate === "desc" ? "asc" : "desc")}
-            title={`Order: ${sortByDate === "desc" ? "Recientes" : "Antiguos"}`}
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 transition"
+            title={`Orden: ${sortByDate === "desc" ? "Recientes" : "Antiguos"}`}
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-sky-500/20 bg-[#020610] text-zinc-400 hover:text-white transition"
           >
             <Clock className={`w-4 h-4 transition-transform ${sortByDate === "asc" ? "rotate-180" : ""}`} />
           </button>
@@ -239,8 +240,8 @@ export function UsersPageClient({
           {/* Reset Search / Filters */}
           <button
             onClick={handleReset}
-            title="Reset Filters"
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 transition"
+            title="Reiniciar Filtros"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-sky-500/20 bg-[#020610] text-zinc-400 hover:text-white transition"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -248,8 +249,8 @@ export function UsersPageClient({
           {/* Export Filtered Users */}
           <button
             onClick={exportUsers}
-            title="Export to TXT"
-            className="w-9 h-9 rounded-md flex items-center justify-center border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 transition"
+            title="Exportar a TXT"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-sky-500/20 bg-[#020610] text-zinc-400 hover:text-white transition"
           >
             <FileText className="w-4 h-4" />
           </button>
@@ -264,10 +265,10 @@ export function UsersPageClient({
               setSelectedAppId("all");
               setPage(1);
             }}
-            className={`rounded-lg px-3.5 py-1.5 border transition ${
+            className={`rounded-xl px-3.5 py-2 border transition-all ${
               selectedAppId === "all"
-                ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
-                : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
+                ? "bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/30"
+                : "bg-[#020610] border-sky-500/20 text-zinc-400 hover:text-white hover:bg-sky-500/10"
             }`}
           >
             Todas las Apps
@@ -279,10 +280,10 @@ export function UsersPageClient({
                 setSelectedAppId(a.id);
                 setPage(1);
               }}
-              className={`rounded-lg px-3.5 py-1.5 border transition ${
+              className={`rounded-xl px-3.5 py-2 border transition-all ${
                 selectedAppId === a.id
-                  ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400"
-                  : "border-zinc-850 text-zinc-500 hover:text-zinc-350"
+                  ? "bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/30"
+                  : "bg-[#020610] border-sky-500/20 text-zinc-400 hover:text-white hover:bg-sky-500/10"
               }`}
             >
               {a.name}

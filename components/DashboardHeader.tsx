@@ -54,6 +54,18 @@ export function DashboardHeader({ email, role, apps }: { email: string; role: st
     router.refresh();
   }
 
+  const [customAvatar, setCustomAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    const updateAvatar = () => {
+      const saved = localStorage.getItem("spectral_x_avatar");
+      if (saved) setCustomAvatar(saved);
+    };
+    updateAvatar();
+    window.addEventListener("spectral-avatar-updated", updateAvatar);
+    return () => window.removeEventListener("spectral-avatar-updated", updateAvatar);
+  }, []);
+
   return (
     <header className="h-14 border-b border-border bg-bg-secondary/40 backdrop-blur-md flex items-center px-6 gap-4 sticky top-0 z-20">
       <button
@@ -162,8 +174,12 @@ export function DashboardHeader({ email, role, apps }: { email: string; role: st
           onClick={() => setMenuOpen((v) => !v)}
           className="flex items-center gap-2.5 pl-1.5 pr-2 py-1 rounded-md hover:bg-bg-hover transition"
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-blue-600 text-white text-xs font-bold flex items-center justify-center">
-            {initials}
+          <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-sky-500/40 bg-gradient-to-br from-accent to-blue-600 text-white text-xs font-bold flex items-center justify-center">
+            {customAvatar ? (
+              <img src={customAvatar} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              initials
+            )}
           </div>
           <div className="text-left hidden md:block">
             <div className="text-[13px] font-medium leading-tight">{email}</div>

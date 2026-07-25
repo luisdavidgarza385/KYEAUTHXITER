@@ -6,6 +6,7 @@ import { store } from "@/lib/store";
 import { GlobalBroadcastNotifier } from "@/components/GlobalBroadcastNotifier";
 import { GlobalMusicPlayer } from "@/components/GlobalMusicPlayer";
 import { GlobalCommandPalette } from "@/components/GlobalCommandPalette";
+import { CyberParticlesBackground } from "@/components/CyberParticlesBackground";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const me = await requireAdmin();
@@ -16,14 +17,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isSubReseller = me.role === "seller" && !!fullAdmin?.created_by;
 
   return (
-    <div className="theme-vyper flex min-h-screen bg-transparent text-text relative overflow-hidden">
-      {/* Video background */}
+    <div className="theme-vyper flex min-h-screen bg-[#01040a] text-text relative overflow-hidden">
+      {/* Cyber Animated Particles Background */}
+      <CyberParticlesBackground />
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover opacity-30"
+        className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover opacity-20"
       >
         <source src="/tunnel.mp4" type="video/mp4" />
       </video>

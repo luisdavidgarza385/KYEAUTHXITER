@@ -2,6 +2,7 @@ export interface Admin {
   id: string;
   email: string;
   username?: string;
+  avatar_url?: string | null;
   password_hash: string;
   role: string;
   created_at: string;

@@ -340,7 +340,7 @@ export default function SubResellersPage() {
         
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg bg-emerald-650 hover:bg-emerald-550 text-white transition-all shadow-md shadow-emerald-500/10"
+          className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-sky-500 hover:bg-sky-400 active:scale-[0.98] text-white transition-all shadow-lg shadow-sky-500/25"
         >
           <Plus className="w-4 h-4" /> Crear sub-reseller
         </button>
@@ -348,33 +348,33 @@ export default function SubResellersPage() {
 
       {/* Search Bar */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-650" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
         <input
           type="text"
-          placeholder="Buscar sub-resellers..."
+          placeholder="Buscar sub-resellers por usuario o ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-zinc-950 border border-zinc-855 rounded-lg pl-10 pr-4 py-2 text-sm text-zinc-250 placeholder:text-zinc-650 outline-none focus:border-emerald-500/50 transition"
+          className="w-full bg-[#020610] border border-sky-500/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-sky-500/50 transition font-mono"
         />
       </div>
 
       {/* Main List */}
       {loading ? (
-        <div className="py-20 flex items-center justify-center gap-2 text-zinc-500 text-sm">
-          <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
-          <span>Cargando vendedores...</span>
+        <div className="py-20 flex items-center justify-center gap-2 text-zinc-400 text-sm">
+          <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+          <span>Cargando vendedores afiliados...</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/20 py-16 text-center">
-          <Users className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-zinc-400">No se encontraron sub-resellers</p>
-          <p className="text-xs text-zinc-550 mt-1">Usa el botón superior para crear tu primer vendedor.</p>
+        <div className="rounded-2xl border border-sky-500/20 bg-[#030914]/80 backdrop-blur-xl py-16 text-center shadow-xl">
+          <Users className="w-10 h-10 text-sky-500/40 mx-auto mb-3" />
+          <p className="text-sm font-semibold text-zinc-300">No se encontraron sub-resellers</p>
+          <p className="text-xs text-zinc-500 mt-1">Usa el botón superior para crear tu primer vendedor.</p>
         </div>
       ) : (
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 overflow-hidden shadow-2xl">
+        <div className="rounded-2xl border border-sky-500/20 bg-[#030914]/80 backdrop-blur-xl overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-zinc-950 text-zinc-500 text-[10px] font-bold uppercase tracking-wider border-b border-zinc-800/80">
+              <thead className="bg-[#050e20] text-sky-400/80 text-[10px] font-bold uppercase tracking-wider border-b border-sky-500/15">
                 <tr>
                   <th className="px-5 py-3.5">Usuario</th>
                   <th className="px-5 py-3.5">ID Aplicación (API Key)</th>
@@ -388,7 +388,7 @@ export default function SubResellersPage() {
                   <th className="px-5 py-3.5 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/50">
+              <tbody className="divide-y divide-sky-500/10">
                 {filtered.map((sub) => {
                   const subIdClean = sub.id.slice(0, 15).replace("-", "");
                   return (

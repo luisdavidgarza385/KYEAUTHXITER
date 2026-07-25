@@ -21,6 +21,7 @@ import {
   Binary,
   Clock,
   AlertTriangle,
+  User as UserIcon,
   X as XIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -54,6 +55,7 @@ const SECTIONS = [
   {
     label: "CUENTA",
     items: [
+      { href: "/dashboard/profile", label: "Perfil / Avatar", icon: UserIcon, adminOnly: false },
       { href: "/dashboard/security", label: "Seguridad (2FA)", icon: Lock, adminOnly: false },
       { href: "/dashboard/api", label: "API", icon: Code, adminOnly: false },
       { href: "/dashboard/settings", label: "Configuración", icon: Settings, adminOnly: true },
@@ -68,7 +70,16 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
   const [dark, setDark] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
+  const [customAvatar, setCustomAvatar] = useState<string | null>(null);
+
   useEffect(() => {
+    const updateAvatar = () => {
+      const saved = localStorage.getItem("spectral_x_avatar");
+      if (saved) setCustomAvatar(saved);
+    };
+    updateAvatar();
+    window.addEventListener("spectral-avatar-updated", updateAvatar);
+
     const handleToggle = () => setIsOpen((prev) => !prev);
     const handleClose = () => setIsOpen(false);
 
@@ -238,8 +249,8 @@ export function Sidebar({ role, email, isSubReseller = false, subscriptionEnd = 
       <div className="p-4 border-t border-sky-500/15 bg-[#020712]/80">
         <div className="rounded-2xl bg-[#050e1f]/80 border border-sky-500/20 p-3.5 space-y-3 shadow-xl backdrop-blur-md">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-sky-500/40 shadow-md shadow-sky-500/20 shrink-0">
-              <img src="/logo.png" alt="Sukuna" className="w-full h-full object-cover" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-sky-500/40 shadow-md shadow-sky-500/20 shrink-0 bg-[#050e20]">
+              <img src={customAvatar || "/logo.png"} alt="Avatar" className="w-full h-full object-cover" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="font-bold text-sm text-white truncate tracking-wide">{capitalizedUsername}</div>

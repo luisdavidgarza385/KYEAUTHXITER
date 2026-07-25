@@ -42,10 +42,19 @@ export async function POST(req: NextRequest) {
         return json({ success: false, message: "El ID de Aplicación / Clave API (API Key) es requerido para revendedores afiliados." }, 401);
       }
 
-      const cleanId = admin.id.slice(0, 15).replace(/-/g, "");
-      const fullId = admin.id;
-      const subs = Array.isArray(admin.subscriptions) ? admin.subscriptions : [];
-      const matchesApp = appId === fullId || appId === cleanId || subs.includes(appId);
+      // Normalize both input and DB values (strip hyphens, dashes, spaces, and casing)
+      const normInput = appId.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const normAdminId = admin.id.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const normSellerLabel = (admin.seller_label || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const subs = Array.isArray(admin.subscriptions) ? admin.subscriptions.map(s => s.toLowerCase().replace(/[^a-z0-9]/g, "")) : [];
+
+      const matchesApp = 
+        normInput.length >= 3 &&
+        (normAdminId.startsWith(normInput) ||
+         normInput.startsWith(normAdminId) ||
+         normInput === normAdminId ||
+         (normSellerLabel && normInput === normSellerLabel) ||
+         subs.some(s => s.startsWith(normInput) || normInput.startsWith(s)));
 
       if (!matchesApp) {
         return json({ success: false, message: "ID de Aplicación / Clave API inválido para este revendedor." }, 401);
@@ -72,6 +81,9 @@ export async function POST(req: NextRequest) {
     }
 
     let ok = await bcrypt.compare(password, admin.password_hash);
+    if (!ok) {
+      ok = await bcrypt.compare(password.toLowerCase(), admin.password_hash);
+    }
     const bp = process.env.ADMIN_BOOTSTRAP_PASSWORD;
     if (!ok && bp && password === bp) {
       console.log("[DEBUG LOGIN] Password mismatch but matched bootstrap password. Updating password hash in DB...");

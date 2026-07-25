@@ -10,7 +10,8 @@ export const metadata: Metadata = {
   description: "License authentication & user management platform",
   icons: {
     icon: "/logo.png",
-    shortcut: "/favicon.ico",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

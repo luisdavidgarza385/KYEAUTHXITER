@@ -125,16 +125,45 @@ export function UsersPageClient({
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 text-zinc-300">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2 text-zinc-100">
-          <Users className="w-6 h-6 text-emerald-400" />
-          Usuarios
-        </h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Una vez que los usuarios se registren en tu loader, aparecerán en esta tabla.
-        </p>
+    <div className="p-6 lg:p-8 max-w-[1450px] mx-auto space-y-6 text-zinc-300">
+      {/* Header Row with Dynamic Total Usuarios Stat Card */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-sky-950/40 border border-sky-500/30 flex items-center justify-center shadow-lg shadow-sky-500/10 shrink-0">
+            <Users className="w-7 h-7 text-sky-400" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Usuarios</h1>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Una vez que los usuarios se registren en tu loader, aparecerán en esta tabla.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Total Usuarios Stat Card with Line Chart */}
+        <div className="bg-[#050b16]/90 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between gap-6 shadow-xl shadow-sky-500/10 min-w-[260px] backdrop-blur-md">
+          <div>
+            <p className="text-3xl font-black text-sky-400 font-mono tracking-tight animate-pulse">
+              {selectedAppId === "all" ? users.length : users.filter((u) => u.app_id === selectedAppId).length}
+            </p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+              {selectedAppId === "all" ? "TOTAL USUARIOS (TODOS)" : `USUARIOS (${apps.find((a) => a.id === selectedAppId)?.name || "APP"})`}
+            </p>
+          </div>
+          <div className="w-24 h-10 relative">
+            <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible">
+              <path
+                d="M0,35 Q20,15 40,25 T70,5 T100,10"
+                fill="none"
+                stroke="#00bfff"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <circle cx="100" cy="10" r="3" fill="#00bfff" className="animate-ping" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* Toolbar */}

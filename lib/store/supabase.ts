@@ -24,11 +24,12 @@ function id(): string {
 const db = () => supabaseAdmin() as any;
 
 export const supabaseStore: Store = {
-  async getAdminByEmail(email) {
+  async getAdminByEmail(emailOrUsername) {
+    const e = emailOrUsername.toLowerCase();
     const { data } = await db()
       .from("admin_users")
       .select("*")
-      .eq("email", email)
+      .or(`email.ilike.${e},seller_label.ilike.${e}`)
       .maybeSingle();
     return data as Admin | null;
   },
@@ -50,6 +51,7 @@ export const supabaseStore: Store = {
         password_hash: data.password_hash,
         role: data.role,
         created_by: data.created_by || null,
+        seller_label: data.seller_label || data.email.split("@")[0],
         credits: data.credits || 0,
         status: data.status || "active",
         permissions: data.permissions || [],

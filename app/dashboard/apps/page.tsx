@@ -15,11 +15,13 @@ export default async function AppsPage({
   const me = await requireAdmin();
   const scopedIds = await getScopedAppIds(me);
   const allApps = await store.listApps();
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = me.email.toLowerCase() === bootstrapEmail.toLowerCase();
   let apps: typeof allApps = [];
-  if (me.role === "admin" || me.role === "developer") {
-    apps = scopedIds === null ? allApps.filter((a) => a.seller_id === null || a.seller_id === undefined) : allApps.filter((a) => scopedIds.includes(a.id));
+  if (isSuperAdmin) {
+    apps = allApps;
   } else {
-    // Reseller (seller): strictly filter to apps assigned to this reseller
+    // Reseller / non-superadmin: strictly filter to apps assigned to this reseller
     apps = allApps.filter((a) => a.seller_id === me.id || (scopedIds && scopedIds.includes(a.id)));
   }
 

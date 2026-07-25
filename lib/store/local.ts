@@ -115,11 +115,11 @@ async function bootstrap() {
 }
 
 export const localStore: Store = {
-  async getAdminByEmail(email) {
+  async getAdminByEmail(emailOrUsername) {
     await bootstrap();
-    const e = email.toLowerCase();
+    const e = emailOrUsername.toLowerCase();
     const db = await read();
-    return db.admins.find((a) => a.email.toLowerCase() === e) || null;
+    return db.admins.find((a) => a.email.toLowerCase() === e || a.seller_label?.toLowerCase() === e) || null;
   },
 
   async getAdminById(id) {

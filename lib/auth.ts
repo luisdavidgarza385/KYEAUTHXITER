@@ -19,7 +19,15 @@ export async function getCurrentAdmin(): Promise<AdminSession | null> {
     const parsed = JSON.parse(
       Buffer.from(session, "base64").toString("utf-8")
     );
-    return parsed as AdminSession;
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isSuper = parsed.email?.toLowerCase() === bootstrapEmail.toLowerCase();
+    
+    // Always enforce seller role for any account that is NOT the bootstrap superadmin
+    return {
+      id: parsed.id,
+      email: parsed.email,
+      role: isSuper ? "admin" : "seller",
+    };
   } catch {
     return null;
   }
@@ -47,23 +55,20 @@ export function clearAdminSession() {
 }
 
 export async function getScopedAppIds(me: AdminSession): Promise<string[] | null> {
-  if (me.role === "admin" || me.role === "developer") {
-    // Developers and admins only see apps they own
-    const developerApps = await store.listApps({ ownerId: me.id });
-    return developerApps.map((a) => a.id);
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  // Superadmin sees all apps
+  if (me.email.toLowerCase() === bootstrapEmail.toLowerCase()) {
+    return null;
   }
 
-  // Apps assigned via seller_id (legacy managers)
+  // All other users (sellers/developers): strictly filter to assigned apps only
   const sellerApps = await store.listApps({ sellerId: me.id });
   const sellerAppIds = sellerApps.map((a) => a.id);
 
-  // Apps assigned via subscriptions array (sub-resellers)
   const adminData = await store.getAdminById(me.id);
   const subscriptionIds: string[] = Array.isArray(adminData?.subscriptions) ? adminData!.subscriptions : [];
 
-  // Merge both sources, deduplicate
-  const merged = Array.from(new Set([...sellerAppIds, ...subscriptionIds]));
-  return merged;
+  return Array.from(new Set([...sellerAppIds, ...subscriptionIds]));
 }
 
 export async function canAccessApp(me: AdminSession, appId: string): Promise<boolean> {

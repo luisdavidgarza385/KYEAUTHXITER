@@ -17,21 +17,25 @@ export async function POST(req: NextRequest) {
     }
 
     const email = String(body?.email || "").trim().toLowerCase();
+    const username = String(body?.username || "").trim();
     const password = String(body?.password || "");
     if (!email || !password) {
-      return json({ success: false, message: "email and password required" }, 400);
+      return json({ success: false, message: "Correo y contraseña son requeridos" }, 400);
     }
     if (password.length < 5) {
       return json({ success: false, message: "La contraseña debe tener al menos 5 caracteres" }, 400);
     }
     if (email.length < 3) {
-      return json({ success: false, message: "Username or email must be at least 3 characters" }, 400);
+      return json({ success: false, message: "El usuario o correo debe tener al menos 3 caracteres" }, 400);
     }
 
+    const sellerLabel = username ? username.toLowerCase() : email.split("@")[0];
+
     // Prevent duplicate emails AND usernames
-    const existing = await store.getAdminByEmail(email);
-    if (existing) {
-      return json({ success: false, message: "Este correo electrónico ya está registrado. Usa otro o inicia sesión." }, 409);
+    const existingByEmail = await store.getAdminByEmail(email);
+    const existingByUsername = username ? await store.getAdminByEmail(username) : null;
+    if (existingByEmail || existingByUsername) {
+      return json({ success: false, message: "Este usuario o correo electrónico ya está registrado. Usa otro o inicia sesión." }, 409);
     }
 
     // New registrations are always sellers (resellers), NOT developers
@@ -42,6 +46,7 @@ export async function POST(req: NextRequest) {
       email,
       password_hash: hash,
       role,
+      seller_label: sellerLabel,
       credits: 3000,
       status: "active",
       permissions: ["generar", "hwid", "ban", "delete"]

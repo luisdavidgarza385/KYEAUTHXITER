@@ -160,6 +160,7 @@ export interface Store {
     password_hash: string;
     role: string;
     created_by?: string | null;
+    seller_label?: string;
     credits?: number;
     status?: string;
     permissions?: string[];

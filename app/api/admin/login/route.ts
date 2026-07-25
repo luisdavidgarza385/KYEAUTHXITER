@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       return json({ success: false, message: "email and password required" }, 400);
     }
 
-    console.log("[DEBUG LOGIN] Attempting login for:", email, "App ID:", appId);
+    console.log("[DEBUG LOGIN] Attempting login for:", email);
 
     let admin = null;
     try {
@@ -31,21 +31,6 @@ export async function POST(req: NextRequest) {
       console.log("[DEBUG LOGIN] Found admin in DB:", admin ? "YES" : "NO");
     } catch (dbErr: any) {
       console.error("[DEBUG LOGIN] Error getting admin from DB:", dbErr);
-    }
-
-    // Reseller Verification Flow
-    if (admin && admin.role === "seller") {
-      if (!appId) {
-        return json({ success: false, message: "ID de Aplicación es requerido para revendedores" }, 401);
-      }
-      const cleanId = admin.id.slice(0, 15).replace("-", "");
-      if (appId !== admin.id && appId !== cleanId) {
-        return json({ success: false, message: "ID de Aplicación inválido para este revendedor" }, 401);
-      }
-    } else if (appId && admin) {
-      if (admin.role !== "seller") {
-        return json({ success: false, message: "El usuario no es un revendedor" }, 401);
-      }
     }
 
     if (!admin) {

@@ -15,14 +15,8 @@ export default async function AppsPage({
   const me = await requireAdmin();
   const scopedIds = await getScopedAppIds(me);
   const allApps = await store.listApps();
-  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
-  const isSuperAdmin = me.email.toLowerCase() === bootstrapEmail.toLowerCase();
-  let apps: typeof allApps = [];
-  if (isSuperAdmin) {
-    apps = allApps;
-  } else {
-    apps = allApps.filter((a) => a.seller_id === me.id || (scopedIds && scopedIds.includes(a.id)));
-  }
+  // Every user (admin or reseller) strictly sees ONLY applications they created/own
+  const apps = allApps.filter((a) => a.owner_id === me.id || a.seller_id === me.id || (scopedIds && scopedIds.includes(a.id)));
 
   const userCounts = new Map<string, number>();
   for (const a of apps) {
@@ -42,6 +36,9 @@ export default async function AppsPage({
   const filtered = q ? apps.filter((a) => a.name.toLowerCase().includes(q) || a.app_id.toLowerCase().includes(q)) : apps;
   const selectedId = searchParams.selected || apps[0]?.id || null;
   const selectedApp = selectedId ? apps.find((a) => a.id === selectedId) || null : null;
+
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = me.email.toLowerCase() === bootstrapEmail.toLowerCase();
 
   // Compute quota for non-superadmin
   const quota = !isSuperAdmin ? await checkQuota(me, apps[0]?.id || "none") : null;
@@ -87,7 +84,7 @@ export default async function AppsPage({
                 </div>
               </div>
               <a
-                href="/dashboard/subscriptions"
+                href="/dashboard/upgrade"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold transition-all shadow-lg shadow-sky-500/25 shrink-0"
               >
                 <Star className="w-3.5 h-3.5" />
@@ -184,7 +181,7 @@ export default async function AppsPage({
               <p className="text-xs text-zinc-400 mt-0.5">Ya tienes 2 aplicaciones (límite del Plan Gratuito). Actualiza a <span className="text-amber-300 font-semibold">Plan VIP</span> para crear aplicaciones ilimitadas.</p>
             </div>
             <a
-              href="/dashboard/subscriptions"
+              href="/dashboard/upgrade"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white text-xs font-bold transition-all shadow-lg shadow-amber-500/20 shrink-0"
             >
               <TrendingUp className="w-3.5 h-3.5" />

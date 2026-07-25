@@ -56,28 +56,25 @@ export function clearAdminSession() {
 
 export async function getScopedAppIds(me: AdminSession): Promise<string[] | null> {
   const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
-  // Superadmin sees all apps
-  if (me.email.toLowerCase() === bootstrapEmail.toLowerCase()) {
-    return null;
-  }
 
-  // All other users (sellers/developers): strictly filter to assigned apps only
-  const sellerApps = await store.listApps({ sellerId: me.id });
-  const sellerAppIds = sellerApps.map((a) => a.id);
+  const [ownedApps, sellerApps] = await Promise.all([
+    store.listApps({ ownerId: me.id }),
+    store.listApps({ sellerId: me.id }),
+  ]);
+  const userAppIds = [...ownedApps.map((a) => a.id), ...sellerApps.map((a) => a.id)];
 
   const adminData = await store.getAdminById(me.id);
   const subscriptionIds: string[] = Array.isArray(adminData?.subscriptions) ? adminData!.subscriptions : [];
 
-  return Array.from(new Set([...sellerAppIds, ...subscriptionIds]));
+  return Array.from(new Set([...userAppIds, ...subscriptionIds]));
 }
 
 export async function canAccessApp(me: AdminSession, appId: string): Promise<boolean> {
-  if (me.role === "admin" || me.role === "developer") {
-    const app = await store.getAppById(appId);
-    return app?.owner_id === me.id;
-  }
-  const apps = await store.listApps({ sellerId: me.id });
-  return apps.some((a) => a.id === appId);
+  const app = await store.getAppById(appId);
+  if (!app) return false;
+  if (app.owner_id === me.id || app.seller_id === me.id) return true;
+  const scopedIds = await getScopedAppIds(me);
+  return scopedIds !== null && scopedIds.includes(appId);
 }
 
 export async function hasUnlimitedQuota(me: AdminSession): Promise<boolean> {

@@ -394,6 +394,9 @@ export function LoginForm() {
                 />
                 <span>Recordar en este navegador</span>
               </label>
+              <a href="/forgot-password" className="text-sky-400 hover:text-sky-300 transition-colors font-medium">
+                ¿Olvidaste tu contraseña?
+              </a>
             </div>
 
             <button type="submit" disabled={loading} className={styles.submitBtn}>

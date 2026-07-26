@@ -1,100 +1,118 @@
 "use client";
+
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, KeyRound, ArrowLeft, Check } from "lucide-react";
+import { Mail, ArrowLeft, Loader2, CheckCircle, Shield } from "lucide-react";
+import { ParticlesBackground } from "@/components/ParticlesBackground";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function submit() {
-    if (!email) { setErr("Email is required"); return; }
-    if (!newPassword || newPassword.length < 6) { setErr("New password must be at least 6 characters"); return; }
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
     setLoading(true);
-    setErr(null);
     try {
-      const res = await fetch("/api/admin/reset-password", {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword }),
+        body: JSON.stringify({ email }),
       });
       const data = await res.json();
-      if (!res.ok) { setErr(data.message || "Error"); return; }
-      setDone(true);
+      if (!res.ok) {
+        setError(data.message || "Error al enviar el correo.");
+        return;
+      }
+      setSent(true);
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-bg">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-accent/30">
-            <img src="/logo.png" alt="Spectral X" className="w-full h-full object-cover" />
-          </div>
-          <span className="text-2xl font-bold tracking-tight">Spectral X</span>
-        </div>
+    <div className="min-h-screen relative flex items-center justify-center bg-[#010309] text-zinc-100 overflow-hidden font-sans p-4">
+      <ParticlesBackground />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,191,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,191,255,0.03)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] pointer-events-none" />
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial from-sky-500/15 via-blue-600/8 to-transparent blur-3xl animate-pulse" style={{ animationDuration: "8s" }} />
+      </div>
 
-        <div className="card !p-6">
-          <Link href="/login" className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text mb-3">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to login
+      <div className="w-full max-w-[420px] relative z-10">
+        <div className="absolute -inset-2 bg-gradient-to-r from-sky-500/20 via-blue-600/15 to-sky-400/20 rounded-3xl blur-2xl opacity-60 pointer-events-none animate-pulse" />
+
+        <div className="relative bg-[#050d1a]/90 backdrop-blur-xl border border-sky-500/20 rounded-2xl p-8 shadow-2xl shadow-sky-500/5">
+          <Link href="/login" className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-sky-400 transition-colors mb-6">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Volver al inicio de sesión
           </Link>
-          <div className="flex items-center gap-2 mb-1">
-            <KeyRound className="w-5 h-5 text-accent-glow" />
-            <h1 className="text-xl font-semibold">Reset your password</h1>
-          </div>
-          <p className="text-sm text-text-muted mb-5">
-            Enter your account email and a new password. This works for self-hosted Spectral X instances where the admin doesn&apos;t have email delivery set up.
-          </p>
 
-          {done ? (
-            <div className="space-y-3">
-              <div className="rounded-md bg-success/10 border border-success/30 px-3 py-3 text-sm text-success flex items-start gap-2">
-                <Check className="w-4 h-4 mt-0.5 shrink-0" />
-                <div>
-                  <div className="font-semibold">Password updated</div>
-                  <div className="text-xs mt-0.5">You can now log in with your new password.</div>
-                </div>
-              </div>
-              <Link href="/login" className="btn-primary text-sm w-full text-center">Go to login</Link>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-sky-500/40 shadow-lg shadow-sky-500/20">
+              <img src="/logo.png" alt="SecureX Auth" className="w-full h-full object-cover" />
             </div>
-          ) : (
-            <div className="space-y-3">
-              <div>
-                <label className="label">Email</label>
-                <input
-                  className="input"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                />
+            <div>
+              <h1 className="text-base font-extrabold tracking-wider text-white uppercase">SecureX Auth</h1>
+              <p className="text-[10px] text-sky-400/70 font-mono tracking-widest">RECUPERACIÓN DE CUENTA</p>
+            </div>
+          </div>
+
+          {!sent ? (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-white mb-1">¿Olvidaste tu contraseña?</h2>
+                <p className="text-sm text-zinc-400">Ingresa tu correo electrónico y te enviaremos un enlace para restablecerla.</p>
               </div>
-              <div>
-                <label className="label">New password</label>
-                <input
-                  className="input"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                />
-              </div>
-              {err && (
-                <div className="rounded-md bg-danger/10 border border-danger/30 px-3 py-2 text-sm text-danger">
-                  {err}
+
+              {error && (
+                <div className="mb-4 px-4 py-3 rounded-xl bg-red-950/40 border border-red-500/30 text-red-400 text-sm">
+                  {error}
                 </div>
               )}
-              <button onClick={submit} disabled={loading} className="btn-primary text-sm w-full">
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Reset password"}
-              </button>
-              <p className="text-[11px] text-text-dim text-center">
-                In a production deployment with SMTP, this would send a reset link to your email.
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">Correo Electrónico</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="tu@correo.com"
+                      className="w-full bg-[#080f1d] border border-sky-500/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/20 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || !email}
+                  className="w-full bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+                  {loading ? "Enviando..." : "Enviar Enlace de Recuperación"}
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-emerald-400" />
+              </div>
+              <h2 className="text-lg font-bold text-white mb-2">¡Correo Enviado!</h2>
+              <p className="text-sm text-zinc-400 mb-1">
+                Si <strong className="text-zinc-200">{email}</strong> está registrado, recibirás un enlace en los próximos minutos.
               </p>
+              <p className="text-xs text-zinc-500 mb-6">Revisa también tu carpeta de spam.</p>
+              <Link href="/login" className="text-sm font-semibold text-sky-400 hover:text-sky-300 transition-colors">
+                ← Volver al inicio de sesión
+              </Link>
             </div>
           )}
         </div>

@@ -151,7 +151,7 @@ export function RegisterForm() {
             Términos de Servicio
           </Link>{" "}
           y la{" "}
-          <Link href="/terms" className="text-sky-400 hover:text-sky-300 underline underline-offset-2 transition-colors">
+          <Link href="/privacy" className="text-sky-400 hover:text-sky-300 underline underline-offset-2 transition-colors">
             Política de Privacidad
           </Link>
         </span>

@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { resetTokenStore } from "@/lib/reset-token-store";
+import { checkRateLimit, LOGIN_RATE_LIMIT } from "@/lib/rate-limit";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
+    // ─── Rate limiting: max 8/min per IP ───
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rl = checkRateLimit(`forgot:${ip}`, LOGIN_RATE_LIMIT);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, message: "Demasiados intentos. Espera unos minutos." }, { status: 429 });
+    }
+
     const { email } = await req.json().catch(() => ({}));
 
     if (!email || typeof email !== "string") {

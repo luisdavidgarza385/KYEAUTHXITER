@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { store } from "@/lib/store";
+import { checkRateLimit, LOGIN_RATE_LIMIT } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   const json = (data: unknown, status = 200) =>
     NextResponse.json(data, { status });
+
+  // ─── Rate limiting: max 8 attempts/min per IP, 15 min block ───
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+  const rl = checkRateLimit(`login:${ip}`, LOGIN_RATE_LIMIT);
+  if (!rl.allowed) {
+    return json({ success: false, message: `Demasiados intentos. Intenta de nuevo en ${Math.ceil(rl.retryAfterSec / 60)} minutos.` }, 429);
+  }
 
   try {
     let body: any;

@@ -61,8 +61,8 @@ const PLANS = [
     id: "unlimited",
     name: "Plan Ilimitado",
     price: "$7.99",
-    period: "/ mes",
-    description: "Para operaciones de gran escala",
+    period: "/ año",
+    description: "Para operaciones de gran escala (365 días)",
     badge: "👑 Premium",
     color: "amber",
     features: [

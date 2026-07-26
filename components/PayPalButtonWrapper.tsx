@@ -113,6 +113,7 @@ export function PayPalButtonWrapper({
         attempts++;
         if (window.paypal) {
           clearInterval(checkInterval);
+          setLoading(false);
           renderButtons();
         } else if (attempts > 50) {
           clearInterval(checkInterval);
@@ -148,9 +149,9 @@ export function PayPalButtonWrapper({
       )}
 
       {loading && (
-        <div className="flex items-center justify-center gap-2 py-4 text-xs text-sky-400 font-mono">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span>Cargando opciones de pago...</span>
+        <div className="flex items-center justify-center gap-2 py-2 text-xs text-sky-400 font-mono animate-pulse">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-400" />
+          <span>Cargando botones de pago...</span>
         </div>
       )}
 
@@ -158,7 +159,7 @@ export function PayPalButtonWrapper({
 
       <div className="flex items-center justify-center gap-1.5 text-[10px] text-zinc-500 font-mono">
         <CreditCard className="w-3 h-3 text-zinc-400" />
-        <span>Acepta PayPal y Tarjetas de Crédito / Débito</span>
+        <span>Acepta PayPal y Tarjetas de Crédito / Débito sin cuenta</span>
       </div>
     </div>
   );

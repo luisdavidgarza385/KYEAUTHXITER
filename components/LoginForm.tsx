@@ -61,9 +61,15 @@ export function LoginForm() {
       if (remember) {
         localStorage.setItem("ka_remember_email", email);
         localStorage.setItem("ka_remember_password", password);
+        localStorage.setItem("ka_remember_role", roleMode);
+        if (appId) {
+          localStorage.setItem("ka_remember_app_id", appId);
+        }
       } else {
         localStorage.removeItem("ka_remember_email");
         localStorage.removeItem("ka_remember_password");
+        localStorage.removeItem("ka_remember_role");
+        localStorage.removeItem("ka_remember_app_id");
       }
 
       const payload: Record<string, string | boolean> = { email, password, remember, roleMode };

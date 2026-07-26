@@ -82,8 +82,8 @@ export default function Home() {
             <a href="#features" className="hover:text-sky-400 transition-colors">Features</a>
             <Link href="/docs" className="hover:text-sky-400 transition-colors">API</Link>
             <Link href="/docs" className="hover:text-sky-400 transition-colors">Docs</Link>
-            <Link href="/dashboard/shop" className="hover:text-sky-400 transition-colors">Pricing</Link>
-            <Link href="/asistente/login" className="hover:text-sky-400 transition-colors">Support</Link>
+            <Link href="/dashboard/upgrade" className="hover:text-sky-400 transition-colors">Pricing</Link>
+            <Link href="/asistente" className="hover:text-sky-400 transition-colors">Support</Link>
           </nav>
 
           <div className="flex items-center gap-4">

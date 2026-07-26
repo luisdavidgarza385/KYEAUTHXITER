@@ -20,7 +20,7 @@ const nextConfig = {
         source: "/:path*",
         headers: [
           // ─── Clickjacking protection ───
-          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
           // ─── MIME sniffing protection ───
           { key: "X-Content-Type-Options", value: "nosniff" },
           // ─── Referrer policy ───
@@ -38,28 +38,24 @@ const nextConfig = {
             value: "max-age=31536000; includeSubDomains; preload",
           },
           // ─── Content Security Policy ───
-          // Allows scripts from self + PayPal SDK + prevents inline injections
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.paypalobjects.com https://pay.google.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://pay.google.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https: https://www.paypalobjects.com https://t.paypal.com",
-              "connect-src 'self' https://api.resend.com https://api-m.paypal.com https://www.paypal.com https://*.supabase.co wss://*.supabase.co",
-              "frame-src https://www.paypal.com https://www.sandbox.paypal.com",
-              "frame-ancestors 'none'",
+              "img-src 'self' data: blob: https: https://www.paypalobjects.com https://*.paypal.com https://t.paypal.com",
+              "connect-src 'self' https://api.resend.com https://api-m.paypal.com https://www.paypal.com https://*.paypal.com https://*.supabase.co wss://*.supabase.co",
+              "frame-src 'self' https://www.paypal.com https://*.paypal.com https://www.sandbox.paypal.com",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://www.paypal.com https://*.paypal.com",
               "upgrade-insecure-requests",
             ].join("; "),
           },
-          // ─── Hide server tech info ───
+          // ─── Hide server tech info + Allow PayPal Popups ───
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
         ],
       },
       // ─── API routes: no caching + strict headers ───
@@ -73,8 +69,6 @@ const nextConfig = {
       },
     ];
   },
-
-  // ─── Redirect HTTP → HTTPS is handled by Vercel automatically ───
 };
 
 module.exports = nextConfig;

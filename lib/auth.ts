@@ -19,14 +19,23 @@ function signToken(dataStr: string): string {
 }
 
 function verifyToken(tokenStr: string): string | null {
+  if (!tokenStr) return null;
   const lastDot = tokenStr.lastIndexOf(".");
-  if (lastDot === -1) return tokenStr; // Fallback for legacy unsigned cookies
-  const rawData = tokenStr.slice(0, lastDot);
-  const signature = tokenStr.slice(lastDot + 1);
-  const expected = crypto.createHmac("sha256", AUTH_SECRET).update(rawData).digest("hex");
-  if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
-    return rawData;
+  if (lastDot !== -1) {
+    const rawData = tokenStr.slice(0, lastDot);
+    const signature = tokenStr.slice(lastDot + 1);
+    const expected = crypto.createHmac("sha256", AUTH_SECRET).update(rawData).digest("hex");
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    if (sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return rawData;
+    }
   }
+  // Fallback for legacy unsigned cookies
+  try {
+    const rawParsed = JSON.parse(Buffer.from(tokenStr, "base64").toString("utf-8"));
+    if (rawParsed?.id && rawParsed?.email) return tokenStr;
+  } catch {}
   return null;
 }
 

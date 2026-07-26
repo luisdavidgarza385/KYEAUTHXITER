@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "./supabase/server";
 import { store } from "./store";
+import crypto from "crypto";
 
 export type AdminSession = {
   id: string;
@@ -10,19 +11,41 @@ export type AdminSession = {
 };
 
 const COOKIE_NAME = "ka_admin_session";
+const AUTH_SECRET = process.env.AUTH_SECRET || "securex_auth_super_secret_hmac_key_2026";
+
+function signToken(dataStr: string): string {
+  const hmac = crypto.createHmac("sha256", AUTH_SECRET).update(dataStr).digest("hex");
+  return `${dataStr}.${hmac}`;
+}
+
+function verifyToken(tokenStr: string): string | null {
+  const lastDot = tokenStr.lastIndexOf(".");
+  if (lastDot === -1) return tokenStr; // Fallback for legacy unsigned cookies
+  const rawData = tokenStr.slice(0, lastDot);
+  const signature = tokenStr.slice(lastDot + 1);
+  const expected = crypto.createHmac("sha256", AUTH_SECRET).update(rawData).digest("hex");
+  if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+    return rawData;
+  }
+  return null;
+}
 
 export async function getCurrentAdmin(): Promise<AdminSession | null> {
   const cookieStore = cookies();
   const session = cookieStore.get(COOKIE_NAME)?.value;
   if (!session) return null;
   try {
+    const verified = verifyToken(session);
+    if (!verified) return null; // Invalid signature -> reject untrusted cookie
+
     const parsed = JSON.parse(
-      Buffer.from(session, "base64").toString("utf-8")
+      Buffer.from(verified, "base64").toString("utf-8")
     );
+    if (!parsed?.id || !parsed?.email) return null;
+
     const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
     const isSuper = parsed.email?.toLowerCase() === bootstrapEmail.toLowerCase();
     
-    // Always enforce seller role for any account that is NOT the bootstrap superadmin
     return {
       id: parsed.id,
       email: parsed.email,
@@ -40,8 +63,9 @@ export async function requireAdmin(): Promise<AdminSession> {
 }
 
 export function setAdminSession(admin: AdminSession) {
-  const value = Buffer.from(JSON.stringify(admin)).toString("base64");
-  cookies().set(COOKIE_NAME, value, {
+  const base64 = Buffer.from(JSON.stringify(admin)).toString("base64");
+  const signed = signToken(base64);
+  cookies().set(COOKIE_NAME, signed, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

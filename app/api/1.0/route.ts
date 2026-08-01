@@ -553,19 +553,54 @@ export async function POST(req: NextRequest) {
       if (lic.status === "paused") {
         return json({ success: false, message: "Esta licencia está pausada por seguridad debido a doble inicio de sesión. Por favor, utiliza el asistente virtual para reactivarla." }, 403);
       }
-      if (lic.status === "unused" && lic.uses >= lic.max_uses) return json({ success: false, message: "No uses left" }, 403);
 
+      let assignedUser: any = null;
       if (lic.used_by) {
-        const simultaneousDetected = await checkForSimultaneousSessions(lic.used_by, hwid || "", lic.key);
-        if (simultaneousDetected) {
-          return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad. Utiliza el asistente virtual para reactivarla." }, 403);
-        }
+        assignedUser = await store.getAppUserById(lic.used_by);
       }
 
-      if (lic.hwid_lock && hwid && lic.used_by) {
-        const prev = await store.getAppUserById(lic.used_by);
-        if (prev?.hwid && prev.hwid !== hwid) {
-          return json({ success: false, message: "HWID mismatch" }, 403);
+      // If license has no user assigned yet, find or create one so HWID is bound to the license
+      if (!assignedUser) {
+        const geoIp = await getGeoInfo(ip);
+        assignedUser = await store.getAppUser(app.id, String(key));
+        if (!assignedUser) {
+          const passwordHash = await bcrypt.hash("KEY_USER_" + Date.now(), 10);
+          assignedUser = await store.createAppUser({
+            app_id: app.id,
+            username: String(key),
+            email: null,
+            password_hash: passwordHash,
+            hwid: hwid || null,
+            ip: geoIp,
+            last_login: new Date().toISOString(),
+            banned: false,
+            ban_reason: null,
+          });
+        } else if (hwid && !assignedUser.hwid) {
+          await store.updateAppUser(assignedUser.id, { hwid });
+          assignedUser.hwid = hwid;
+        }
+        await store.updateLicense(lic.id, { used_by: assignedUser.id });
+        lic.used_by = assignedUser.id;
+      }
+
+      // Strict 1-PC HWID Lock check
+      const isMultiPc = lic.hwid_lock === false || (lic.max_uses && lic.max_uses > 1);
+      if (!isMultiPc && assignedUser?.hwid && hwid && assignedUser.hwid !== hwid) {
+        return json({ success: false, message: "HWID mismatch: Esta licencia está autorizada para 1 sola PC. Pide un reset de HWID a tu administrador para cambiar de PC." }, 403);
+      }
+
+      // If user had no HWID bound previously, bind the current HWID now
+      if (!isMultiPc && hwid && assignedUser && !assignedUser.hwid) {
+        await store.updateAppUser(assignedUser.id, { hwid });
+        assignedUser.hwid = hwid;
+      }
+
+      // Check for simultaneous sessions
+      if (assignedUser) {
+        const simultaneousDetected = await checkForSimultaneousSessions(assignedUser.id, hwid || "", lic.key);
+        if (simultaneousDetected && !isMultiPc) {
+          return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad. Utiliza el asistente virtual para reactivarla." }, 403);
         }
       }
 
@@ -575,12 +610,12 @@ export async function POST(req: NextRequest) {
         expiresAt = new Date(now.getTime() + lic.duration_days * 86400000);
         await store.updateLicense(lic.id, {
           status: "used",
-          used_by: lic.used_by || session.user_id,
+          used_by: assignedUser ? assignedUser.id : (lic.used_by || session.user_id),
           activated_at: lic.activated_at || now.toISOString(),
           expires_at: expiresAt.toISOString(),
           uses: lic.uses + 1,
         });
-      } else if (session.user_id) {
+      } else {
         await store.updateLicense(lic.id, { uses: lic.uses + 1 });
       }
 

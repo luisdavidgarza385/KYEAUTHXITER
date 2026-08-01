@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         new Date(lic.expires_at) > now
     );
 
-    const isMultiPcLicense = allLicenses.some(l => l.used_by === user.id && (l.hwid_lock === false || (l.max_uses && l.max_uses > 1)));
+    const isMultiPcLicense = allLicenses.some(l => l.used_by === user.id && !!(l.max_uses && l.max_uses > 1));
 
     // Strict 1-PC HWID Lock check (skipped for Multi-PC licenses)
     if (!isMultiPcLicense && user.hwid && hwid && user.hwid !== hwid) {

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       : Math.max(parseInt(String(body?.durationDays ?? 30)) || 30, 1);
     const level = Math.max(parseInt(String(body?.level || 1)) || 1, 1);
     const maxUses = Math.max(parseInt(String(body?.maxUses || 1)) || 1, 1);
-    const hwidLock = !!body?.hwidLock;
+    const hwidLock = body?.hwidLock !== undefined ? !!body.hwidLock : true;
     const ipLock = !!body?.ipLock;
     const prefix = String(body?.prefix || "Spectral X").trim() || "Spectral X";
     const suffix = String(body?.suffix || "****-****-****-****").trim() || "****-****-****-****";

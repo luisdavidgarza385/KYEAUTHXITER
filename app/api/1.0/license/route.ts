@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
       lic.used_by = assignedUser.id;
     }
 
-    // Strict 1-PC HWID Lock check
-    const isMultiPc = lic.hwid_lock === false || (lic.max_uses && lic.max_uses > 1);
+    // Strict 1-PC HWID Lock check (all 1-use licenses are strictly locked to 1 PC)
+    const isMultiPc = !!(lic.max_uses && lic.max_uses > 1);
     if (!isMultiPc && assignedUser?.hwid && hwid && assignedUser.hwid !== hwid) {
       return json({ success: false, message: "HWID mismatch: Esta licencia está autorizada para 1 sola PC." }, 403);
     }

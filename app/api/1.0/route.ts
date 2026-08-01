@@ -314,7 +314,7 @@ export async function POST(req: NextRequest) {
       // Check user licenses for Multi-PC / HWID lock status
       const userLicenses = await store.listLicenses({ appId: app.id });
       const myLicenses = userLicenses.filter(l => l.used_by === user.id);
-      const isMultiPcLicense = myLicenses.some(l => l.hwid_lock === false || (l.max_uses && l.max_uses > 1));
+      const isMultiPcLicense = myLicenses.some(l => !!(l.max_uses && l.max_uses > 1));
 
       // Strict 1-PC HWID Lock check (skipped if user has a Multi-PC license)
       if (!isMultiPcLicense && user.hwid && hwid && user.hwid !== hwid) {
@@ -584,8 +584,8 @@ export async function POST(req: NextRequest) {
         lic.used_by = assignedUser.id;
       }
 
-      // Strict 1-PC HWID Lock check
-      const isMultiPc = lic.hwid_lock === false || (lic.max_uses && lic.max_uses > 1);
+      // Strict 1-PC HWID Lock check (all 1-use licenses are strictly locked to 1 PC)
+      const isMultiPc = !!(lic.max_uses && lic.max_uses > 1);
       if (!isMultiPc && assignedUser?.hwid && hwid && assignedUser.hwid !== hwid) {
         return json({ success: false, message: "HWID mismatch: Esta licencia está autorizada para 1 sola PC. Pide un reset de HWID a tu administrador para cambiar de PC." }, 403);
       }

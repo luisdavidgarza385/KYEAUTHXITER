@@ -9,6 +9,7 @@ export function AppActions({ app }: { app: App }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(app.name);
   const [version, setVersion] = useState(app.version);
+  const [downloadLink, setDownloadLink] = useState(app.download_link || "");
   const [busy, setBusy] = useState(false);
 
   async function save() {
@@ -16,7 +17,7 @@ export function AppActions({ app }: { app: App }) {
     const res = await fetch(`/api/admin/apps/${app.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, version }),
+      body: JSON.stringify({ name, version, download_link: downloadLink }),
     });
     setBusy(false);
     const data = await res.json();
@@ -56,13 +57,14 @@ export function AppActions({ app }: { app: App }) {
 
   if (editing) {
     return (
-      <div className="flex items-center gap-2 bg-bg-card border border-border rounded-md p-2">
-        <input className="input text-sm w-40" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
-        <input className="input text-sm w-20" value={version} onChange={(e) => setVersion(e.target.value)} placeholder="1.0" />
+      <div className="flex flex-wrap items-center gap-2 bg-bg-card border border-border rounded-md p-2">
+        <input className="input text-sm w-36" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
+        <input className="input text-sm w-20" value={version} onChange={(e) => setVersion(e.target.value)} placeholder="Version (e.g. 2.0.0)" />
+        <input className="input text-sm w-64" value={downloadLink} onChange={(e) => setDownloadLink(e.target.value)} placeholder="Download Link (.exe URL)" />
         <button onClick={save} disabled={busy} className="btn-primary text-xs px-3 py-1.5">
           <Save className="w-3.5 h-3.5" /> Save
         </button>
-        <button onClick={() => { setEditing(false); setName(app.name); setVersion(app.version); }} className="btn-secondary text-xs px-3 py-1.5">
+        <button onClick={() => { setEditing(false); setName(app.name); setVersion(app.version); setDownloadLink(app.download_link || ""); }} className="btn-secondary text-xs px-3 py-1.5">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>

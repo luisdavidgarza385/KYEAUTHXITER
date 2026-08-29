@@ -69,6 +69,7 @@ export function UsersPageClient({
 
   // View Mode: Grid (Cards en cuadritos) vs List (Tabla) (Matching Screenshot 5)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedAppId, setSelectedAppId] = useState(defaultAppId || (apps[0]?.id ?? "9999"));
   const [selectedAppFilter, setSelectedAppFilter] = useState("all");
   const [pageSize, setPageSize] = useState<number>(10);
   const [openActionDropdown, setOpenActionDropdown] = useState<string | null>(null);
@@ -89,22 +90,12 @@ export function UsersPageClient({
     { name: "basic", label: "basic (L1)" },
   ]);
 
-  const activeApp = apps.find((a) => a.id === defaultAppId) || apps[0] || { id: "9999", name: "9999" };
+  const activeApp = apps.find((a) => a.id === (selectedAppFilter !== "all" ? selectedAppFilter : defaultAppId)) || apps[0] || { id: "9999", name: "9999" };
 
-  // Sample App Filter Tabs (Matching Screenshot 5)
+  // Dynamic Real App Filter Tabs
   const appTabs = [
     { id: "all", label: "Todas las Apps" },
-    { id: "dashboard", label: "dashboard" },
-    { id: "new", label: "NEW" },
-    { id: "aimkkill", label: "AIMKKILL" },
-    { id: "forius", label: "FORIUS XIT" },
-    { id: "luminox_bypass", label: "LUMINOX Bypass" },
-    { id: "luminox_elite", label: "LUMINOX Elite" },
-    { id: "luminox_basico", label: "LUMINOX BASICO" },
-    { id: "luminox_complex", label: "LUMINOX Complex" },
-    { id: "luminox_pro", label: "LUMINOX PRO" },
-    { id: "louder", label: "LOUDER" },
-    { id: "darkside", label: "DarkSide" },
+    ...apps.map((a) => ({ id: a.id, label: a.name || a.id })),
   ];
 
   useEffect(() => {
@@ -153,7 +144,7 @@ export function UsersPageClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          appId: activeApp.id,
+          appId: selectedAppId,
           username: newUsername.trim(),
           password: newPassword.trim(),
           durationDays: days,
@@ -174,7 +165,7 @@ export function UsersPageClient({
       } else {
         const newUser: AppUser = {
           id: `usr-${Date.now()}`,
-          app_id: activeApp.id,
+          app_id: selectedAppId,
           username: newUsername.trim(),
           email: null,
           password_hash: "",
@@ -221,9 +212,9 @@ export function UsersPageClient({
     setOpenActionDropdown(null);
   };
 
-  const handleToggleBan = (id: string) => {
+  const handleToggleBan = (id: string, currentBanned: boolean) => {
     setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, banned: !u.banned } : u))
+      prev.map((u) => (u.id === id ? { ...u, banned: !currentBanned } : u))
     );
     setOpenActionDropdown(null);
   };
@@ -248,12 +239,18 @@ export function UsersPageClient({
     }
   };
 
-  const filtered = users.filter(
-    (u) =>
-      u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (u.ip && u.ip.includes(searchQuery)) ||
-      (u.package_name && u.package_name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filtered = users.filter((u) => {
+    if (selectedAppFilter !== "all" && u.app_id !== selectedAppFilter) {
+      return false;
+    }
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      u.username.toLowerCase().includes(q) ||
+      (u.ip && u.ip.includes(q)) ||
+      (u.package_name && u.package_name.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <div className="space-y-6 animate-fade-in text-slate-200" onClick={() => setOpenActionDropdown(null)}>
@@ -611,6 +608,24 @@ export function UsersPageClient({
             </div>
 
             <form onSubmit={handleCreateUser} className="space-y-4">
+              {/* Selector de Aplicacion */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5 font-mono">
+                  Aplicación *
+                </label>
+                <select
+                  value={selectedAppId}
+                  onChange={(e) => setSelectedAppId(e.target.value)}
+                  className="w-full bg-[#020713] border border-[#0099ff]/30 focus:border-[#00c2ff] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none font-mono cursor-pointer"
+                >
+                  {apps.map((a) => (
+                    <option key={a.id} value={a.id} className="bg-[#040e24] text-white">
+                      {a.name || a.id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Username & Password */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

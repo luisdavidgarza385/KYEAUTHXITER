@@ -70,6 +70,9 @@ export function LicensesPageClient({
   const [generatedKeys, setGeneratedKeys] = useState<string[] | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
 
+  const [selectedAppId, setSelectedAppId] = useState(defaultAppId || (apps[0]?.id ?? "9999"));
+  const [selectedAppFilter, setSelectedAppFilter] = useState("all");
+
   // Modal Fields (Matching Image 1)
   const [count, setCount] = useState(1);
   const [mask, setMask] = useState("******_******_******");
@@ -87,7 +90,12 @@ export function LicensesPageClient({
     { name: "basic", label: "basic (L1)" },
   ]);
 
-  const activeApp = apps.find((a) => a.id === defaultAppId) || apps[0] || { id: "9999", name: "9999" };
+  const activeApp = apps.find((a) => a.id === (selectedAppFilter !== "all" ? selectedAppFilter : defaultAppId)) || apps[0] || { id: "9999", name: "9999" };
+
+  const appTabs = [
+    { id: "all", label: "Todas las Apps" },
+    ...apps.map((a) => ({ id: a.id, label: a.name || a.id })),
+  ];
 
   useEffect(() => {
     try {
@@ -147,7 +155,7 @@ export function LicensesPageClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          appId: activeApp.id,
+          appId: selectedAppId,
           count,
           durationDays: days,
           level: 1,
@@ -166,7 +174,7 @@ export function LicensesPageClient({
 
         const newLicList = data.data.keys.map((k: string, idx: number) => ({
           id: `lic-${Date.now()}-${idx}`,
-          app_id: activeApp.id,
+          app_id: selectedAppId,
           key: k,
           duration_days: days,
           level: 1,
@@ -187,19 +195,14 @@ export function LicensesPageClient({
         // Fallback local key generation
         const generated: string[] = [];
         for (let i = 0; i < count; i++) {
-          const rand = Array.from({ length: 18 }, () =>
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(Math.floor(Math.random() * 36))
-          );
-          const keyFormatted = `${rand.slice(0, 6).join("")}_${rand.slice(6, 12).join("")}_${rand.slice(12, 18).join("")}`;
-          generated.push(caseFormat === "lower" ? keyFormatted.toLowerCase() : keyFormatted.toUpperCase());
+          const raw = `${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 8)}`;
+          const formatted = caseFormat === "upper" ? raw.toUpperCase() : raw.toLowerCase();
+          generated.push(formatted);
         }
-
-        setCreateModalOpen(false);
-        setGeneratedKeys(generated);
 
         const newLicList = generated.map((k, idx) => ({
           id: `lic-${Date.now()}-${idx}`,
-          app_id: activeApp.id,
+          app_id: selectedAppId,
           key: k,
           duration_days: days,
           level: 1,
@@ -215,25 +218,44 @@ export function LicensesPageClient({
           created_at: new Date().toISOString(),
           package_name: subName,
         }));
+
         setLicenses((prev) => [...newLicList, ...prev]);
+        setGeneratedKeys(generated);
+        setCreateModalOpen(false);
       }
     } catch (err: any) {
-      alert(err.message || "Error al crear licencia");
+      alert(err.message || "Error al crear licencias");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePauseAllLicenses = () => {
-    if (confirm("¿Pausar todas las licencias?")) {
-      setLicenses((prev) => prev.map((l) => ({ ...l, status: "paused" })));
-    }
+  const handlePauseAllLicenses = async () => {
+    setLicenses((prev) =>
+      prev.map((l) => (l.status === "active" ? { ...l, status: "paused" } : l))
+    );
+    try {
+      await fetch("/api/admin/licenses/bulk-pause", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appId: activeApp.id, action: "pause" }),
+      });
+      router.refresh();
+    } catch {}
   };
 
-  const handleResumeAllLicenses = () => {
-    if (confirm("¿Reanudar todas las licencias?")) {
-      setLicenses((prev) => prev.map((l) => ({ ...l, status: "active" })));
-    }
+  const handleResumeAllLicenses = async () => {
+    setLicenses((prev) =>
+      prev.map((l) => (l.status === "paused" ? { ...l, status: "active" } : l))
+    );
+    try {
+      await fetch("/api/admin/licenses/bulk-pause", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appId: activeApp.id, action: "resume" }),
+      });
+      router.refresh();
+    } catch {}
   };
 
   const handleToggleSingleLicense = (id: string) => {
@@ -270,6 +292,9 @@ export function LicensesPageClient({
   };
 
   const filtered = licenses.filter((l) => {
+    if (selectedAppFilter !== "all" && l.app_id !== selectedAppFilter) {
+      return false;
+    }
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -288,7 +313,7 @@ export function LicensesPageClient({
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 rounded-full bg-[#00ff88]/15 text-[#00ff88] text-[9.5px] font-black border border-[#00ff88]/30">
-                • Admin: Newdavis García
+                • {role === "admin" ? "Admin: SpectralX" : `Rol: ${role}`}
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-[#0088ff]/15 text-[#00c2ff] text-[9.5px] font-black border border-[#0088ff]/30">
                 {activeApp.name || "9999"}
@@ -308,6 +333,29 @@ export function LicensesPageClient({
           </div>
         </div>
       </div>
+
+      {/* ── APP FILTER TABS (MATCHING USERS PAGE) ── */}
+      {appTabs.length > 1 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {appTabs.map((tab) => {
+            const isSelected = selectedAppFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSelectedAppFilter(tab.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all uppercase font-mono cursor-pointer ${
+                  isSelected
+                    ? "bg-[#00c2ff] text-black shadow-[0_0_12px_rgba(0,194,255,0.4)]"
+                    : "bg-[#040e24] hover:bg-[#071738] text-slate-400 hover:text-white border border-[#0099ff]/20"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* ── SECTION: CREAR LICENCIAS BAR ── */}
       <div className="rounded-2xl bg-[#040e24]/85 border border-[#0099ff]/25 p-4 backdrop-blur-2xl shadow-xl flex flex-wrap items-center justify-between gap-3">
@@ -538,6 +586,24 @@ export function LicensesPageClient({
             </div>
 
             <form onSubmit={handleCreateLicense} className="space-y-4">
+              {/* Selector de Aplicacion */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5 font-mono">
+                  Aplicación *
+                </label>
+                <select
+                  value={selectedAppId}
+                  onChange={(e) => setSelectedAppId(e.target.value)}
+                  className="w-full bg-[#020713] border border-[#0099ff]/30 focus:border-[#00c2ff] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none font-mono cursor-pointer"
+                >
+                  {apps.map((a) => (
+                    <option key={a.id} value={a.id} className="bg-[#040e24] text-white">
+                      {a.name || a.id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1.5">

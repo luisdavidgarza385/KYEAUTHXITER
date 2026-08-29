@@ -151,6 +151,7 @@ export function LicensesPageClient({
 
       const targetApp = apps.find((a) => a.id === selectedAppId);
       const appName = targetApp?.name || "";
+      const subName = selectedSub ? selectedSub.split(" ")[0] : "default";
 
       const res = await fetch("/api/admin/licenses", {
         method: "POST",

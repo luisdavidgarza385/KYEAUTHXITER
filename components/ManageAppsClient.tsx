@@ -266,16 +266,36 @@ export function ManageAppsClient({
   };
 
   const getCode = (lang: string) => {
-    if (lang === "csharp") {
-      return `using SecureXAuth;\nvar app = new Client("${currentApp.name}", "${currentApp.ownerId}", "${currentApp.secret}", "${currentApp.version}");\nawait app.InitAsync();`;
-    }
     if (lang === "cpp") {
-      return `#include "SecureXAuth.h"\nSecureXAuth::Client AuthOwner(SecureXAuth::ApiUrl(), "${currentApp.name}", "${currentApp.ownerId}", "${currentApp.secret}", "${currentApp.version}");\nAuthOwner.Init();`;
+      return `std::string name = "${currentApp.name}";
+std::string ownerid = "${currentApp.ownerId}";
+std::string secret = "${currentApp.secret}";
+std::string version = "${currentApp.version}";
+std::string url = "https://keyauthpro.xyz/api/1.0";
+std::string path = "";`;
+    }
+    if (lang === "csharp") {
+      return `string name = "${currentApp.name}";
+string ownerid = "${currentApp.ownerId}";
+string secret = "${currentApp.secret}";
+string version = "${currentApp.version}";
+string url = "https://keyauthpro.xyz/api/1.0";
+string path = "";`;
     }
     if (lang === "python") {
-      return `from securexauth import SecureXAuth\napp = SecureXAuth("${currentApp.name}", "${currentApp.ownerId}", "${currentApp.secret}", "${currentApp.version}")\napp.init()`;
+      return `name = "${currentApp.name}"
+ownerid = "${currentApp.ownerId}"
+secret = "${currentApp.secret}"
+version = "${currentApp.version}"
+url = "https://keyauthpro.xyz/api/1.0"
+path = ""`;
     }
-    return `const SecureXAuth = require('securexauth');\nconst app = new SecureXAuth("${currentApp.name}", "${currentApp.ownerId}", "${currentApp.secret}", "${currentApp.version}");\nawait app.init();`;
+    return `const name = "${currentApp.name}";
+const ownerid = "${currentApp.ownerId}";
+const secret = "${currentApp.secret}";
+const version = "${currentApp.version}";
+const url = "https://keyauthpro.xyz/api/1.0";
+const path = "";`;
   };
 
   const filteredApps = appsList.filter((a) =>

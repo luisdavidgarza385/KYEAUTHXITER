@@ -69,13 +69,8 @@ namespace SecureXLoader
 
         static string UnshiftUrl(byte[] raw)
         {
-            string s = ReadMarker(raw);
-            if (s.StartsWith("http")) return s;
-            var sb = new StringBuilder();
-            foreach (char c in s) sb.Append((char)(c - OBFC_KEY));
-            string u = sb.ToString();
-            int n = u.IndexOf('\0'); if (n >= 0) u = u.Substring(0, n);
-            return u.Trim();
+            // URL is stored as plain text (no shift encoding)
+            return ReadMarker(raw);
         }
 
         class DllItem { public string Name, Filename, Url; }
@@ -111,27 +106,35 @@ namespace SecureXLoader
 
             // ── FETCH DLL LIST FROM API ──
             var dllList = new List<DllItem>();
-            if (!string.IsNullOrEmpty(apiUrl) && apiUrl.StartsWith("http") && !apiUrl.Contains("localhost"))
+            if (!string.IsNullOrEmpty(apiUrl) && apiUrl.StartsWith("http"))
             {
-                try
+                for (int attempt = 0; attempt < 3 && dllList.Count == 0; attempt++)
                 {
-                    ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
-                    using (var wc = new WebClient())
+                    try
                     {
-                        wc.Headers["User-Agent"] = "Loader/2.0";
-                        string json = wc.DownloadString(apiUrl);
-                        dllList = ParseDlls(json);
+                        ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | SecurityProtocolType.Tls;
+                        using (var wc = new WebClient())
+                        {
+                            wc.Headers["User-Agent"] = "Loader/3.0";
+                            wc.Headers["Cache-Control"] = "no-cache";
+                            string json = wc.DownloadString(apiUrl);
+                            dllList = ParseDlls(json);
+                        }
                     }
+                    catch { if (attempt < 2) Thread.Sleep(1000); }
                 }
-                catch { }
             }
 
             if (dllList.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("No se pudo conectar al servidor.");
+                if (string.IsNullOrEmpty(apiUrl) || apiUrl.StartsWith("__API_URL__"))
+                    Console.WriteLine("[!] URL no configurada.");
+                else
+                    Console.WriteLine("[!] Sin modulos: " + apiUrl);
                 Console.ResetColor();
-                Thread.Sleep(3000);
+                Console.WriteLine("Presiona cualquier tecla...");
+                try { Console.ReadKey(true); } catch { }
                 return;
             }
 
@@ -281,33 +284,65 @@ namespace SecureXLoader
             return null;
         }
 
+        // Extracts every {...} block at any nesting depth
+        static List<string> ExtractObjects(string json)
+        {
+            var result = new List<string>();
+            int len = json.Length;
+            for (int i = 0; i < len; i++)
+            {
+                if (json[i] != '{') continue;
+                int depth = 0;
+                bool inStr = false;
+                int start = i;
+                for (int j = i; j < len; j++)
+                {
+                    char c = json[j];
+                    if (c == '\\' && inStr) { j++; continue; }
+                    if (c == '"')  { inStr = !inStr; continue; }
+                    if (inStr) continue;
+                    if (c == '{') depth++;
+                    else if (c == '}')
+                    {
+                        depth--;
+                        if (depth == 0) { result.Add(json.Substring(start, j - start + 1)); i = j; break; }
+                    }
+                }
+            }
+            return result;
+        }
+
         static List<DllItem> ParseDlls(string json)
         {
             var list = new List<DllItem>();
             if (string.IsNullOrEmpty(json)) return list;
             try
             {
-                foreach (Match m in Regex.Matches(json, @"\{[^{}]*\}"))
+                foreach (string obj in ExtractObjects(json))
                 {
-                    string obj = m.Value;
                     string url = JsonVal(obj, "url");
-                    if (string.IsNullOrEmpty(url)) continue;
-                    list.Add(new DllItem
-                    {
-                        Name     = JsonVal(obj, "name"),
-                        Filename = JsonVal(obj, "filename"),
-                        Url      = url.Replace("\\/", "/")
-                    });
+                    if (string.IsNullOrEmpty(url) || !url.StartsWith("http")) continue;
+                    string name     = JsonVal(obj, "name");
+                    string filename = JsonVal(obj, "filename");
+                    string display  = !string.IsNullOrEmpty(name) ? name
+                                    : !string.IsNullOrEmpty(filename) ? Regex.Replace(filename, @"(?i)\.dll$", "") : "Module";
+                    list.Add(new DllItem { Name = display, Filename = filename, Url = url.Replace("\\/", "/") });
                 }
             }
             catch { }
-            return list;
+
+            // Deduplicate by URL
+            var seen   = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var deduped = new List<DllItem>();
+            foreach (DllItem d in list)
+                if (seen.Add(d.Url)) deduped.Add(d);
+            return deduped;
         }
 
         static string JsonVal(string obj, string key)
         {
-            var m = Regex.Match(obj, "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"");
-            return m.Success ? m.Groups[1].Value : "";
+            var m = Regex.Match(obj, "\"" + Regex.Escape(key) + "\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*?)\"");
+            return m.Success ? m.Groups[1].Value.Replace("\\/", "/") : "";
         }
 
         static bool InjectDll(int pid, string dllPath)

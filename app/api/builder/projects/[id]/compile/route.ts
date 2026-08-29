@@ -16,10 +16,41 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Mark as compiling
     await updateProject(project.id, { lastBuild: { status: 'compiling', date: new Date().toISOString() } });
 
-    // Build the API URL that the loader will use to download DLLs
-    const host = req.headers.get('host') || 'keyauthpro.xyz';
-    const proto = host.includes('localhost') ? 'http' : 'https';
-    const apiUrl = `${proto}://${host}/api/projects/${project.id}/dlls`;
+    // Build the API URL that the loader will use to download DLLs.
+    // Priority: NEXT_PUBLIC_BASE_URL env var (set this to your production domain)
+    // → VERCEL_URL (auto-set by Vercel in production)
+    // → x-forwarded-host header (behind a proxy/CDN)
+    // → host header fallback
+    let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+
+    if (!baseUrl || baseUrl.includes('localhost')) {
+      // Try Vercel's automatic production URL
+      const vercelUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL || '';
+      if (vercelUrl && !vercelUrl.includes('localhost')) {
+        baseUrl = `https://${vercelUrl}`;
+      }
+    }
+
+    if (!baseUrl || baseUrl.includes('localhost')) {
+      // Try forwarded host (e.g. behind Cloudflare / nginx)
+      const fwdHost = req.headers.get('x-forwarded-host') || '';
+      if (fwdHost && !fwdHost.includes('localhost')) {
+        const fwdProto = req.headers.get('x-forwarded-proto') || 'https';
+        baseUrl = `${fwdProto}://${fwdHost}`;
+      }
+    }
+
+    if (!baseUrl || baseUrl.includes('localhost')) {
+      // Last resort: use the request host as-is
+      const host = req.headers.get('host') || 'keyauthpro.xyz';
+      const proto = host.includes('localhost') ? 'http' : 'https';
+      baseUrl = `${proto}://${host}`;
+    }
+
+    // Strip trailing slash
+    baseUrl = baseUrl.replace(/\/$/, '');
+
+    const apiUrl = `${baseUrl}/api/projects/${project.id}/dlls`;
 
     // Attempt to download base_loader.exe
     let baseExeBuf: Buffer | null = null;

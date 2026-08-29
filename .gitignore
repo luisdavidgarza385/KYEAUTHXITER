@@ -7,7 +7,7 @@ out
 .DS_Store
 *.log
 .vercel
-
-.vercel
-
-.vercel
+push_git.js
+do_push.bat
+upload_and_deploy.ps1
+deploy_vercel.ps1

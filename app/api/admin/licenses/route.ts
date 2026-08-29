@@ -25,8 +25,18 @@ export async function POST(req: NextRequest) {
     const maxUses = Math.max(parseInt(String(body?.maxUses || 1)) || 1, 1);
     const hwidLock = body?.hwidLock !== undefined ? !!body.hwidLock : true;
     const ipLock = !!body?.ipLock;
-    const prefix = String(body?.prefix || "Spectral X").trim() || "Spectral X";
-    const suffix = String(body?.suffix || "****-****-****-****").trim() || "****-****-****-****";
+    if (!appId) return { status: 400, data: { success: false, message: "appId required" } };
+
+    const app = await store.getAppById(appId);
+    if (!app) return { status: 404, data: { success: false, message: "App not found" } };
+
+    const appName = app.name || "KEYAUTH";
+    const prefix = String(body?.prefix || appName).trim() || appName;
+    const rawMask = String(body?.mask || body?.suffix || "******-******-******").trim();
+    const charCase = body?.case === "lower" ? "lower" : "upper";
+    const charset = charCase === "lower"
+      ? "abcdefghijklmnopqrstuvwxyz0123456789"
+      : "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     
     let packageName = String(body?.packageName || "").trim();
     if (!packageName || packageName === "Bypass") {
@@ -36,11 +46,6 @@ export async function POST(req: NextRequest) {
     }
 
     const note = String(body?.note || "").trim();
-
-    if (!appId) return { status: 400, data: { success: false, message: "appId required" } };
-
-    const app = await store.getAppById(appId);
-    if (!app) return { status: 404, data: { success: false, message: "App not found" } };
 
     const scopedIds = await getScopedAppIds(me);
     if (scopedIds !== null && !scopedIds.includes(appId)) {
@@ -96,14 +101,22 @@ export async function POST(req: NextRequest) {
 
     const generatedKeys = new Set<string>();
     let retries = 0;
-    const maxRetries = 1000;
+    const maxRetries = 2000;
 
     while (generatedKeys.size < count && retries < maxRetries) {
       retries++;
-      const segs = suffix.split("-").map((seg) =>
-        seg.replace(/\*/g, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(Math.floor(Math.random() * 36)))
+      // Replace wildcard characters '*' with random characters
+      let seg = rawMask.replace(/[*]/g, () =>
+        charset.charAt(Math.floor(Math.random() * charset.length))
       );
-      const key = prefix ? `${prefix}-${segs.join("-")}` : segs.join("-");
+
+      let key = "";
+      if (prefix && !seg.toLowerCase().startsWith(prefix.toLowerCase())) {
+        key = `${prefix}-${seg}`;
+      } else {
+        key = seg;
+      }
+
       if (!generatedKeys.has(key)) {
         generatedKeys.add(key);
       }

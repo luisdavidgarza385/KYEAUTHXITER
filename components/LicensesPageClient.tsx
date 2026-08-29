@@ -149,7 +149,8 @@ export function LicensesPageClient({
       else if (expiryUnit === "Años") days = days * 365;
       else if (expiryUnit === "De por vida") days = 9999;
 
-      const subName = selectedSub.split(" ")[0] || activeApp.name || "default";
+      const targetApp = apps.find((a) => a.id === selectedAppId);
+      const appName = targetApp?.name || "";
 
       const res = await fetch("/api/admin/licenses", {
         method: "POST",
@@ -163,6 +164,8 @@ export function LicensesPageClient({
           hwidLock: true,
           packageName: subName,
           mask,
+          prefix: appName,
+          case: caseFormat,
         }),
       });
 

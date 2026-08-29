@@ -1,0 +1,21 @@
+==============================================================
+   SECUREX AUTH - APLICACIÓN OFICIAL PARA WINDOWS Y TELÉFONOS
+==============================================================
+
+Hola! Aquí tienes los archivos de la aplicación listos para usar:
+
+1. PARA WINDOWS (PC):
+   - Ejecutable: SecureX-Auth-App.exe
+   - Al abrirlo, se ejecuta como una aplicación de escritorio nativa sin barras de navegador y conectada directamente a tu servidor https://keyauthpro.xyz/dashboard.
+
+2. PARA TELÉFONOS (ANDROID / IPHONE):
+   - Abre el archivo "Instalar-En-Telefono-Android-e-iPhone.html" o entra desde tu teléfono a:
+     👉 https://keyauthpro.xyz
+   - En Android (Chrome): Toca los 3 puntos arriba a la derecha -> "Instalar aplicación" o "Añadir a pantalla de inicio".
+   - En iPhone (Safari): Toca el botón Compartir -> "Agregar a pantalla de inicio".
+
+3. AUTO-ACTUALIZACIÓN EN TIEMPO REAL:
+   - Cada vez que hagas un cambio en la web o se despliegue una actualización en Vercel, la aplicación en tu PC y en los teléfonos se actualiza automáticamente al instante sin tener que reinstalar.
+
+Icono oficial incluido: app.ico
+==============================================================

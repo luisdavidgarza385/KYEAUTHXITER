@@ -73,6 +73,12 @@ export function LicensesPageClient({
   const [selectedAppId, setSelectedAppId] = useState(defaultAppId || (apps[0]?.id ?? "9999"));
   const [selectedAppFilter, setSelectedAppFilter] = useState("all");
 
+  useEffect(() => {
+    if (selectedAppFilter !== "all") {
+      setSelectedAppId(selectedAppFilter);
+    }
+  }, [selectedAppFilter]);
+
   // Modal Fields (Matching Image 1)
   const [count, setCount] = useState(1);
   const [mask, setMask] = useState("******_******_******");
@@ -363,7 +369,10 @@ export function LicensesPageClient({
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setSelectedAppFilter(tab.id)}
+                onClick={() => {
+                  setSelectedAppFilter(tab.id);
+                  if (tab.id !== "all") setSelectedAppId(tab.id);
+                }}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all uppercase font-mono cursor-pointer ${
                   isSelected
                     ? "bg-[#00c2ff] text-black shadow-[0_0_12px_rgba(0,194,255,0.4)]"
@@ -402,7 +411,12 @@ export function LicensesPageClient({
 
           <button
             type="button"
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => {
+              if (selectedAppFilter !== "all") {
+                setSelectedAppId(selectedAppFilter);
+              }
+              setCreateModalOpen(true);
+            }}
             className="px-5 py-2.5 bg-gradient-to-r from-[#0080ff] to-[#00b4ff] hover:from-[#0070e0] hover:to-[#00a2ff] text-white font-extrabold text-xs tracking-wide rounded-xl shadow-[0_0_18px_rgba(0,153,255,0.45)] transition-all cursor-pointer"
           >
             Crear licencia

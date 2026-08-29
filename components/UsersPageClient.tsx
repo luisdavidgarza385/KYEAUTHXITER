@@ -71,6 +71,12 @@ export function UsersPageClient({
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedAppId, setSelectedAppId] = useState(defaultAppId || (apps[0]?.id ?? "9999"));
   const [selectedAppFilter, setSelectedAppFilter] = useState("all");
+
+  useEffect(() => {
+    if (selectedAppFilter !== "all") {
+      setSelectedAppId(selectedAppFilter);
+    }
+  }, [selectedAppFilter]);
   const [pageSize, setPageSize] = useState<number>(10);
   const [openActionDropdown, setOpenActionDropdown] = useState<string | null>(null);
 
@@ -350,7 +356,12 @@ export function UsersPageClient({
           {/* Crear Usuario Button */}
           <button
             type="button"
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => {
+              if (selectedAppFilter !== "all") {
+                setSelectedAppId(selectedAppFilter);
+              }
+              setCreateModalOpen(true);
+            }}
             className="px-4 py-2 bg-gradient-to-r from-[#0080ff] to-[#00b4ff] hover:from-[#0070e0] hover:to-[#00a2ff] text-white font-extrabold text-xs rounded-xl shadow-[0_0_16px_rgba(0,153,255,0.4)] transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -395,7 +406,10 @@ export function UsersPageClient({
             <button
               key={tab.id}
               type="button"
-              onClick={() => setSelectedAppFilter(tab.id)}
+              onClick={() => {
+                setSelectedAppFilter(tab.id);
+                if (tab.id !== "all") setSelectedAppId(tab.id);
+              }}
               className={`px-3.5 py-1.5 rounded-full whitespace-nowrap transition-all cursor-pointer ${
                 isSelected
                   ? "bg-[#00c2ff] text-slate-950 font-black shadow-[0_0_15px_rgba(0,194,255,0.5)]"

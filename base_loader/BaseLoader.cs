@@ -13,206 +13,141 @@ namespace SecureXLoader
     class Program
     {
         // ── EXACT ASCII MARKERS (Single-byte matching dll-patcher.ts strings) ──
-        // Length 63
         private static byte[] RAW_PROJECT_NAME_BYTES = new byte[] {
             95,95,80,82,79,74,69,67,84,95,78,65,77,69,95,95,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120
         };
-
-        // Length 63
         private static byte[] RAW_TARGET_PROCESS_BYTES = new byte[] {
             95,95,84,65,82,71,69,84,95,80,82,79,67,69,83,83,95,95,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120
         };
-
-        // Length 267
         private static byte[] RAW_API_URL_BYTES = new byte[] {
             95,95,65,80,73,95,85,82,76,95,95,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120
         };
-
-        // Length 16
         private static byte[] RAW_COLOR_BYTES = new byte[] {
             95,95,67,79,76,79,82,95,95,120,120,120,120,120,120,120
         };
-
-        // Length 63
         private static byte[] RAW_KA_NAME_BYTES = new byte[] {
             95,95,75,65,95,78,65,77,69,95,95,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120
         };
-
-        // Length 63
         private static byte[] RAW_KA_OWNER_BYTES = new byte[] {
             95,95,75,65,95,79,87,78,69,82,95,95,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120
         };
-
-        // Length 16
         private static byte[] RAW_KA_VER_BYTES = new byte[] {
             95,95,75,65,95,86,69,82,95,95,120,120,120,120,120,120
         };
-
-        // Length 95
         private static byte[] RAW_KA_SECRET_BYTES = new byte[] {
             95,95,75,65,95,83,69,67,82,69,84,95,95,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120
         };
 
-        // ── WIN32 API IMPORTS ──
+        // ── WIN32 API ──
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
-
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
-
+        static extern IntPtr OpenProcess(uint dwAccess, bool inherit, int pid);
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out UIntPtr lpNumberOfBytesWritten);
-
+        static extern IntPtr VirtualAllocEx(IntPtr hProc, IntPtr addr, uint size, uint allocType, uint protect);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool WriteProcessMemory(IntPtr hProc, IntPtr addr, byte[] buf, uint size, out UIntPtr written);
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
-        private static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
+        static extern IntPtr GetProcAddress(IntPtr hMod, string proc);
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
+        static extern IntPtr GetModuleHandle(string name);
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr CreateRemoteThread(IntPtr hProcess, IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, out IntPtr lpThreadId);
+        static extern IntPtr CreateRemoteThread(IntPtr hProc, IntPtr attr, uint stackSize, IntPtr start, IntPtr param, uint flags, out IntPtr threadId);
+        [DllImport("kernel32.dll")] static extern UInt32 WaitForSingleObject(IntPtr h, UInt32 ms);
+        [DllImport("kernel32.dll")] static extern bool VirtualFreeEx(IntPtr hProc, IntPtr addr, uint size, uint type);
+        [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern UInt32 WaitForSingleObject(IntPtr hHandle, UInt32 dwMilliseconds);
+        const uint PROCESS_ALL_ACCESS = 0x1F0FFF;
+        const uint MEM_COMMIT_RESERVE = 0x3000;
+        const uint PAGE_READWRITE = 0x04;
+        const int  OBFC_KEY = 13;
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, uint dwFreeType, uint dwSize);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool CloseHandle(IntPtr hObject);
-
-        private const uint PROCESS_CREATE_THREAD = 0x0002;
-        private const uint PROCESS_QUERY_INFORMATION = 0x0400;
-        private const uint PROCESS_VM_OPERATION = 0x0008;
-        private const uint PROCESS_VM_WRITE = 0x0020;
-        private const uint PROCESS_VM_READ = 0x0010;
-        private const uint PROCESS_ALL_ACCESS = 0x1F0FFF;
-
-        private const uint MEM_COMMIT = 0x1000;
-        private const uint MEM_RESERVE = 0x2000;
-        private const uint PAGE_READWRITE = 0x04;
-
-        private const int OBFC_KEY = 13;
-
-        // Clean string extracted from byte marker
-        private static string ReadMarker(byte[] rawBytes)
+        static string ReadMarker(byte[] raw)
         {
-            if (rawBytes == null || rawBytes.Length == 0) return "";
-            string str = Encoding.ASCII.GetString(rawBytes);
-            int nullIdx = str.IndexOf('\0');
-            if (nullIdx >= 0) str = str.Substring(0, nullIdx);
-            return str.Trim();
+            string s = Encoding.ASCII.GetString(raw);
+            int n = s.IndexOf('\0'); if (n >= 0) s = s.Substring(0, n);
+            return s.Trim();
         }
 
-        // Unshift API URL (ROT-13 unshift)
-        private static string UnshiftUrl(byte[] rawBytes)
+        static string UnshiftUrl(byte[] raw)
         {
-            string cleaned = ReadMarker(rawBytes);
-            if (cleaned.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
-                cleaned.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            {
-                return cleaned;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            foreach (char c in cleaned)
-            {
-                sb.Append((char)(c - OBFC_KEY));
-            }
-            string unshifted = sb.ToString();
-            int nullIdx = unshifted.IndexOf('\0');
-            if (nullIdx >= 0) unshifted = unshifted.Substring(0, nullIdx);
-            return unshifted.Trim();
+            string s = ReadMarker(raw);
+            if (s.StartsWith("http")) return s;
+            var sb = new StringBuilder();
+            foreach (char c in s) sb.Append((char)(c - OBFC_KEY));
+            string u = sb.ToString();
+            int n = u.IndexOf('\0'); if (n >= 0) u = u.Substring(0, n);
+            return u.Trim();
         }
 
-        private class DllItem
-        {
-            public string Name { get; set; }
-            public string Filename { get; set; }
-            public string Url { get; set; }
-        }
+        class DllItem { public string Name, Filename, Url; }
 
         static void Main(string[] args)
         {
-            try
-            {
-                Console.OutputEncoding = Encoding.UTF8;
-            }
-            catch { }
+            // Keep markers alive in binary
+            if (RAW_COLOR_BYTES.Length < 0 || RAW_KA_NAME_BYTES.Length < 0 ||
+                RAW_KA_OWNER_BYTES.Length < 0 || RAW_KA_VER_BYTES.Length < 0 ||
+                RAW_KA_SECRET_BYTES.Length < 0) { }
 
-            // ── FIXED CONSOLE WINDOW SIZE (no scrollbar) ──
+            // ── SMALL FIXED WINDOW (no scrollbar) ──
             try
             {
-                const int WIN_W = 55;
-                const int WIN_H = 18;
                 Console.CursorVisible = false;
-                // Set buffer = window size to remove scrollbars
-                Console.SetBufferSize(WIN_W, WIN_H);
-                Console.SetWindowSize(WIN_W, WIN_H);
+                // Set buffer first, then window
+                Console.SetBufferSize(45, 14);
+                Console.SetWindowSize(45, 14);
             }
             catch { }
 
-            // Reference unused markers to guarantee they are linked into binary
-            if (RAW_COLOR_BYTES.Length < 0 || RAW_KA_NAME_BYTES.Length < 0 || RAW_KA_OWNER_BYTES.Length < 0 || RAW_KA_VER_BYTES.Length < 0 || RAW_KA_SECRET_BYTES.Length < 0)
-            {
-                Console.Write("");
-            }
-
-            // 1. Resolve configuration values
             string projectName = ReadMarker(RAW_PROJECT_NAME_BYTES);
             if (string.IsNullOrEmpty(projectName) || projectName.StartsWith("__PROJECT_NAME__"))
-            {
-                projectName = "LUMINOX";
-            }
+                projectName = "LOADER";
 
             string targetProcess = ReadMarker(RAW_TARGET_PROCESS_BYTES);
             if (string.IsNullOrEmpty(targetProcess) || targetProcess.StartsWith("__TARGET_PROCESS__"))
-            {
                 targetProcess = "HD-Player.exe";
-            }
 
             string apiUrl = UnshiftUrl(RAW_API_URL_BYTES);
 
-            // Set Initial Console Title
-            try
-            {
-                Console.Title = projectName;
-            }
-            catch { }
+            try { Console.Title = projectName; } catch { }
 
-            // Fetch DLL modules from API
-            List<DllItem> dllList = new List<DllItem>();
-            try
+            // ── FETCH DLL LIST FROM API ──
+            var dllList = new List<DllItem>();
+            if (!string.IsNullOrEmpty(apiUrl) && apiUrl.StartsWith("http") && !apiUrl.Contains("localhost"))
             {
-                if (!string.IsNullOrEmpty(apiUrl) && !apiUrl.StartsWith("__API_URL__") && apiUrl.StartsWith("http"))
+                try
                 {
-                    using (WebClient client = new WebClient())
+                    ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+                    using (var wc = new WebClient())
                     {
-                        ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | SecurityProtocolType.Tls; // Tls12
-                        client.Headers.Add("User-Agent", "Loader/2.0");
-                        string json = client.DownloadString(apiUrl);
+                        wc.Headers["User-Agent"] = "Loader/2.0";
+                        string json = wc.DownloadString(apiUrl);
                         dllList = ParseDlls(json);
                     }
                 }
+                catch { }
             }
-            catch { }
 
-            // Fallback list if offline / mock
             if (dllList.Count == 0)
             {
-                dllList.Add(new DllItem { Name = projectName + " COMPLEX", Filename = projectName + " COMPLEX.dll", Url = "" });
-                dllList.Add(new DllItem { Name = projectName + " BASICO", Filename = projectName + " BASICO.dll", Url = "" });
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("No se pudo conectar al servidor.");
+                Console.ResetColor();
+                Thread.Sleep(3000);
+                return;
             }
 
-            DllItem selectedDll = null;
+            // ── SELECTION MENU (only when >1 DLL) ──
+            DllItem selected = null;
 
-            // ── PRODUCT SELECTION MENU ──
-            if (dllList.Count > 1)
+            if (dllList.Count == 1)
+            {
+                selected = dllList[0];
+                try { Console.Title = selected.Name; } catch { }
+            }
+            else
             {
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write("Welcome to ");
-                Console.WriteLine(projectName);
+                Console.WriteLine("Welcome to " + projectName);
                 Console.WriteLine();
 
                 for (int i = 0; i < dllList.Count; i++)
@@ -220,274 +155,193 @@ namespace SecureXLoader
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write("[");
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.Write((i + 1).ToString());
+                    Console.Write(i + 1);
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("] " + dllList[i].Name);
                 }
 
                 Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.White;
                 Console.Write("Select: ");
 
-                while (selectedDll == null)
+                while (selected == null)
                 {
-                    ConsoleKeyInfo keyInfo = Console.ReadKey();
-                    Console.WriteLine();
-
-                    char c = keyInfo.KeyChar;
-                    if (char.IsDigit(c))
+                    var key = Console.ReadKey(true); // intercept=true, no echo
+                    if (char.IsDigit(key.KeyChar))
                     {
-                        int choice = (int)char.GetNumericValue(c);
+                        int choice = (int)char.GetNumericValue(key.KeyChar);
                         if (choice >= 1 && choice <= dllList.Count)
                         {
-                            selectedDll = dllList[choice - 1];
+                            selected = dllList[choice - 1];
                             break;
                         }
                     }
-
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("Opcion invalida. Select: ");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    // ignore invalid keys silently
                 }
 
-                // Clear screen for clean injection UI
                 Console.Clear();
-            }
-            else if (dllList.Count == 1)
-            {
-                selectedDll = dllList[0];
+                try { Console.Title = selected.Name; } catch { }
             }
 
-            // Determine active title / name
-            string activeTitle = (selectedDll != null && !string.IsNullOrEmpty(selectedDll.Name)) 
-                ? selectedDll.Name 
-                : projectName;
-
-            try
-            {
-                Console.Title = activeTitle;
-            }
-            catch { }
-
-            // ── IMAGE 4: Clean Welcome Banner ──
+            // ── INJECTION UI ──
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write("Welcome to ");
-            Console.WriteLine(activeTitle);
+            Console.WriteLine("Welcome to " + selected.Name);
             Console.WriteLine();
-            Thread.Sleep(600);
+            Thread.Sleep(400);
 
-            // ── STEP 1: Checking Updates ──
-            PrintStep("Checking Updates");
-            Thread.Sleep(500);
+            // Download DLL
+            string dllPath = null;
+            Step("Checking Updates");
+            Thread.Sleep(400);
 
-            // Download selected DLL module
-            string downloadedDllPath = null;
-            if (selectedDll != null && !string.IsNullOrEmpty(selectedDll.Url))
+            if (!string.IsNullOrEmpty(selected.Url))
             {
                 try
                 {
-                    string fullUrl = selectedDll.Url;
-                    if (fullUrl.StartsWith("/") && !string.IsNullOrEmpty(apiUrl) && apiUrl.StartsWith("http"))
+                    string url = selected.Url;
+                    string fname = Path.GetFileName(selected.Filename ?? selected.Name + ".dll");
+                    if (string.IsNullOrEmpty(fname)) fname = Guid.NewGuid().ToString("N") + ".dll";
+                    string path = Path.Combine(Path.GetTempPath(), fname);
+                    using (var wc = new WebClient())
                     {
-                        Uri baseUri = new Uri(apiUrl);
-                        fullUrl = baseUri.Scheme + "://" + baseUri.Authority + fullUrl;
+                        ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+                        wc.Headers["User-Agent"] = "Loader/2.0";
+                        wc.DownloadFile(url, path);
                     }
-
-                    string tempDir = Path.GetTempPath();
-                    string safeName = Path.GetFileName(selectedDll.Filename);
-                    if (string.IsNullOrEmpty(safeName)) safeName = Guid.NewGuid().ToString("N") + ".dll";
-                    string targetPath = Path.Combine(tempDir, safeName);
-
-                    using (WebClient client = new WebClient())
-                    {
-                        ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | SecurityProtocolType.Tls;
-                        client.Headers.Add("User-Agent", "Loader/2.0");
-                        client.DownloadFile(fullUrl, targetPath);
-                    }
-
-                    if (File.Exists(targetPath))
-                    {
-                        downloadedDllPath = targetPath;
-                    }
+                    if (File.Exists(path) && new FileInfo(path).Length > 0)
+                        dllPath = path;
                 }
                 catch { }
             }
 
-            // ── STEP 2: Checking Process Detected ──
-            PrintStep("Checking Process Detected");
-            Thread.Sleep(600);
-
-            // ── STEP 3: Checking Process Emulator ──
-            PrintStep("Checking Process Emulator");
-            Thread.Sleep(500);
-
-            string processClean = targetProcess.Replace(".exe", "").Replace(".EXE", "");
-            Process targetProc = null;
-            int waitAttempts = 0;
-
-            while (targetProc == null && waitAttempts < 60)
+            if (string.IsNullOrEmpty(dllPath))
             {
-                Process[] procs = Process.GetProcessesByName(processClean);
-                if (procs != null && procs.Length > 0)
-                {
-                    targetProc = procs[0];
-                    break;
-                }
-
-                if (processClean.Equals("HD-Player", StringComparison.OrdinalIgnoreCase))
-                {
-                    Process[] altProcs = Process.GetProcessesByName("HD-Player");
-                    if (altProcs.Length > 0) { targetProc = altProcs[0]; break; }
-                    altProcs = Process.GetProcessesByName("BlueStacks");
-                    if (altProcs.Length > 0) { targetProc = altProcs[0]; break; }
-                    altProcs = Process.GetProcessesByName("LdVBoxHeadless");
-                    if (altProcs.Length > 0) { targetProc = altProcs[0]; break; }
-                    altProcs = Process.GetProcessesByName("dnplayer");
-                    if (altProcs.Length > 0) { targetProc = altProcs[0]; break; }
-                }
-
-                Thread.Sleep(300);
-                waitAttempts++;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error: DLL no descargada.");
+                Console.ResetColor();
+                Thread.Sleep(3000);
+                return;
             }
 
-            // ── STEP 4: Injection Process ──
-            PrintStep("Injection Process");
-            Thread.Sleep(700);
-
-            if (targetProc != null && !string.IsNullOrEmpty(downloadedDllPath))
-            {
-                InjectDll(targetProc.Id, downloadedDllPath);
-                Thread.Sleep(300);
-            }
-
-            // ── STEP 5: Success ! (Red color as shown in image 5) ──
-            PrintSuccessLine("Success !");
+            Step("Checking Process Detected");
+            Thread.Sleep(400);
+            Step("Checking Process Emulator");
             Thread.Sleep(400);
 
-            // ── STEP 6: Modulos listos. (Green color as shown in image 5) ──
-            PrintReadyLine("Modulos listos.");
+            // Find target process
+            string procName = targetProcess.Replace(".exe", "").Replace(".EXE", "");
+            Process proc = FindProcess(procName);
 
-            // Wait a few seconds before closing
-            Thread.Sleep(4000);
-        }
+            if (proc == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Proceso no encontrado: " + targetProcess);
+                Console.ResetColor();
+                Thread.Sleep(3000);
+                return;
+            }
 
-        private static void PrintStep(string text)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write("+] ");
-            Console.WriteLine(text);
-        }
+            Step("Injection Process");
+            Thread.Sleep(400);
 
-        private static void PrintSuccessLine(string text)
-        {
+            bool injected = InjectDll(proc.Id, dllPath);
+
+            if (!injected)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("+] Error de inyeccion.");
+                Console.ResetColor();
+                Thread.Sleep(3000);
+                return;
+            }
+
+            // ── SUCCESS ──
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("+] ");
-            Console.WriteLine(text);
-            Console.ForegroundColor = ConsoleColor.White;
-        }
-
-        private static void PrintReadyLine(string text)
-        {
+            Console.WriteLine("+] Success !");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("+] ");
-            Console.WriteLine(text);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("+] Modulos listos.");
+            Console.ResetColor();
+
+            Thread.Sleep(3000);
         }
 
-        // Lightweight JSON Parser for DLL array
-        private static List<DllItem> ParseDlls(string json)
+        static void Step(string text)
         {
-            List<DllItem> list = new List<DllItem>();
-            if (string.IsNullOrEmpty(json)) return list;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("+] " + text);
+        }
 
+        static Process FindProcess(string name)
+        {
+            string[] names = { name, "HD-Player", "BlueStacks", "Bluestacks", "dnplayer", "LdVBoxHeadless", "MEmu" };
+            foreach (string n in names)
+            {
+                Process[] list = Process.GetProcessesByName(n);
+                if (list != null && list.Length > 0) return list[0];
+            }
+            return null;
+        }
+
+        static List<DllItem> ParseDlls(string json)
+        {
+            var list = new List<DllItem>();
+            if (string.IsNullOrEmpty(json)) return list;
             try
             {
-                MatchCollection matches = Regex.Matches(json, @"\{[^{}]*\}");
-                foreach (Match m in matches)
+                foreach (Match m in Regex.Matches(json, @"\{[^{}]*\}"))
                 {
-                    string objStr = m.Value;
-                    string name = ExtractJsonValue(objStr, "name");
-                    string filename = ExtractJsonValue(objStr, "filename");
-                    string url = ExtractJsonValue(objStr, "url");
-
-                    if (!string.IsNullOrEmpty(url))
+                    string obj = m.Value;
+                    string url = JsonVal(obj, "url");
+                    if (string.IsNullOrEmpty(url)) continue;
+                    list.Add(new DllItem
                     {
-                        list.Add(new DllItem
-                        {
-                            Name = string.IsNullOrEmpty(name) ? filename : name,
-                            Filename = filename,
-                            Url = url
-                        });
-                    }
+                        Name     = JsonVal(obj, "name"),
+                        Filename = JsonVal(obj, "filename"),
+                        Url      = url.Replace("\\/", "/")
+                    });
                 }
             }
             catch { }
-
             return list;
         }
 
-        private static string ExtractJsonValue(string objStr, string key)
+        static string JsonVal(string obj, string key)
         {
-            Match m = Regex.Match(objStr, "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"");
-            if (m.Success)
-            {
-                return m.Groups[1].Value.Replace("\\/", "/");
-            }
-            return "";
+            var m = Regex.Match(obj, "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"");
+            return m.Success ? m.Groups[1].Value : "";
         }
 
-        // Win32 Standard LoadLibrary Injection
-        private static bool InjectDll(int processId, string dllPath)
+        static bool InjectDll(int pid, string dllPath)
         {
-            if (!File.Exists(dllPath)) return false;
-
-            IntPtr hProcess = IntPtr.Zero;
-            IntPtr allocMem = IntPtr.Zero;
-            IntPtr hThread = IntPtr.Zero;
-
+            IntPtr hProc = IntPtr.Zero, mem = IntPtr.Zero, thread = IntPtr.Zero;
             try
             {
-                hProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ, false, processId);
-                if (hProcess == IntPtr.Zero)
-                {
-                    hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, processId);
-                }
+                hProc = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+                if (hProc == IntPtr.Zero) return false;
 
-                if (hProcess == IntPtr.Zero) return false;
+                byte[] bytes = Encoding.ASCII.GetBytes(dllPath + "\0");
+                mem = VirtualAllocEx(hProc, IntPtr.Zero, (uint)bytes.Length, MEM_COMMIT_RESERVE, PAGE_READWRITE);
+                if (mem == IntPtr.Zero) return false;
 
-                byte[] dllBytes = Encoding.ASCII.GetBytes(dllPath + "\0");
-                allocMem = VirtualAllocEx(hProcess, IntPtr.Zero, (uint)dllBytes.Length, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-                if (allocMem == IntPtr.Zero) return false;
+                UIntPtr written;
+                if (!WriteProcessMemory(hProc, mem, bytes, (uint)bytes.Length, out written)) return false;
 
-                UIntPtr bytesWritten;
-                if (!WriteProcessMemory(hProcess, allocMem, dllBytes, (uint)dllBytes.Length, out bytesWritten))
-                {
-                    return false;
-                }
+                IntPtr k32   = GetModuleHandle("kernel32.dll");
+                IntPtr loadA = GetProcAddress(k32, "LoadLibraryA");
+                if (loadA == IntPtr.Zero) return false;
 
-                IntPtr kernel32 = GetModuleHandle("kernel32.dll");
-                IntPtr loadLibraryAddr = GetProcAddress(kernel32, "LoadLibraryA");
-                if (loadLibraryAddr == IntPtr.Zero) return false;
+                IntPtr tid;
+                thread = CreateRemoteThread(hProc, IntPtr.Zero, 0, loadA, mem, 0, out tid);
+                if (thread == IntPtr.Zero) return false;
 
-                IntPtr threadId;
-                hThread = CreateRemoteThread(hProcess, IntPtr.Zero, 0, loadLibraryAddr, allocMem, 0, out threadId);
-                if (hThread == IntPtr.Zero) return false;
-
-                WaitForSingleObject(hThread, 6000);
+                WaitForSingleObject(thread, 6000);
                 return true;
             }
-            catch
-            {
-                return false;
-            }
+            catch { return false; }
             finally
             {
-                if (allocMem != IntPtr.Zero && hProcess != IntPtr.Zero)
-                {
-                    VirtualFreeEx(hProcess, allocMem, 0x8000, 0); // MEM_RELEASE
-                }
-                if (hThread != IntPtr.Zero) CloseHandle(hThread);
-                if (hProcess != IntPtr.Zero) CloseHandle(hProcess);
+                if (mem    != IntPtr.Zero && hProc != IntPtr.Zero) VirtualFreeEx(hProc, mem, 0, 0x8000);
+                if (thread != IntPtr.Zero) CloseHandle(thread);
+                if (hProc  != IntPtr.Zero) CloseHandle(hProc);
             }
         }
     }

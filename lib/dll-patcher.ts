@@ -28,16 +28,31 @@ function findPattern(haystack: Buffer, needle: Buffer): number {
 }
 
 function patchString(buf: Buffer, oldStr: string, newStr: string): number {
-  const marker = Buffer.from(oldStr, 'binary');
-  const maxLen = oldStr.length;
-  const replacement = strBuf(newStr, maxLen + 1).slice(0, maxLen);
   let count = 0;
-  let idx = findPattern(buf, marker);
-  while (idx !== -1) {
-    replacement.copy(buf, idx);
+
+  // 1. Try UTF-16LE (used in .NET / C# binaries)
+  const markerUtf16 = Buffer.from(oldStr, 'utf16le');
+  let idx16 = findPattern(buf, markerUtf16);
+  while (idx16 !== -1) {
+    const maxChars = oldStr.length;
+    const replacement16 = Buffer.alloc(maxChars * 2, 0);
+    Buffer.from(newStr, 'utf16le').copy(replacement16, 0, 0, Math.min(newStr.length * 2, maxChars * 2 - 2));
+    replacement16.copy(buf, idx16);
     count++;
-    idx = findPattern(buf, marker);
+    idx16 = findPattern(buf, markerUtf16);
   }
+
+  // 2. Try ASCII / binary (used in C++ native binaries)
+  const markerAscii = Buffer.from(oldStr, 'binary');
+  let idxAscii = findPattern(buf, markerAscii);
+  while (idxAscii !== -1) {
+    const maxLen = oldStr.length;
+    const replacementAscii = strBuf(newStr, maxLen + 1).slice(0, maxLen);
+    replacementAscii.copy(buf, idxAscii);
+    count++;
+    idxAscii = findPattern(buf, markerAscii);
+  }
+
   return count;
 }
 

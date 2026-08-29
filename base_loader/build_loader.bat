@@ -17,7 +17,7 @@ if not exist "%CSC_PATH%" (
 
 echo Usando compilador: "%CSC_PATH%"
 
-"%CSC_PATH%" /target:exe /platform:anycpu /optimize+ /out:"%~dp0base_loader.exe" "%~dp0BaseLoader.cs"
+"%CSC_PATH%" /target:exe /platform:anycpu /optimize+ /win32manifest:"%~dp0loader.manifest" /out:"%~dp0base_loader.exe" "%~dp0BaseLoader.cs"
 
 if %ERRORLEVEL% equ 0 (
     echo Compilacion exitosa.

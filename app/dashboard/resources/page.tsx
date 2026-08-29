@@ -780,6 +780,15 @@ if ($auth->license($key)) {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+          <a
+            href="/SecureX-Auth.apk"
+            download="SecureX-Auth.apk"
+            className="px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            <span>🤖 Descargar APK (Android)</span>
+          </a>
+
           <button
             type="button"
             onClick={() => {
@@ -790,17 +799,17 @@ if ($auth->license($key)) {
               const isAndroid = /android/i.test(navigator.userAgent);
               const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
               if (isAndroid) {
-                alert("Para instalar en Android:\n1. Toca los 3 puntos arriba a la derecha en Chrome.\n2. Toca en 'Instalar aplicación' o 'Agregar a pantalla principal'.");
+                window.location.href = "/SecureX-Auth.apk";
               } else if (isIOS) {
                 alert("Para instalar en iPhone:\n1. Toca el botón Compartir en Safari.\n2. Toca en 'Agregar a pantalla de inicio'.");
               } else {
-                alert("Para instalar en PC:\n1. Haz clic en el icono de instalación en la barra de URL de tu navegador.");
+                alert("Para instalar en PC:\n1. Haz clic en el icono de instalación en la barra de URL de tu navegador o ejecuta el archivo SecureX-Auth-App.exe.");
               }
             }}
-            className="px-6 py-3 bg-gradient-to-r from-[#0080ff] to-[#00c2ff] hover:from-[#0070e0] hover:to-[#00b0ff] text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(0,153,255,0.4)] transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap"
+            className="px-5 py-3 bg-gradient-to-r from-[#0080ff] to-[#00c2ff] hover:from-[#0070e0] hover:to-[#00b0ff] text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(0,153,255,0.4)] transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap"
           >
             <Download className="w-4 h-4" />
-            <span>📲 Instalar App en Teléfono / PC</span>
+            <span>📲 Instalar App (PWA)</span>
           </button>
         </div>
       </div>

@@ -192,19 +192,29 @@ export function UsersPageClient({
     }
   };
 
-  const handleBulkDelete = (actionType: "banned" | "inactive" | "all") => {
+  const handleBulkDelete = async (actionType: "banned" | "inactive" | "all") => {
     if (!confirm(`¿Estás seguro de realizar la acción "${actionType}"?`)) return;
 
     if (actionType === "all") {
-      setUsers([]);
+      setUsers((prev) => (selectedAppFilter !== "all" ? prev.filter((u) => u.app_id !== selectedAppFilter) : []));
     } else if (actionType === "banned") {
       setUsers((prev) => prev.filter((u) => !u.banned));
     } else {
       setUsers((prev) => prev.filter((u) => u.last_login !== null));
     }
+
+    try {
+      const appIdParam = selectedAppFilter !== "all" ? `&appId=${encodeURIComponent(selectedAppFilter)}` : "";
+      await fetch(`/api/admin/users?action=${actionType}${appIdParam}`, {
+        method: "DELETE",
+      });
+      router.refresh();
+    } catch (e) {
+      console.error("Error bulk deleting users:", e);
+    }
   };
 
-  const handleResetHWID = (id: string) => {
+  const handleResetHWID = async (id: string) => {
     setUsers((prev) =>
       prev.map((u) => (u.id === id ? { ...u, hwid: null } : u))
     );
@@ -212,7 +222,7 @@ export function UsersPageClient({
     setOpenActionDropdown(null);
   };
 
-  const handleToggleBan = (id: string, currentBanned: boolean) => {
+  const handleToggleBan = async (id: string, currentBanned: boolean) => {
     setUsers((prev) =>
       prev.map((u) => (u.id === id ? { ...u, banned: !currentBanned } : u))
     );
@@ -232,10 +242,17 @@ export function UsersPageClient({
     setOpenActionDropdown(null);
   };
 
-  const handleDeleteUser = (id: string) => {
-    if (confirm("¿Estás seguro de eliminar este usuario?")) {
-      setUsers((prev) => prev.filter((u) => u.id !== id));
-      setOpenActionDropdown(null);
+  const handleDeleteUser = async (id: string) => {
+    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    setOpenActionDropdown(null);
+    try {
+      await fetch(`/api/admin/users?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      router.refresh();
+    } catch (e) {
+      console.error("Error deleting user:", e);
     }
   };
 

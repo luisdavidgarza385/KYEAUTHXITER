@@ -270,11 +270,24 @@ export function LicensesPageClient({
     );
   };
 
+  const handleDeleteSingleLicense = async (id: string) => {
+    if (!confirm("¿Eliminar esta licencia?")) return;
+    setLicenses((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await fetch(`/api/admin/licenses/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      router.refresh();
+    } catch (e) {
+      console.error("Error deleting license:", e);
+    }
+  };
+
   const handleBulkDelete = async (actionType: "expired" | "unused" | "all") => {
     if (!confirm(`¿Estás seguro de realizar la acción "${actionType}"?`)) return;
 
     if (actionType === "all") {
-      setLicenses([]);
+      setLicenses((prev) => (selectedAppFilter !== "all" ? prev.filter((l) => l.app_id !== selectedAppFilter) : []));
     } else if (actionType === "unused") {
       setLicenses((prev) => prev.filter((l) => l.status !== "unused"));
     } else {
@@ -282,13 +295,16 @@ export function LicensesPageClient({
     }
 
     try {
+      const appId = selectedAppFilter !== "all" ? selectedAppFilter : undefined;
       await fetch("/api/admin/licenses/bulk-delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ appId: activeApp.id, deleteType: actionType }),
+        body: JSON.stringify({ appId, mode: actionType }),
       });
       router.refresh();
-    } catch {}
+    } catch (e) {
+      console.error("Error bulk deleting licenses:", e);
+    }
   };
 
   const filtered = licenses.filter((l) => {
@@ -557,11 +573,7 @@ export function LicensesPageClient({
                           {/* Delete */}
                           <button
                             type="button"
-                            onClick={() => {
-                              if (confirm("¿Eliminar esta licencia?")) {
-                                setLicenses((prev) => prev.filter((item) => item.id !== l.id));
-                              }
-                            }}
+                            onClick={() => handleDeleteSingleLicense(l.id)}
                             className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

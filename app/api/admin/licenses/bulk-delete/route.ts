@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
   return safeRoute(async () => {
     const me = await requireAdmin();
     const body = await req.json().catch(() => ({}));
-    const mode = String(body?.mode || "");
+    const mode = String(body?.mode || body?.deleteType || "");
     const appId = body?.appId ? String(body.appId) : undefined;
 
-    if (!["all", "unused", "used", "banned"].includes(mode)) {
-      return { status: 400, data: { success: false, message: "Invalid mode" } };
+    if (!["all", "unused", "used", "banned", "expired"].includes(mode)) {
+      return { status: 400, data: { success: false, message: "Invalid mode: " + mode } };
     }
 
     const scopedIds = await getScopedAppIds(me);
@@ -23,15 +23,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const all = await store.listLicenses({ appId, limit: 5000 });
+    const all = await store.listLicenses({ appId, limit: 10000 });
     let toDelete = scopedIds
       ? all.filter((l) => scopedIds.includes(l.app_id))
       : all;
     if (me.role === "seller") {
       toDelete = toDelete.filter((l) => l.created_by === me.id);
     }
+
+    const now = new Date();
     const filtered = toDelete.filter((l) => {
       if (mode === "all") return true;
+      if (mode === "expired") {
+        return l.status === "expired" || (l.expires_at && new Date(l.expires_at) < now);
+      }
       return l.status === mode;
     });
 

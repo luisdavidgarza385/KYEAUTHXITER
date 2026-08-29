@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { requireAdmin, safeRoute } from "@/lib/api-helpers";
+import { requireAdmin } from "@/lib/api-helpers";
 import { store } from "@/lib/store";
-import { getScopedAppIds, checkQuota } from "@/lib/auth";
+import { getScopedAppIds } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const me = await requireAdmin();
     const url = new URL(req.url);
     const appId = url.searchParams.get("appId") || undefined;
-    const users = await store.listAppUsers({ appId, limit: 1000 });
+    const users = await store.listAppUsers({ appId, limit: 10000 });
     return json({ success: true, data: users });
   } catch (e: any) {
     return json({ success: false, message: e?.message || "Server error" }, 500);
@@ -82,6 +82,27 @@ export async function DELETE(req: NextRequest) {
     const me = await requireAdmin();
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
+    const appId = url.searchParams.get("appId") || undefined;
+    const action = url.searchParams.get("action"); // "all", "banned", "inactive"
+
+    if (action) {
+      const allUsers = await store.listAppUsers({ appId, limit: 10000 });
+      let count = 0;
+      for (const u of allUsers) {
+        if (action === "all") {
+          await store.deleteAppUser(u.id);
+          count++;
+        } else if (action === "banned" && u.banned) {
+          await store.deleteAppUser(u.id);
+          count++;
+        } else if (action === "inactive" && !u.last_login) {
+          await store.deleteAppUser(u.id);
+          count++;
+        }
+      }
+      return json({ success: true, message: `${count} usuarios eliminados`, data: { deleted: count } });
+    }
+
     if (!id) {
       return json({ success: false, message: "ID requerido" }, 400);
     }

@@ -757,6 +757,54 @@ if ($auth->license($key)) {
         </p>
       </div>
 
+      {/* ── SECTION: DESCARGA DE APLICACION MOVIL (PWA & ANDROID/IOS) ── */}
+      <div className="rounded-2xl bg-gradient-to-r from-[#031538] via-[#040e24] to-[#020d22] border border-[#0099ff]/40 p-6 backdrop-blur-2xl shadow-[0_0_30px_rgba(0,153,255,0.15)] flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0099ff] to-[#0044aa] p-[2px] shadow-[0_0_20px_rgba(0,153,255,0.5)] shrink-0 flex items-center justify-center overflow-hidden bg-[#040e24]">
+            <img src="/logo.png" alt="SecureX Auth App Logo" className="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase font-mono border border-emerald-500/30">
+                APP OFICIAL DISPONIBLE
+              </span>
+              <span className="px-2 py-0.5 rounded bg-[#0088ff]/20 text-[#00c2ff] text-[10px] font-black uppercase font-mono border border-[#0088ff]/30">
+                ANDROID · IOS · WINDOWS
+              </span>
+            </div>
+            <h2 className="text-xl font-black text-white mt-1">Descargar e Instalar SecureX Auth App</h2>
+            <p className="text-xs text-slate-300 max-w-xl mt-0.5">
+              Instala la aplicación completa en tu teléfono o computadora. Se actualiza sola en tiempo real cada vez que hay cambios en el sistema.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.matchMedia('(display-mode: standalone)').matches) {
+                alert("¡Ya estás utilizando la aplicación instalada!");
+                return;
+              }
+              const isAndroid = /android/i.test(navigator.userAgent);
+              const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+              if (isAndroid) {
+                alert("Para instalar en Android:\n1. Toca los 3 puntos arriba a la derecha en Chrome.\n2. Toca en 'Instalar aplicación' o 'Agregar a pantalla principal'.");
+              } else if (isIOS) {
+                alert("Para instalar en iPhone:\n1. Toca el botón Compartir en Safari.\n2. Toca en 'Agregar a pantalla de inicio'.");
+              } else {
+                alert("Para instalar en PC:\n1. Haz clic en el icono de instalación en la barra de URL de tu navegador.");
+              }
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-[#0080ff] to-[#00c2ff] hover:from-[#0070e0] hover:to-[#00b0ff] text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(0,153,255,0.4)] transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            <span>📲 Instalar App en Teléfono / PC</span>
+          </button>
+        </div>
+      </div>
+
       {/* ── SECTION: C++ / MSVC X64 INDIVIDUAL FILES & OFFICIAL SDKS ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: C++ Individual Files */}

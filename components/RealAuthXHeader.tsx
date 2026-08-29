@@ -131,7 +131,7 @@ export function RealAuthXHeader({
         </button>
 
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 font-mono">
-          <span className="text-slate-400">RealAuthX</span>
+          <span className="text-slate-400">SecureX Auth</span>
           <span>•</span>
           <span className="text-slate-200 font-bold">{getSectionTitle()}</span>
           <span>•</span>

@@ -67,39 +67,53 @@ export function RealAuthXSidebar({
     };
   }, []);
 
+  const isAdmin = role === "admin";
+
+  const generalItems = [
+    {
+      href: "/dashboard",
+      label: t.navCommandCenter || "Centro de Mando",
+      icon: LayoutDashboard,
+      exact: true,
+    },
+    ...(isAdmin
+      ? [
+          {
+            href: "/dashboard/apps",
+            label: t.navManageApps || "Gestionar apps",
+            icon: Grid,
+          },
+          {
+            href: "/dashboard/builder",
+            label: t.navBuilder || "Builder",
+            icon: Terminal,
+            badge: "VIP",
+          },
+        ]
+      : []),
+  ];
+
+  const toolsSection = isAdmin
+    ? [
+        {
+          label: t.navTools || "HERRAMIENTAS",
+          items: [
+            {
+              href: "/dashboard/hex-converter",
+              label: t.navHexConverter || "Convertidor Hex",
+              icon: Binary,
+            },
+          ],
+        },
+      ]
+    : [];
+
   const navSections = [
     {
       label: t.navGeneral || "GENERAL",
-      items: [
-        {
-          href: "/dashboard",
-          label: t.navCommandCenter || "Centro de Mando",
-          icon: LayoutDashboard,
-          exact: true,
-        },
-        {
-          href: "/dashboard/apps",
-          label: t.navManageApps || "Gestionar apps",
-          icon: Grid,
-        },
-        {
-          href: "/dashboard/builder",
-          label: t.navBuilder || "Builder",
-          icon: Terminal,
-          badge: "VIP",
-        },
-      ],
+      items: generalItems,
     },
-    {
-      label: t.navTools || "HERRAMIENTAS",
-      items: [
-        {
-          href: "/dashboard/hex-converter",
-          label: t.navHexConverter || "Convertidor Hex",
-          icon: Binary,
-        },
-      ],
-    },
+    ...toolsSection,
     {
       label: t.navManagement || "GESTION",
       items: [
@@ -118,11 +132,15 @@ export function RealAuthXSidebar({
           label: t.navSubscriptions || "Suscripciones",
           icon: Layers,
         },
-        {
-          href: "/dashboard/sub-resellers",
-          label: t.navSubResellers || "Sub-resellers",
-          icon: Layers,
-        },
+        ...(isAdmin
+          ? [
+              {
+                href: "/dashboard/sub-resellers",
+                label: t.navSubResellers || "Sub-resellers",
+                icon: Layers,
+              },
+            ]
+          : []),
         {
           href: "/dashboard/sessions",
           label: t.navSessions || "Sesiones",
@@ -217,10 +235,12 @@ export function RealAuthXSidebar({
         {/* Brand Header */}
         <div className="p-4 border-b border-[#0099ff]/15 flex items-center gap-3">
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0099ff] to-[#0055d4] p-[1px] shadow-[0_0_15px_rgba(0,153,255,0.4)] transition-transform group-hover:scale-105">
-              <div className="w-full h-full bg-[#040e24] rounded-[11px] flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-[#00c2ff]" />
-              </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0099ff] to-[#0055d4] p-[1px] shadow-[0_0_15px_rgba(0,153,255,0.4)] transition-transform group-hover:scale-105 flex items-center justify-center overflow-hidden bg-[#040e24]">
+              <img
+                src="/logo.png"
+                alt="SecureX Auth Logo"
+                className="w-full h-full object-contain p-1 rounded-xl"
+              />
             </div>
             <div>
               <span className="text-base font-black tracking-tight text-white block">

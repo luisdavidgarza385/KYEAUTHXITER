@@ -156,14 +156,14 @@ export default function ResourcesPage() {
   };
 
   // Real C++ Header content
-  const realAuthHeaderContent = `// RealAuthX C++ SDK v1.4
+  const realAuthHeaderContent = `// SecureXAuth C++ SDK v1.4
 #pragma once
 #include <iostream>
 #include <string>
 #include <vector>
 
-namespace RealAuth {
-    inline std::string ApiUrl() { return "https://realauthx.com/api/1.0/"; }
+namespace SecureXAuth {
+    inline std::string ApiUrl() { return "https://keyauthpro.xyz/api/1.0/"; }
 
     struct UserData {
         std::string username;
@@ -225,11 +225,11 @@ namespace RealAuth {
 }
 `;
 
-  const realCryptHeaderContent = `// RealCrypt.h - RealAuthX String Encryption
+  const realCryptHeaderContent = `// SecureXCrypt.h - SecureX Auth String Encryption
 #pragma once
 #include <string>
 
-inline std::string RealCrypt(const std::string& input) {
+inline std::string SecureXCrypt(const std::string& input) {
     return input;
 }
 `;
@@ -240,41 +240,41 @@ inline std::string RealCrypt(const std::string& input) {
 
     if (langName.includes("C++")) {
       files = [
-        { name: "RealAuth.h", content: realAuthHeaderContent },
-        { name: "RealCrypt.h", content: realCryptHeaderContent },
+        { name: "SecureXAuth.h", content: realAuthHeaderContent },
+        { name: "SecureXCrypt.h", content: realCryptHeaderContent },
         { name: "main.cpp", content: getCodeSnippet("cpp", activeTab) },
-        { name: "README.md", content: "# RealAuthX C++ SDK\n\n1. Add RealAuth.h and RealCrypt.h to your Visual Studio project.\n2. Compile in x64 Release mode.\n" },
+        { name: "README.md", content: "# SecureX Auth C++ SDK\n\n1. Add SecureXAuth.h and SecureXCrypt.h to your Visual Studio project.\n2. Compile in x64 Release mode.\n" },
       ];
     } else if (langName.includes("C#")) {
       files = [
-        { name: "RealAuth.cs", content: getCsharpClass() },
+        { name: "SecureXAuth.cs", content: getCsharpClass() },
         { name: "Program.cs", content: getCodeSnippet("csharp", activeTab) },
-        { name: "README.md", content: "# RealAuthX C# .NET SDK\n\nAdd RealAuth.cs to your solution.\n" },
+        { name: "README.md", content: "# SecureX Auth C# .NET SDK\n\nAdd SecureXAuth.cs to your solution.\n" },
       ];
     } else if (langName.includes("Python")) {
       files = [
-        { name: "realauth.py", content: getPythonClass() },
+        { name: "securexauth.py", content: getPythonClass() },
         { name: "main.py", content: getCodeSnippet("python", activeTab) },
         { name: "requirements.txt", content: "requests>=2.28.0\n" },
-        { name: "README.md", content: "# RealAuthX Python SDK\n\nRun `pip install -r requirements.txt` and `python main.py`\n" },
+        { name: "README.md", content: "# SecureX Auth Python SDK\n\nRun `pip install -r requirements.txt` and `python main.py`\n" },
       ];
     } else if (langName.includes("JavaScript") || langName.includes("TypeScript")) {
       files = [
-        { name: "realauth.js", content: getJsClass() },
+        { name: "securexauth.js", content: getJsClass() },
         { name: "index.js", content: getCodeSnippet("js", activeTab) },
-        { name: "package.json", content: '{\n  "name": "realauthx-client",\n  "version": "1.0.0",\n  "main": "index.js",\n  "dependencies": {\n    "node-fetch": "^2.6.7"\n  }\n}\n' },
-        { name: "README.md", content: "# RealAuthX JavaScript SDK\n\nRun `npm install` and `node index.js`\n" },
+        { name: "package.json", content: '{\n  "name": "securexauth-client",\n  "version": "1.0.0",\n  "main": "index.js",\n  "dependencies": {\n    "node-fetch": "^2.6.7"\n  }\n}\n' },
+        { name: "README.md", content: "# SecureX Auth JavaScript SDK\n\nRun `npm install` and `node index.js`\n" },
       ];
     } else if (langName.includes("PHP")) {
       files = [
-        { name: "RealAuth.php", content: getPhpClass() },
+        { name: "SecureXAuth.php", content: getPhpClass() },
         { name: "index.php", content: getCodeSnippet("php", activeTab) },
-        { name: "README.md", content: "# RealAuthX PHP SDK\n\nInclude RealAuth.php in your backend.\n" },
+        { name: "README.md", content: "# SecureX Auth PHP SDK\n\nInclude SecureXAuth.php in your backend.\n" },
       ];
     } else {
       files = [
-        { name: "realauth_client.txt", content: getCodeSnippet(selectedLang, activeTab) },
-        { name: "README.md", content: `# RealAuthX Official SDK - ${langName}\n\nOfficial integration files for ${langName}.\n` },
+        { name: "securexauth_client.txt", content: getCodeSnippet(selectedLang, activeTab) },
+        { name: "README.md", content: `# SecureX Auth Official SDK - ${langName}\n\nOfficial integration files for ${langName}.\n` },
       ];
     }
 
@@ -778,40 +778,40 @@ if ($auth->license($key)) {
           </p>
 
           <div className="space-y-3 pt-2">
-            {/* RealAuth.lib */}
+            {/* SecureXAuth.lib */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#030919] border border-[#0099ff]/20">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#0088ff]/15 flex items-center justify-center text-[#00c2ff]">
                   <FileCode className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white">RealAuth.lib</div>
+                  <div className="text-xs font-bold text-white">SecureXAuth.lib</div>
                   <div className="text-[10px] text-slate-400 font-mono">Librería estática MSVC v142 (x64) · HWID</div>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => downloadText("RealAuth.lib", "!<arch>\nRealAuthX-Static-Lib-MSVC-v142-x64\n")}
+                onClick={() => downloadText("SecureXAuth.lib", "!<arch>\nSecureXAuth-Static-Lib-MSVC-v142-x64\n")}
                 className="px-3.5 py-1.5 rounded-lg bg-[#0088ff] hover:bg-[#0099ff] text-white text-xs font-bold shadow-md transition-all cursor-pointer"
               >
                 Descargar
               </button>
             </div>
 
-            {/* RealAuth.h */}
+            {/* SecureXAuth.h */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#030919] border border-[#0099ff]/20">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#0088ff]/15 flex items-center justify-center text-[#00c2ff]">
                   <Code2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white">RealAuth.h</div>
+                  <div className="text-xs font-bold text-white">SecureXAuth.h</div>
                   <div className="text-[10px] text-slate-400 font-mono">Cabecera C++ con todas las clases y métodos</div>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => downloadText("RealAuth.h", realAuthHeaderContent)}
+                onClick={() => downloadText("SecureXAuth.h", realAuthHeaderContent)}
                 className="px-3.5 py-1.5 rounded-lg bg-[#0088ff] hover:bg-[#0099ff] text-white text-xs font-bold shadow-md transition-all cursor-pointer"
               >
                 Descargar
@@ -834,7 +834,7 @@ if ($auth->license($key)) {
                 onClick={() =>
                   downloadText(
                     "SHA256SUMS.txt",
-                    "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f  RealAuth.lib\n3a8b2c1e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c  RealAuth.h\n"
+                    "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f  SecureXAuth.lib\n3a8b2c1e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c  SecureXAuth.h\n"
                   )
                 }
                 className="px-3.5 py-1.5 rounded-lg bg-[#08152e] hover:bg-[#0c1f44] text-slate-200 border border-[#0099ff]/30 text-xs font-bold transition-all cursor-pointer"
@@ -866,19 +866,19 @@ if ($auth->license($key)) {
           {/* Grid of 13 Zip Downloads (Real ZIP Files) */}
           <div className="grid grid-cols-2 gap-2.5 pt-2">
             {[
-              { name: "C++ (MSVC / ISO)", file: "RealAuthX-cpp-sdk.zip", label: "C++.ZIP" },
-              { name: "C# (.NET / Unity)", file: "RealAuthX-csharp-sdk.zip", label: "C#.ZIP" },
-              { name: "Python 3.x", file: "RealAuthX-python-sdk.zip", label: "Python.ZIP" },
-              { name: "PHP", file: "RealAuthX-php-sdk.zip", label: "PHP.ZIP" },
-              { name: "JavaScript / Node.js", file: "RealAuthX-js-sdk.zip", label: "JavaScript.ZIP" },
-              { name: "TypeScript", file: "RealAuthX-ts-sdk.zip", label: "TypeScript.ZIP" },
-              { name: "Java (Android/Desktop)", file: "RealAuthX-java-sdk.zip", label: "Java.ZIP" },
-              { name: "VB.NET", file: "RealAuthX-vbnet-sdk.zip", label: "VB.NET.ZIP" },
-              { name: "Rust", file: "RealAuthX-rust-sdk.zip", label: "Rust.ZIP" },
-              { name: "Go (Golang)", file: "RealAuthX-go-sdk.zip", label: "Go.ZIP" },
-              { name: "Lua (Roblox / FiveM)", file: "RealAuthX-lua-sdk.zip", label: "Lua.ZIP" },
-              { name: "Ruby", file: "RealAuthX-ruby-sdk.zip", label: "Ruby.ZIP" },
-              { name: "Perl", file: "RealAuthX-perl-sdk.zip", label: "Perl.ZIP" },
+              { name: "C++ (MSVC / ISO)", file: "SecureXAuth-cpp-sdk.zip", label: "C++.ZIP" },
+              { name: "C# (.NET / Unity)", file: "SecureXAuth-csharp-sdk.zip", label: "C#.ZIP" },
+              { name: "Python 3.x", file: "SecureXAuth-python-sdk.zip", label: "Python.ZIP" },
+              { name: "PHP", file: "SecureXAuth-php-sdk.zip", label: "PHP.ZIP" },
+              { name: "JavaScript / Node.js", file: "SecureXAuth-js-sdk.zip", label: "JavaScript.ZIP" },
+              { name: "TypeScript", file: "SecureXAuth-ts-sdk.zip", label: "TypeScript.ZIP" },
+              { name: "Java (Android/Desktop)", file: "SecureXAuth-java-sdk.zip", label: "Java.ZIP" },
+              { name: "VB.NET", file: "SecureXAuth-vbnet-sdk.zip", label: "VB.NET.ZIP" },
+              { name: "Rust", file: "SecureXAuth-rust-sdk.zip", label: "Rust.ZIP" },
+              { name: "Go (Golang)", file: "SecureXAuth-go-sdk.zip", label: "Go.ZIP" },
+              { name: "Lua (Roblox / FiveM)", file: "SecureXAuth-lua-sdk.zip", label: "Lua.ZIP" },
+              { name: "Ruby", file: "SecureXAuth-ruby-sdk.zip", label: "Ruby.ZIP" },
+              { name: "Perl", file: "SecureXAuth-perl-sdk.zip", label: "Perl.ZIP" },
               { name: "SHA-256", file: "SHA256SUMS.txt", label: "SHA-256", isHash: true },
             ].map((sdk) => (
               <button

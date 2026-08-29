@@ -11,6 +11,7 @@ interface MusicConfig {
 }
 
 function getYouTubeId(url: string) {
+  if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
@@ -24,20 +25,39 @@ export function GlobalMusicPlayer() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
-  const ytContainerId = "yt-music-player-container";
+  const ytContainerId = "yt-global-music-container";
   const [ytApiReady, setYtApiReady] = useState(false);
 
   // Load user mute preference
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("spectral_x_music_muted");
+      const stored = localStorage.getItem("securex_music_muted");
       if (stored === "true") setUserMuted(true);
     }
   }, []);
 
-  // Fetch music config (checks personal localStorage music first, falls back to global API)
+  // Fetch music config
   useEffect(() => {
     async function updateActiveMusic() {
+      try {
+        // 1. Check global music from backend first
+        const res = await fetch("/api/admin/music");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.config && json.config.enabled && json.config.url) {
+            // Global music is active and overrides all
+            setConfig({
+              enabled: true,
+              url: json.config.url,
+              volume: json.config.volume ?? 0.25,
+              title: json.config.title || "Música Global",
+            });
+            return;
+          }
+        }
+      } catch {}
+
+      // 2. If global music is disabled, check user's personal music preference
       if (typeof window !== "undefined") {
         const personal = localStorage.getItem("spectral_x_personal_music");
         if (personal) {
@@ -47,8 +67,8 @@ export function GlobalMusicPlayer() {
               setConfig({
                 enabled: true,
                 url: pConfig.url,
-                volume: pConfig.volume ?? 0.15,
-                title: pConfig.title || "Personal Track",
+                volume: pConfig.volume ?? 0.25,
+                title: pConfig.title || "Música Personal",
               });
               return;
             }
@@ -56,18 +76,13 @@ export function GlobalMusicPlayer() {
         }
       }
 
-      try {
-        const res = await fetch("/api/admin/music");
-        if (!res.ok) return;
-        const json = await res.json();
-        if (json.success && json.config) {
-          setConfig(json.config);
-        }
-      } catch {}
+      // 3. Neither active
+      setConfig(null);
+      setIsPlaying(false);
     }
 
     updateActiveMusic();
-    const interval = setInterval(updateActiveMusic, 15000);
+    const interval = setInterval(updateActiveMusic, 12000);
     const handlePersonalUpdate = () => updateActiveMusic();
     window.addEventListener("spectral-personal-music-updated", handlePersonalUpdate);
 
@@ -77,7 +92,7 @@ export function GlobalMusicPlayer() {
     };
   }, []);
 
-  // Load YouTube Iframe Player API if url is YouTube
+  // Load YouTube Iframe API if required
   useEffect(() => {
     if (!config || !config.enabled || !config.url) return;
     const isYt = !!getYouTubeId(config.url);
@@ -88,7 +103,6 @@ export function GlobalMusicPlayer() {
       return;
     }
 
-    // Bind global ready callback
     (window as any).onYouTubeIframeAPIReady = () => {
       setYtApiReady(true);
     };
@@ -97,26 +111,16 @@ export function GlobalMusicPlayer() {
       const tag = document.createElement("script");
       tag.id = "yt-iframe-api-script";
       tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      if (firstScriptTag && firstScriptTag.parentNode) {
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      } else {
-        document.head.appendChild(tag);
-      }
+      document.head.appendChild(tag);
     }
   }, [config]);
 
-  // Main Audio Control (YouTube vs HTML5 Audio)
+  // Handle Playback
   useEffect(() => {
     if (!config || !config.enabled || !config.url) {
-      // Pause both
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      if (audioRef.current) audioRef.current.pause();
       if (ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
-        try {
-          ytPlayerRef.current.pauseVideo();
-        } catch {}
+        try { ytPlayerRef.current.pauseVideo(); } catch {}
       }
       setIsPlaying(false);
       return;
@@ -125,13 +129,9 @@ export function GlobalMusicPlayer() {
     const ytId = getYouTubeId(config.url);
 
     if (userMuted) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      if (audioRef.current) audioRef.current.pause();
       if (ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
-        try {
-          ytPlayerRef.current.pauseVideo();
-        } catch {}
+        try { ytPlayerRef.current.pauseVideo(); } catch {}
       }
       setIsPlaying(false);
       setShowBar(true);
@@ -139,123 +139,114 @@ export function GlobalMusicPlayer() {
     }
 
     if (ytId) {
-      // Pause HTML5 Audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      // Pause HTML5 audio
+      if (audioRef.current) audioRef.current.pause();
 
       if (!ytApiReady || !(window as any).YT) return;
 
-      const initYtPlayer = () => {
-        try {
-          // If player already exists, load video or play
-          if (ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === "function") {
-            const currentUrl = ytPlayerRef.current.getVideoUrl ? ytPlayerRef.current.getVideoUrl() : "";
-            if (!currentUrl.includes(ytId)) {
-              ytPlayerRef.current.loadVideoById({
-                videoId: ytId,
-                startSeconds: 0,
-              });
-            }
-            ytPlayerRef.current.setVolume(config.volume * 100);
-            if (!userMuted) {
-              ytPlayerRef.current.playVideo();
-            }
-          } else {
-            // Create container element dynamically if not present
-            let container = document.getElementById(ytContainerId);
-            if (!container) {
-              container = document.createElement("div");
-              container.id = ytContainerId;
-              container.style.position = "absolute";
-              container.style.width = "0px";
-              container.style.height = "0px";
-              container.style.left = "-9999px";
-              container.style.top = "-9999px";
-              container.style.pointerEvents = "none";
-              document.body.appendChild(container);
-            }
-
-            ytPlayerRef.current = new (window as any).YT.Player(ytContainerId, {
-              videoId: ytId,
-              height: "0",
-              width: "0",
-              playerVars: {
-                autoplay: 1,
-                controls: 0,
-                disablekb: 1,
-                fs: 0,
-                loop: 1,
-                playlist: ytId, // Required for loop in YT Iframe player
-                modestbranding: 1,
-                rel: 0,
-                showinfo: 0,
-              },
-              events: {
-                onReady: (event: any) => {
-                  event.target.setVolume(config.volume * 100);
-                  if (!userMuted) {
-                    event.target.playVideo();
-                  }
-                },
-                onStateChange: (event: any) => {
-                  // 1 = PLAYING, 2 = PAUSED
-                  if (event.data === 1) {
-                    setIsPlaying(true);
-                  } else {
-                    setIsPlaying(false);
-                  }
-                  // Auto loop video if it ends
-                  if (event.data === 0) {
-                    event.target.playVideo();
-                  }
-                },
-              },
-            });
+      try {
+        if (ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === "function") {
+          const currentUrl = ytPlayerRef.current.getVideoUrl ? ytPlayerRef.current.getVideoUrl() : "";
+          if (!currentUrl.includes(ytId)) {
+            ytPlayerRef.current.loadVideoById({ videoId: ytId, startSeconds: 0 });
           }
-        } catch (e) {
-          console.warn("YouTube Player initialization failed:", e);
-        }
-      };
+          ytPlayerRef.current.setVolume(Math.round((config.volume ?? 0.25) * 100));
+          if (!userMuted) {
+            ytPlayerRef.current.playVideo();
+          }
+        } else {
+          let container = document.getElementById(ytContainerId);
+          if (!container) {
+            container = document.createElement("div");
+            container.id = ytContainerId;
+            container.style.position = "fixed";
+            container.style.width = "10px";
+            container.style.height = "10px";
+            container.style.bottom = "0px";
+            container.style.left = "0px";
+            container.style.opacity = "0.001";
+            container.style.pointerEvents = "none";
+            container.style.zIndex = "-1";
+            document.body.appendChild(container);
+          }
 
-      initYtPlayer();
+          ytPlayerRef.current = new (window as any).YT.Player(ytContainerId, {
+            videoId: ytId,
+            height: "10",
+            width: "10",
+            playerVars: {
+              autoplay: 1,
+              controls: 0,
+              disablekb: 1,
+              fs: 0,
+              loop: 1,
+              playlist: ytId,
+              modestbranding: 1,
+              rel: 0,
+              showinfo: 0,
+            },
+            events: {
+              onReady: (event: any) => {
+                event.target.setVolume(Math.round((config.volume ?? 0.25) * 100));
+                if (!userMuted) {
+                  event.target.playVideo();
+                }
+              },
+              onStateChange: (event: any) => {
+                if (event.data === 1) {
+                  setIsPlaying(true);
+                } else {
+                  setIsPlaying(false);
+                }
+                if (event.data === 0) {
+                  event.target.playVideo();
+                }
+              },
+            },
+          });
+        }
+      } catch (e) {
+        console.warn("YouTube Player initialization:", e);
+      }
+
+      // Interaction unlock for browser autoplay policies
+      const unlockYt = () => {
+        if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function" && !userMuted) {
+          try { ytPlayerRef.current.playVideo(); } catch {}
+        }
+        window.removeEventListener("click", unlockYt);
+      };
+      window.addEventListener("click", unlockYt);
     } else {
       // Pause YouTube
       if (ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
-        try {
-          ytPlayerRef.current.pauseVideo();
-        } catch {}
+        try { ytPlayerRef.current.pauseVideo(); } catch {}
       }
 
-      // Handle HTML5 Audio
       if (!audioRef.current || audioRef.current.src !== config.url) {
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
+        if (audioRef.current) audioRef.current.pause();
         const audio = new Audio(config.url);
         audio.loop = true;
-        audio.volume = config.volume;
+        audio.volume = config.volume ?? 0.25;
         audioRef.current = audio;
 
         audio.addEventListener("playing", () => setIsPlaying(true));
         audio.addEventListener("pause", () => setIsPlaying(false));
         audio.addEventListener("error", () => setIsPlaying(false));
       } else {
-        audioRef.current.volume = config.volume;
+        audioRef.current.volume = config.volume ?? 0.25;
       }
 
-      const playPromise = audioRef.current.play();
-      if (playPromise) {
-        playPromise.catch(() => {
-          const startOnInteraction = () => {
+      const p = audioRef.current.play();
+      if (p) {
+        p.catch(() => {
+          const unlock = () => {
             if (audioRef.current && config.enabled && !userMuted && !getYouTubeId(config.url)) {
               audioRef.current.play().catch(() => {});
             }
-            window.removeEventListener("click", startOnInteraction);
-            window.removeEventListener("keydown", startOnInteraction);
+            window.removeEventListener("click", unlock);
           };
-          window.addEventListener("click", startOnInteraction);
-          window.addEventListener("keydown", startOnInteraction);
+          window.addEventListener("click", unlock);
         });
       }
     }
@@ -263,7 +254,7 @@ export function GlobalMusicPlayer() {
     setShowBar(true);
   }, [config, userMuted, ytApiReady]);
 
-  // Clean up on unmount
+  // Clean up
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -271,9 +262,7 @@ export function GlobalMusicPlayer() {
         audioRef.current = null;
       }
       if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === "function") {
-        try {
-          ytPlayerRef.current.destroy();
-        } catch {}
+        try { ytPlayerRef.current.destroy(); } catch {}
         ytPlayerRef.current = null;
       }
     };
@@ -282,34 +271,34 @@ export function GlobalMusicPlayer() {
   const toggleMute = () => {
     const next = !userMuted;
     setUserMuted(next);
-    localStorage.setItem("spectral_x_music_muted", String(next));
+    localStorage.setItem("securex_music_muted", String(next));
   };
 
   if (!config || !config.enabled || !config.url || !showBar) return null;
 
   return (
-    <div className="fixed bottom-5 left-5 z-[9998] flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-950/80 backdrop-blur-md border border-zinc-800/60 shadow-[0_8px_24px_rgba(0,0,0,0.6)] transition-all duration-300 group hover:border-emerald-500/30">
+    <div className="fixed bottom-5 left-5 z-[9998] flex items-center gap-2 px-3 py-2 rounded-xl bg-[#040e24]/90 backdrop-blur-md border border-[#0099ff]/35 shadow-[0_8px_24px_rgba(0,0,0,0.8)] transition-all duration-300 group hover:border-[#00c2ff]/60">
       <div
         className={`w-7 h-7 rounded-full flex items-center justify-center ${
-          isPlaying ? "bg-emerald-950/50 border border-emerald-500/30 text-emerald-400" : "bg-zinc-900 border border-zinc-800 text-zinc-500"
+          isPlaying ? "bg-[#00c2ff]/20 border border-[#00c2ff]/40 text-[#00c2ff]" : "bg-zinc-900 border border-zinc-800 text-zinc-500"
         }`}
       >
         <Music className={`w-3.5 h-3.5 ${isPlaying ? "animate-pulse" : ""}`} />
       </div>
 
-      <div className="max-w-[120px]">
-        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider leading-none">Música</p>
-        <p className="text-[11px] text-zinc-300 truncate leading-tight mt-0.5">
-          {config.title || "Background Track"}
+      <div className="max-w-[130px]">
+        <p className="text-[9px] text-[#00c2ff] font-extrabold uppercase tracking-wider leading-none font-mono">Música</p>
+        <p className="text-[11px] text-slate-200 truncate leading-tight mt-0.5 font-medium">
+          {config.title || "SecureX Audio"}
         </p>
       </div>
 
       <button
         onClick={toggleMute}
-        className={`p-1.5 rounded-lg border transition-all ${
+        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
           userMuted
             ? "bg-red-950/30 border-red-500/30 text-red-400 hover:bg-red-950/50"
-            : "bg-emerald-950/30 border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/50"
+            : "bg-[#0088ff]/20 border-[#0088ff]/40 text-[#00c2ff] hover:bg-[#0088ff]/30"
         }`}
         title={userMuted ? "Activar música" : "Silenciar música"}
       >

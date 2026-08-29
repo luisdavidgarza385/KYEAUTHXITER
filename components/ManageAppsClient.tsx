@@ -7,9 +7,11 @@ import {
   Check,
   Plus,
   Trash2,
+  Edit2,
   CheckCircle2,
   Loader2,
-  RefreshCw,
+  RotateCcw,
+  Save,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -60,12 +62,19 @@ export function ManageAppsClient({
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Modal Create App State
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newAppName, setNewAppName] = useState("");
   const [newAppDesc, setNewAppDesc] = useState("");
+
+  // Modal Rename / Edit App State
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingApp, setEditingApp] = useState<AppItemData | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editVersion, setEditVersion] = useState("");
+  const [editDownloadUrl, setEditDownloadUrl] = useState("");
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -76,14 +85,14 @@ export function ManageAppsClient({
   const handleSelectApp = (app: AppItemData) => {
     setCurrentApp(app);
     document.cookie = `ka_current_app=${app.id}; path=/; max-age=2592000`;
-    setFeedback(`Aplicación seleccionada: ${app.name}`);
+    setFeedback(`Aplicación activa: ${app.name}`);
     setTimeout(() => setFeedback(null), 2500);
   };
 
   const handleCreateApp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAppName.trim()) return;
-    setLoading(true);
+    setSaving(true);
 
     try {
       const res = await fetch("/api/admin/apps", {
@@ -121,50 +130,94 @@ export function ManageAppsClient({
         setNewAppName("");
         setNewAppDesc("");
         setFeedback(`¡Aplicación "${newAppItem.name}" creada con éxito!`);
-        setTimeout(() => setFeedback(null), 3000);
       } else {
-        const generatedOwner = Math.random().toString(36).slice(2, 12).toUpperCase();
-        const generatedSecret = Array.from({ length: 64 }, () =>
-          Math.floor(Math.random() * 16).toString(16)
-        ).join("");
-
-        const fallbackApp: AppItemData = {
-          id: `app-${Date.now()}`,
-          name: newAppName.trim(),
-          description: newAppDesc.trim() || "App SecureX",
-          ownerId: generatedOwner,
-          secret: generatedSecret,
-          version: "1.0",
-          downloadUrl: "",
-          status: "active",
-          users: 0,
-          licenses: 0,
-          subscriptions: 1,
-          hwidLock: true,
-          maxResets: 20,
-          hwidMismatchMsg: "HWID doesn't match. Ask for a HWID reset",
-        };
-        setAppsList((prev) => [fallbackApp, ...prev]);
-        setCurrentApp(fallbackApp);
-        setCreateModalOpen(false);
-        setNewAppName("");
-        setNewAppDesc("");
-        setFeedback(`Aplicación "${fallbackApp.name}" añadida.`);
-        setTimeout(() => setFeedback(null), 3000);
+        alert(json.message || "Error al crear aplicación");
       }
     } catch {
-      alert("Error al crear aplicación");
+      alert("Error al conectar con el servidor.");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleSaveChanges = () => {
-    setAppsList((prev) =>
-      prev.map((a) => (a.id === currentApp.id ? { ...currentApp } : a))
-    );
-    setFeedback("Cambios guardados con éxito.");
-    setTimeout(() => setFeedback(null), 3000);
+  const openEditModal = (app: AppItemData) => {
+    setEditingApp(app);
+    setEditName(app.name);
+    setEditVersion(app.version);
+    setEditDownloadUrl(app.downloadUrl);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveAppEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingApp || !editName.trim()) return;
+    setSaving(true);
+
+    try {
+      const res = await fetch(`/api/admin/apps/${editingApp.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName.trim(),
+          version: editVersion.trim() || "1.0",
+          download_link: editDownloadUrl.trim(),
+        }),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success) {
+        const updatedList = appsList.map((a) =>
+          a.id === editingApp.id
+            ? { ...a, name: editName.trim(), version: editVersion.trim(), downloadUrl: editDownloadUrl.trim() }
+            : a
+        );
+        setAppsList(updatedList);
+        if (currentApp.id === editingApp.id) {
+          setCurrentApp((prev) => ({
+            ...prev,
+            name: editName.trim(),
+            version: editVersion.trim(),
+            downloadUrl: editDownloadUrl.trim(),
+          }));
+        }
+        setEditModalOpen(false);
+        setFeedback(`¡Aplicación renombrada a "${editName.trim()}" con éxito!`);
+        setTimeout(() => setFeedback(null), 3000);
+      } else {
+        alert(json.message || "Error al actualizar aplicación.");
+      }
+    } catch {
+      alert("Error de red al actualizar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/apps/${currentApp.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: currentApp.name,
+          version: currentApp.version,
+          download_link: currentApp.downloadUrl,
+          status: currentApp.status,
+        }),
+      });
+      if (res.ok) {
+        setAppsList((prev) =>
+          prev.map((a) => (a.id === currentApp.id ? { ...currentApp } : a))
+        );
+        setFeedback("Cambios guardados con éxito.");
+      }
+    } catch {
+      setFeedback("Error al guardar cambios.");
+    } finally {
+      setSaving(false);
+      setTimeout(() => setFeedback(null), 3000);
+    }
   };
 
   const handleRotateSecret = () => {
@@ -179,12 +232,37 @@ export function ManageAppsClient({
     setTimeout(() => setFeedback(null), 3000);
   };
 
-  const handleTogglePause = () => {
+  const handleTogglePause = async () => {
     const nextStatus = currentApp.status === "active" ? "paused" : "active";
     setCurrentApp((prev) => ({ ...prev, status: nextStatus }));
     setAppsList((prev) =>
       prev.map((a) => (a.id === currentApp.id ? { ...a, status: nextStatus } : a))
     );
+    try {
+      await fetch(`/api/admin/apps/${currentApp.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+    } catch {}
+  };
+
+  const handleDeleteApp = async (app: AppItemData) => {
+    if (!confirm(`¿Estás seguro de eliminar permanentemente la app "${app.name}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/apps/${app.id}`, { method: "DELETE" });
+      if (res.ok) {
+        const filtered = appsList.filter((a) => a.id !== app.id);
+        setAppsList(filtered);
+        if (currentApp.id === app.id && filtered.length > 0) {
+          setCurrentApp(filtered[0]);
+        }
+        setFeedback(`App "${app.name}" eliminada.`);
+        setTimeout(() => setFeedback(null), 3000);
+      }
+    } catch {
+      alert("Error al eliminar la app.");
+    }
   };
 
   const getCode = (lang: string) => {
@@ -227,8 +305,16 @@ export function ManageAppsClient({
               <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9.5px] font-black tracking-wider uppercase border border-emerald-500/30">
                 {currentApp.status === "active" ? "ACTIVA" : "PAUSADA"}
               </span>
+              <button
+                type="button"
+                onClick={() => openEditModal(currentApp)}
+                className="p-1 text-slate-400 hover:text-[#00c2ff] rounded hover:bg-[#07193b] transition"
+                title="Renombrar o Editar esta App"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <p className="text-xs text-slate-400 font-mono">App SecureX Auth</p>
+            <p className="text-xs text-slate-400 font-mono">App SecureX Auth · ID: {currentApp.id}</p>
           </div>
         </div>
 
@@ -243,7 +329,7 @@ export function ManageAppsClient({
           className="px-4 py-2 rounded-xl bg-[#07193b] hover:bg-[#0c2452] border border-[#0099ff]/30 text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
         >
           {copiedKey === "all-creds" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-[#00c2ff]" />}
-          <span>{copiedKey === "all-creds" ? "Copiado" : "Copiar todo"}</span>
+          <span>{copiedKey === "all-creds" ? "Copiado" : "Copiar credenciales"}</span>
         </button>
       </div>
 
@@ -254,9 +340,9 @@ export function ManageAppsClient({
             <span className="text-[9.5px] font-extrabold uppercase text-slate-400 tracking-wider font-mono">
               INTEGRACIÓN MULTI-LENGUAJE
             </span>
-            <h3 className="text-base font-extrabold text-white">Inicialización de la Aplicación</h3>
+            <h3 className="text-base font-extrabold text-white">Inicialización de la Aplicación ({currentApp.name})</h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Selecciona tu lenguaje para copiar las credenciales de inicialización formateadas listas para tu código.
+              Copia el código listo para integrar esta aplicación en tus proyectos.
             </p>
           </div>
 
@@ -294,7 +380,7 @@ export function ManageAppsClient({
             href="/dashboard/resources"
             className="px-4 py-2 rounded-xl bg-[#07193b] hover:bg-[#0c2452] border border-[#0099ff]/30 text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <span>Ver Ejemplos Completos en Recursos →</span>
+            <span>Ver Ejemplos en Recursos →</span>
           </Link>
         </div>
       </div>
@@ -305,26 +391,17 @@ export function ManageAppsClient({
         <div className="lg:col-span-6 rounded-2xl bg-[#040e24]/85 border border-[#0099ff]/25 p-6 backdrop-blur-2xl shadow-xl space-y-4">
           <div>
             <h3 className="text-base font-extrabold text-white">General</h3>
-            <p className="text-xs text-slate-400">Nombre, descripción, versión y descarga de la app.</p>
+            <p className="text-xs text-slate-400">Nombre, versión y URL de descarga para {currentApp.name}.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
             <div>
-              <label className="block text-slate-400 font-bold mb-1">Nombre</label>
+              <label className="block text-slate-400 font-bold mb-1">Nombre de la Aplicación</label>
               <input
                 type="text"
                 value={currentApp.name}
                 onChange={(e) => setCurrentApp({ ...currentApp, name: e.target.value })}
                 className="w-full bg-[#020713] border border-[#0099ff]/30 rounded-xl px-3.5 py-2.5 text-white font-mono focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-400 font-bold mb-1">Descripción</label>
-              <input
-                type="text"
-                value={currentApp.description}
-                onChange={(e) => setCurrentApp({ ...currentApp, description: e.target.value })}
-                className="w-full bg-[#020713] border border-[#0099ff]/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none"
               />
             </div>
             <div>
@@ -336,13 +413,13 @@ export function ManageAppsClient({
                 className="w-full bg-[#020713] border border-[#0099ff]/30 rounded-xl px-3.5 py-2.5 text-white font-mono focus:outline-none"
               />
             </div>
-            <div>
-              <label className="block text-slate-400 font-bold mb-1">URL de descarga</label>
+            <div className="sm:col-span-2">
+              <label className="block text-slate-400 font-bold mb-1">URL de Descarga del Loader/Archivo</label>
               <input
                 type="text"
                 value={currentApp.downloadUrl}
                 onChange={(e) => setCurrentApp({ ...currentApp, downloadUrl: e.target.value })}
-                placeholder="URL de descarga"
+                placeholder="https://tudominio.com/loader.exe"
                 className="w-full bg-[#020713] border border-[#0099ff]/30 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none"
               />
             </div>
@@ -353,7 +430,7 @@ export function ManageAppsClient({
         <div className="lg:col-span-6 rounded-2xl bg-[#040e24]/85 border border-[#0099ff]/25 p-6 backdrop-blur-2xl shadow-xl space-y-4">
           <div>
             <h3 className="text-base font-extrabold text-white">HWID y Seguridad</h3>
-            <p className="text-xs text-slate-400">Controla el lock forzado, longitud mínima y mensaje de error.</p>
+            <p className="text-xs text-slate-400">Control de vinculación a hardware y resets de HWID.</p>
           </div>
 
           <div className="space-y-3 text-xs">
@@ -367,7 +444,7 @@ export function ManageAppsClient({
             </div>
 
             <div>
-              <label className="block text-slate-400 font-bold mb-1">Max Resets</label>
+              <label className="block text-slate-400 font-bold mb-1">Max Resets de HWID</label>
               <input
                 type="number"
                 value={currentApp.maxResets}
@@ -399,7 +476,7 @@ export function ManageAppsClient({
         <div className="lg:col-span-7 rounded-2xl bg-[#040e24]/85 border border-[#0099ff]/25 p-6 backdrop-blur-2xl shadow-xl space-y-4">
           <div>
             <h3 className="text-base font-extrabold text-white">Claves de acceso</h3>
-            <p className="text-xs text-slate-400">ID del propietario y secreto de aplicacion para integrar tu aplicacion.</p>
+            <p className="text-xs text-slate-400">Credenciales maestras para {currentApp.name}.</p>
           </div>
 
           <div className="space-y-3 text-xs font-mono">
@@ -447,12 +524,9 @@ export function ManageAppsClient({
               <span className="px-2 py-0.5 rounded bg-[#0088ff]/20 text-[#00c2ff] text-[9.5px] font-mono font-bold">
                 LICENCIAS: {currentApp.licenses}
               </span>
-              <span className="px-2 py-0.5 rounded bg-[#0088ff]/20 text-[#00c2ff] text-[9.5px] font-mono font-bold">
-                SUSCRIPCIONES: {currentApp.subscriptions}
-              </span>
             </div>
-            <h3 className="text-base font-extrabold text-white">Acciones</h3>
-            <p className="text-xs text-slate-400">Guarda aquí tus cambios generales y de seguridad.</p>
+            <h3 className="text-base font-extrabold text-white">Acciones Rápidas</h3>
+            <p className="text-xs text-slate-400">Guarda los cambios de {currentApp.name} en el sistema.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 pt-4">
@@ -466,8 +540,10 @@ export function ManageAppsClient({
             <button
               type="button"
               onClick={handleSaveChanges}
-              className="px-4 py-2 rounded-xl bg-[#0088ff] hover:bg-[#0099ff] text-white text-xs font-bold shadow-md transition-all cursor-pointer"
+              disabled={saving}
+              className="px-4 py-2 rounded-xl bg-[#0088ff] hover:bg-[#0099ff] text-white text-xs font-bold shadow-md transition-all cursor-pointer flex items-center gap-1.5"
             >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               Guardar cambios
             </button>
             <button
@@ -481,50 +557,13 @@ export function ManageAppsClient({
         </div>
       </div>
 
-      {/* ── CARD 4: ICONO DE APP ── */}
-      <div className="rounded-2xl bg-[#040e24]/85 border border-[#0099ff]/25 p-6 backdrop-blur-2xl shadow-xl flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0088ff] to-[#0044aa] flex items-center justify-center font-black text-white text-2xl shadow-lg">
-            {currentApp.name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <span className="px-2 py-0.5 rounded bg-sky-500/15 text-[#00c2ff] text-[9.5px] font-bold font-mono uppercase">
-              INICIAL AUTOMÁTICA
-            </span>
-            <h4 className="text-base font-extrabold text-white mt-0.5">Icono de app</h4>
-            <p className="text-xs text-slate-400 max-w-lg">
-              Sube un PNG o JPEG para mostrarlo en listas, tarjetas y resumen. PNG o JPEG hasta 2 MB. Si no subes uno, se usa la inicial.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="file"
-            id="icon-upload"
-            className="hidden"
-            accept="image/png, image/jpeg"
-            onChange={() => {
-              setFeedback("Icono cargado correctamente.");
-              setTimeout(() => setFeedback(null), 2500);
-            }}
-          />
-          <label
-            htmlFor="icon-upload"
-            className="px-5 py-2.5 bg-[#0088ff] hover:bg-[#0099ff] text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
-          >
-            Subir icono
-          </label>
-        </div>
-      </div>
-
-      {/* ── CARD 5: CREAR NUEVA APP BAR ── */}
+      {/* ── CARD 4: CREAR NUEVA APP BAR ── */}
       <div className="rounded-2xl bg-[#040e24]/85 border border-[#0099ff]/25 p-6 backdrop-blur-2xl shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-black text-white">Crear nueva app</h3>
             <p className="text-xs text-slate-400">
-              El ID de propietario y secreto se generan automáticos. Solo pide nombre y descripción.
+              El ID de propietario y secreto se generan automáticos en la base de datos.
             </p>
           </div>
 
@@ -537,23 +576,14 @@ export function ManageAppsClient({
             <span>Crear aplicacion</span>
           </button>
         </div>
-
-        <div className="flex items-center gap-2 pt-1 font-mono text-[9.5px]">
-          <span className="px-2.5 py-1 rounded bg-[#0088ff]/15 text-[#00c2ff] font-bold border border-[#0088ff]/25">
-            ID DE PROPIETARIO AUTOMATICO
-          </span>
-          <span className="px-2.5 py-1 rounded bg-[#0088ff]/15 text-[#00c2ff] font-bold border border-[#0088ff]/25">
-            SECRETO AUTOMATICO (64 HEX)
-          </span>
-        </div>
       </div>
 
-      {/* ── CARD 6: MIS APLICACIONES TABLA ── */}
+      {/* ── CARD 5: TODAS MIS APLICACIONES TABLA (CON RENOMBRAR Y EDITAR) ── */}
       <div className="rounded-2xl bg-[#040e24]/85 border border-[#0099ff]/25 p-6 backdrop-blur-2xl shadow-2xl space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-lg font-black text-white">Mis aplicaciones</h3>
-            <p className="text-xs text-slate-400 font-mono mt-0.5">{filteredApps.length} aplicación(es)</p>
+            <h3 className="text-lg font-black text-white">Todas Mis Aplicaciones</h3>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">{filteredApps.length} aplicación(es) disponibles</p>
           </div>
 
           <div className="relative w-full sm:w-64">
@@ -561,7 +591,7 @@ export function ManageAppsClient({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar aplicaciones..."
+              placeholder="Buscar aplicación por nombre..."
               className="w-full bg-[#020713]/90 border border-[#0099ff]/30 rounded-xl px-3.5 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-none"
             />
           </div>
@@ -573,12 +603,11 @@ export function ManageAppsClient({
             <thead>
               <tr className="border-b border-slate-800 text-[10px] font-black uppercase text-slate-400 tracking-wider font-mono">
                 <th className="py-3 px-3">NOMBRE</th>
-                <th className="py-3 px-3">ID DEL PROPIETARIO</th>
+                <th className="py-3 px-3">ID PROPIETARIO</th>
                 <th className="py-3 px-3">VERSION</th>
                 <th className="py-3 px-3">ESTADO</th>
                 <th className="py-3 px-3 text-center">USUARIOS</th>
                 <th className="py-3 px-3 text-center">LICENCIAS</th>
-                <th className="py-3 px-3 text-center">SUSCRIPCIONES</th>
                 <th className="py-3 px-3 text-right">ACCIONES</th>
               </tr>
             </thead>
@@ -591,8 +620,18 @@ export function ManageAppsClient({
                         {app.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-extrabold text-white text-xs font-sans">{app.name}</div>
-                        <div className="text-[10px] text-slate-400">App SecureX Auth</div>
+                        <div className="font-extrabold text-white text-xs font-sans flex items-center gap-2">
+                          <span>{app.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(app)}
+                            className="p-1 text-slate-400 hover:text-[#00c2ff] rounded"
+                            title="Cambiar nombre de esta app"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <div className="text-[10px] text-slate-400">App SecureX</div>
                       </div>
                     </div>
                   </td>
@@ -620,16 +659,16 @@ export function ManageAppsClient({
 
                   <td className="py-3.5 px-3 text-center text-slate-300">{app.users}</td>
                   <td className="py-3.5 px-3 text-center text-slate-300">{app.licenses}</td>
-                  <td className="py-3.5 px-3 text-center text-slate-300">{app.subscriptions}</td>
 
                   <td className="py-3.5 px-3 text-right">
                     <div className="flex items-center justify-end gap-1.5 font-sans">
                       <button
                         type="button"
-                        onClick={() => handleCopy(app.ownerId, `row-all-${app.id}`)}
-                        className="px-2.5 py-1 rounded-lg bg-[#07193b] hover:bg-[#0c2452] border border-[#0099ff]/30 text-[11px] font-bold text-slate-200 cursor-pointer"
+                        onClick={() => openEditModal(app)}
+                        className="px-2.5 py-1 rounded-lg bg-[#07193b] hover:bg-[#0c2452] border border-[#0099ff]/30 text-[11px] font-bold text-sky-300 cursor-pointer flex items-center gap-1"
                       >
-                        Copiar todo
+                        <Edit2 className="w-3 h-3" />
+                        <span>Renombrar</span>
                       </button>
                       <button
                         type="button"
@@ -640,33 +679,16 @@ export function ManageAppsClient({
                             : "bg-[#0088ff] hover:bg-[#0099ff] text-white"
                         }`}
                       >
-                        {currentApp.id === app.id ? "Seleccionada" : "Seleccionar"}
+                        {currentApp.id === app.id ? "Activa" : "Seleccionar"}
                       </button>
                       <button
                         type="button"
-                        onClick={() => {
-                          const updated = appsList.map((a) =>
-                            a.id === app.id ? { ...a, status: a.status === "active" ? ("paused" as const) : ("active" as const) } : a
-                          );
-                          setAppsList(updated);
-                        }}
-                        className="px-2.5 py-1 rounded-lg bg-[#07193b] hover:bg-[#0c2452] border border-[#0099ff]/30 text-[11px] font-bold text-slate-200 cursor-pointer"
+                        onClick={() => handleDeleteApp(app)}
+                        className="px-2 py-1 rounded-lg bg-rose-950/30 hover:bg-rose-950/50 border border-rose-500/40 text-[11px] font-bold text-rose-400 cursor-pointer"
+                        title="Eliminar aplicación"
                       >
-                        {app.status === "active" ? "Pausar" : "Reanudar"}
+                        <Trash2 className="w-3 h-3" />
                       </button>
-                      {appsList.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (confirm(`¿Eliminar app "${app.name}"?`)) {
-                              setAppsList((prev) => prev.filter((a) => a.id !== app.id));
-                            }
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-rose-950/30 hover:bg-rose-950/50 border border-rose-500/40 text-[11px] font-bold text-rose-400 cursor-pointer"
-                        >
-                          Eliminar
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
@@ -675,6 +697,74 @@ export function ManageAppsClient({
           </table>
         </div>
       </div>
+
+      {/* ── MODAL: RENOMBRAR / EDITAR APLICACION ── */}
+      {editModalOpen && editingApp && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-3xl bg-[#040e24] border border-[#0099ff]/35 shadow-[0_20px_60px_rgba(0,0,0,0.9)] p-7 space-y-4 animate-in fade-in">
+            <div>
+              <h2 className="text-2xl font-black text-white">Editar / Renombrar App</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Cambia el nombre o versión de <strong>{editingApp.name}</strong>.
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveAppEdit} className="space-y-4 pt-1">
+              <div>
+                <label className="block text-slate-400 text-xs font-bold mb-1">Nombre de la Aplicación</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Nombre de la aplicación"
+                  required
+                  className="w-full bg-[#020713] border border-[#0099ff]/30 focus:border-[#00c2ff] rounded-xl px-4 py-3 text-xs text-white focus:outline-none font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-xs font-bold mb-1">Versión</label>
+                <input
+                  type="text"
+                  value={editVersion}
+                  onChange={(e) => setEditVersion(e.target.value)}
+                  placeholder="1.0"
+                  className="w-full bg-[#020713] border border-[#0099ff]/30 focus:border-[#00c2ff] rounded-xl px-4 py-3 text-xs text-white focus:outline-none font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-xs font-bold mb-1">URL de Descarga</label>
+                <input
+                  type="text"
+                  value={editDownloadUrl}
+                  onChange={(e) => setEditDownloadUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-[#020713] border border-[#0099ff]/30 focus:border-[#00c2ff] rounded-xl px-4 py-3 text-xs text-white focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl bg-[#08152e] hover:bg-[#0c1f44] text-slate-300 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#0080ff] to-[#00b4ff] hover:from-[#0070e0] hover:to-[#00a2ff] text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ── MODAL: CREAR NUEVA APLICACION ── */}
       {createModalOpen && (
@@ -722,10 +812,10 @@ export function ManageAppsClient({
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={saving}
                   className="px-6 py-2.5 bg-gradient-to-r from-[#0080ff] to-[#00b4ff] hover:from-[#0070e0] hover:to-[#00a2ff] text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   Crear
                 </button>
               </div>

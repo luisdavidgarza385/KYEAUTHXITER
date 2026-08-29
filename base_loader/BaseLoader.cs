@@ -140,6 +140,18 @@ namespace SecureXLoader
             }
             catch { }
 
+            // ── FIXED CONSOLE WINDOW SIZE (no scrollbar) ──
+            try
+            {
+                const int WIN_W = 55;
+                const int WIN_H = 18;
+                Console.CursorVisible = false;
+                // Set buffer = window size to remove scrollbars
+                Console.SetBufferSize(WIN_W, WIN_H);
+                Console.SetWindowSize(WIN_W, WIN_H);
+            }
+            catch { }
+
             // Reference unused markers to guarantee they are linked into binary
             if (RAW_COLOR_BYTES.Length < 0 || RAW_KA_NAME_BYTES.Length < 0 || RAW_KA_OWNER_BYTES.Length < 0 || RAW_KA_VER_BYTES.Length < 0 || RAW_KA_SECRET_BYTES.Length < 0)
             {

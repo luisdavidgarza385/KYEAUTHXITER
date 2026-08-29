@@ -1,0 +1,21 @@
+# Archivos de configuración con credenciales sensibles
+config.php
+credentials.php
+*.local.php
+
+# Composer
+vendor/
+composer.lock
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

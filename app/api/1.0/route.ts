@@ -1,0 +1,792 @@
+import { NextRequest, NextResponse } from "next/server";
+import { store } from "@/lib/store";
+import { getClientIp, generateId } from "@/lib/utils";
+import bcrypt from "bcryptjs";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
+
+const secureJson = (data: unknown, status = 200) => {
+  const res = NextResponse.json(data, { status });
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("X-Frame-Options", "DENY");
+  res.headers.set("X-XSS-Protection", "1; mode=block");
+  res.headers.set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none';");
+  return res;
+};
+
+const json = secureJson;
+
+const sessionsMap = new Map();
+
+async function checkForSimultaneousSessions(userId: string, currentHwid: string, licenseKey?: string): Promise<boolean> {
+  if (!userId || !currentHwid) return false;
+  const db = supabaseAdmin() as any;
+  
+  // Find other active, valid sessions for this user with a different HWID
+  const { data: activeSessions } = await db
+    .from("sessions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("valid", true)
+    .neq("hwid", currentHwid);
+    
+  if (activeSessions && activeSessions.length > 0) {
+    const now = new Date();
+    // Filter to ensure sessions are not expired yet
+    const unexpiredSessions = activeSessions.filter((s: any) => new Date(s.expires_at) > now);
+    
+    if (unexpiredSessions.length > 0) {
+      // simultaneous session detected!
+      // 1. Invalidate all sessions for this user in DB
+      await db
+        .from("sessions")
+        .update({ valid: false })
+        .eq("user_id", userId);
+        
+      // 2. Clear from local sessionsMap if applicable
+      for (const [key, value] of sessionsMap.entries()) {
+        if (value.user_id === userId) {
+          sessionsMap.delete(key);
+        }
+      }
+      
+      // 3. Pause the license
+      if (licenseKey) {
+        const { data: lic } = await db
+          .from("licenses")
+          .select("*")
+          .eq("key", licenseKey)
+          .maybeSingle();
+        if (lic) {
+          await db
+            .from("licenses")
+            .update({ status: "paused" })
+            .eq("id", lic.id);
+        }
+      } else {
+        // Find licenses of this user and pause them
+        const { data: lics } = await db
+          .from("licenses")
+          .select("*")
+          .eq("used_by", userId);
+        if (lics) {
+          for (const lic of lics) {
+            await db
+              .from("licenses")
+              .update({ status: "paused" })
+              .eq("id", lic.id);
+          }
+        }
+      }
+      
+      return true; // simultaneous usage detected and handled
+    }
+  }
+  return false;
+}
+
+// Brute-force & Anti-spam Rate Limiting state
+const rateLimits = new Map<string, { attempts: number; blockedUntil: number }>();
+
+function registerFailure(ip: string) {
+  const limit = rateLimits.get(ip) || { attempts: 0, blockedUntil: 0 };
+  limit.attempts += 1;
+  if (limit.attempts >= 10) {
+    limit.blockedUntil = Date.now() + 5 * 60 * 1000; // Block for 5 minutes
+  }
+  rateLimits.set(ip, limit);
+}
+
+function registerSuccess(ip: string) {
+  rateLimits.delete(ip);
+}
+
+async function getGeoInfo(ip: string): Promise<string> {
+  if (!ip || ip === "::1" || ip === "127.0.0.1" || ip.startsWith("10.") || ip.startsWith("192.168.")) {
+    return ip;
+  }
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 1200); // 1.2s timeout
+    const res = await fetch(`http://ip-api.com/json/${ip}`, { signal: controller.signal });
+    clearTimeout(id);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.status === "success") {
+        return `${ip} (${data.countryCode || data.country} - ${data.isp || "WiFi/ISP"})`;
+      }
+    }
+  } catch {}
+  return ip;
+}
+
+function xorDecrypt(hexData: string, key: string): string {
+  const buf = Buffer.from(hexData, "hex");
+  const keyBuf = Buffer.from(key, "utf-8");
+  const out = Buffer.alloc(buf.length);
+  for (let i = 0; i < buf.length; i++) {
+    out[i] = buf[i] ^ keyBuf[i % keyBuf.length];
+  }
+  return out.toString("utf-8");
+}
+function hex2bin(hex: string): string {
+  try { return Buffer.from(hex, "hex").toString("utf-8"); } catch { return hex; }
+}
+
+function bin2hex(str: string): string {
+  return Buffer.from(str, "utf-8").toString("hex");
+}
+
+async function getParams(req: NextRequest): Promise<Record<string, string>> {
+  const ct = req.headers.get("content-type") || "";
+  const text = await req.text();
+  const params: Record<string, string> = {};
+
+  // Debug: log raw body for non-JSON requests
+  if (!ct.includes("application/json") && text.length < 2000) {
+    console.log("[RAW BODY]", text);
+  }
+
+  if (ct.includes("application/json")) {
+    try { return JSON.parse(text); } catch {}
+  }
+  try {
+    const sp = new URLSearchParams(text);
+    for (const [k, v] of sp) params[k] = v;
+  } catch {}
+  // NOTE: hex-decode deshabilitado — el SDK C++ no usa este protocolo
+  // if (hexEncoded && Object.keys(params).length > 0) { ... }
+
+  for (const [k, v] of new URL(req.url).searchParams) {
+    if (!params[k]) params[k] = v;
+  }
+  return params;
+}
+
+function toUnixTimestamp(dateVal: any): string {
+  if (!dateVal) return "0";
+  if (dateVal === "lifetime" || String(dateVal).toLowerCase() === "lifetime") return "lifetime";
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) {
+      if (/^\d+$/.test(String(dateVal))) return String(dateVal);
+      return "0";
+    }
+    return String(Math.floor(d.getTime() / 1000));
+  } catch {
+    return "0";
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const p = await getParams(req);
+    const type = p.type;
+    const ip = getClientIp(req);
+
+    // 1. Rate Limiting Check
+    const ipLimit = rateLimits.get(ip);
+    if (ipLimit && ipLimit.blockedUntil > Date.now()) {
+      return json({ success: false, message: "Demasiadas peticiones. Bloqueado temporalmente." }, 429);
+    }
+
+    // 2. Input Sanitization (Anti SQL/HTML injection)
+    const suspiciousSql = /['";#]/g;
+    const valuesToCheck = [p.username, p.key, p.appid, p.secret, p.type].filter(Boolean);
+    for (const val of valuesToCheck) {
+      if (typeof val === "string" && (suspiciousSql.test(val) || val.toUpperCase().includes(" OR ") || val.toUpperCase().includes(" UNION "))) {
+        registerFailure(ip);
+        return json({ success: false, message: "Petición bloqueada por razones de seguridad." }, 400);
+      }
+    }
+
+    // 3. Session Hijacking Prevention
+    if (type !== "init" && p.sessionid) {
+      const session = sessionsMap.get(String(p.sessionid));
+      if (session) {
+        if (session.ip !== ip) {
+          registerFailure(ip);
+          return json({ success: false, message: "Acceso denegado: IP de sesión incorrecta." }, 401);
+        }
+        const hwid = p.hwid || null;
+        if (session.hwid && hwid && session.hwid !== hwid) {
+          registerFailure(ip);
+          return json({ success: false, message: "Acceso denegado: Dispositivo no autorizado." }, 401);
+        }
+      }
+    }
+
+    if (type === "init") {
+      const name = p.name;
+      const ownerid = p.ownerid;
+      const appId = p.appid || ownerid;
+
+      let app: any = null;
+      if (name) app = await store.getAppByName(String(name));
+      if (!app && appId) app = await store.getAppByAppId(String(appId));
+      if (!app) return json({ success: false, message: "Application not found" }, 404);
+
+      if (p.secret && p.secret !== app.app_secret) return json({ success: false, message: "Invalid application secret" }, 401);
+      if (app.status !== "active") return json({ success: false, message: "Application is " + app.status }, 403);
+
+      const hwid = p.hwid || null;
+      const sessionId = generateId(48);
+      const enckey = generateId(64);
+      const nonce = generateId(16);
+      const expires = new Date(Date.now() + 86400000);
+      sessionsMap.set(sessionId, { app_id: app.id, user_id: null, ip, hwid: p.hwid || null, enckey, expires_at: expires.toISOString(), valid: true });
+      await store.createLog({ app_id: app.id, user_id: null, message: `init from ${ip}`, level: "info" });
+
+      const allLicenses = await store.listLicenses({ appId: app.id });
+      const allUsers = await store.listAppUsers({ appId: app.id });
+      const numKeys = allLicenses.length;
+      const numUsers = allUsers.length;
+      const numOnline = allUsers.filter((u: any) => u.last_login && Date.now() - new Date(u.last_login).getTime() < 300000).length;
+
+      const appInfoData = {
+        name: app.name,
+        version: app.version,
+        download_link: app.download_link || "",
+        numUsers: String(numUsers),
+        numOnlineUsers: String(numOnline),
+        numKeys: String(numKeys),
+        customerPanelLink: "",
+      };
+      const userData = {
+        username: "",
+        ip: "",
+        hwid: "",
+        createdate: "",
+        lastlogin: "",
+        subscription: "",
+        subscriptions: [],
+        expiry: "",
+      };
+      return json({
+        success: true,
+        sessionid: sessionId,
+        message: "",
+        ownerid: app.app_id,
+        appinfo: appInfoData,
+        subscriptions: [],
+        userdata: userData,
+        user_data: userData,
+        nonce,
+        enckey,
+      });
+    }
+
+    if (type === "login") {
+      const appId = p.appid || p.ownerid;
+      const appName = p.name;
+      const sessionId = p.sessionid;
+      const username = p.username;
+      const password = p.pass || p.password;
+      const hwid = p.hwid || null;
+
+      if ((!appId && !appName) || !username || !password) return json({ success: false, message: "appid, username, password required" }, 400);
+      if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
+
+      let app: any = null;
+      if (appName) app = await store.getAppByName(String(appName));
+      if (!app && appId) app = await store.getAppByAppId(String(appId));
+      if (!app) return json({ success: false, message: "Application not found" }, 404);
+      if (p.secret && p.secret !== app.app_secret) return json({ success: false, message: "Invalid application secret" }, 401);
+
+      const session = sessionsMap.get(String(sessionId));
+      if (!session || session.app_id !== app.id) return json({ success: false, message: "Invalid session" }, 401);
+
+      const user = await store.getAppUser(app.id, String(username));
+      if (!user) {
+        registerFailure(ip);
+        return json({ success: false, message: "Invalid credentials" }, 401);
+      }
+      if (user.banned) return json({ success: false, message: "You are banned: " + (user.ban_reason || "") }, 403);
+
+      let valid = await bcrypt.compare(String(password), user.password_hash);
+      if (!valid) valid = String(password) === String(user.password_hash);
+      if (!valid) {
+        registerFailure(ip);
+        return json({ success: false, message: "Invalid credentials" }, 401);
+      }
+
+      // Check user licenses for Multi-PC / HWID lock status
+      const userLicenses = await store.listLicenses({ appId: app.id });
+      const myLicenses = userLicenses.filter(l => l.used_by === user.id);
+      const isMultiPcLicense = myLicenses.some(l => !!(l.max_uses && l.max_uses > 1));
+
+      // Strict 1-PC HWID Lock check (skipped if user has a Multi-PC license)
+      if (!isMultiPcLicense && user.hwid && hwid && user.hwid !== hwid) {
+        return json({ success: false, message: "HWID mismatch: Esta cuenta está autorizada para 1 sola PC. Pide un reset de HWID a tu administrador para cambiar de PC." }, 403);
+      }
+
+      // Check for simultaneous sessions
+      const simultaneousDetected = await checkForSimultaneousSessions(user.id, hwid || "");
+      if (simultaneousDetected && !isMultiPcLicense) {
+        return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad." }, 403);
+      }
+
+      const activeLicenses = myLicenses.filter(l => l.status === "used" && (!l.expires_at || new Date(l.expires_at) > new Date()));
+
+      const geoIp = await getGeoInfo(ip);
+      await store.updateAppUser(user.id, { last_login: new Date().toISOString(), ip: geoIp, hwid: hwid || user.hwid });
+      await store.updateSession(String(sessionId), { user_id: user.id, hwid, ip });
+      await store.createLog({ app_id: app.id, user_id: user.id, message: `login ${username} de ${geoIp.includes("(") ? geoIp.substring(geoIp.indexOf("(")) : ip}`, level: "info" });
+
+      registerSuccess(ip);
+
+      let maxExpiry = 0;
+      const subs: any[] = [];
+      activeLicenses.forEach(l => {
+        const lvl = l.level || 1;
+        let subName = "basic";
+        if (lvl === 2) subName = "VIP";
+        if (lvl === 3) subName = "Combo";
+        // Override with package_name if they provided a custom one that isn't Bypass
+        if (l.package_name && l.package_name.trim() !== "" && l.package_name !== "Bypass") {
+          if (l.package_name.toLowerCase() === "basic") {
+            subName = "basic";
+          } else if (l.package_name.toLowerCase() === "vip") {
+            subName = "VIP";
+          } else {
+            subName = l.package_name;
+          }
+        }
+        
+        if (l.expires_at) {
+          const t = new Date(l.expires_at).getTime();
+          if (t > maxExpiry) maxExpiry = t;
+        } else {
+          maxExpiry = Infinity;
+        }
+
+        const expiryVal = toUnixTimestamp(l.expires_at || "lifetime");
+        const isVahalla = req.headers.get("x-vahalla-client") === "1.0" || 
+                          req.headers.get("user-agent")?.includes("Vahalla") || 
+                          String(p.name).toUpperCase().includes("WHITE") || 
+                          String(p.name).toUpperCase().includes("BLK") ||
+                          String(p.name).toUpperCase().includes("XITER");
+
+        const isVipLic = lvl >= 2 || (l.package_name && l.package_name.toLowerCase() === "vip");
+        if (isVahalla) {
+          subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
+          subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
+          subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+        } else {
+          if (isVipLic) {
+            subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+          } else {
+            subs.push({ subscription: "basic", name: "basic", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "VIP", name: "VIP", key: l.key, expiry: expiryVal });
+            subs.push({ subscription: "Combo", name: "Combo", key: l.key, expiry: expiryVal });
+          }
+        }
+        if (subName !== "basic" && subName !== "VIP" && subName !== "Combo") {
+          subs.push({ subscription: subName, name: subName, key: l.key, expiry: expiryVal });
+        }
+      });
+
+      const expiryStr = maxExpiry === Infinity ? "lifetime" : maxExpiry > 0 ? String(Math.floor(maxExpiry / 1000)) : "0";
+
+      const responseUserData = {
+        username: user.username,
+        ip,
+        hwid: hwid || user.hwid || "",
+        createdate: toUnixTimestamp(user.created_at),
+        lastlogin: toUnixTimestamp(user.last_login),
+        expiry: expiryStr,
+        subscriptions: subs,
+        role: "user",
+        balance: String(user.balance || 0),
+      };
+
+      return json({
+        success: true,
+        message: "Logged in",
+        info: responseUserData,
+        userdata: responseUserData,
+        user_data: responseUserData,
+      });
+    }
+
+    if (type === "register") {
+      const appId = p.ownerid || p.appid;
+      const appName = p.name;
+      const sessionId = p.sessionid;
+      const username = p.username;
+      const password = p.pass || p.password;
+      const key = p.key;
+      const hwid = p.hwid || null;
+
+      if ((!appId && !appName) || !username || !password) return json({ success: false, message: "appid, username, password required" }, 400);
+      if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
+      if (!key) return json({ success: false, message: "License key required" }, 400);
+
+      let app: any = null;
+      if (appName) app = await store.getAppByName(String(appName));
+      if (!app && appId) app = await store.getAppByAppId(String(appId));
+      if (!app) return json({ success: false, message: "Application not found" }, 404);
+      if (app.status !== "active") return json({ success: false, message: "Application is " + app.status }, 403);
+
+      const session = sessionsMap.get(String(sessionId));
+      if (!session || session.app_id !== app.id) return json({ success: false, message: "Invalid session" }, 401);
+
+      const existing = await store.getAppUser(app.id, String(username));
+      if (existing) return json({ success: false, message: "Username already exists" }, 409);
+
+      const lic = await store.getLicenseByKey(app.id, String(key));
+      if (!lic) return json({ success: false, message: "Invalid license key" }, 404);
+      if (lic.status === "banned") return json({ success: false, message: "License is banned" }, 403);
+      if (lic.uses >= lic.max_uses) return json({ success: false, message: "License has no uses left" }, 403);
+
+      if (lic.hwid_lock && hwid && lic.used_by) {
+        const prev = await store.getAppUserById(lic.used_by);
+        if (prev?.hwid && prev.hwid !== hwid) {
+          return json({ success: false, message: "License locked to a different HWID" }, 403);
+        }
+      }
+
+      const geoIp = await getGeoInfo(ip);
+      const passwordHash = await bcrypt.hash(String(password), 10);
+      const user = await store.createAppUser({
+        app_id: app.id,
+        username: String(username),
+        email: null,
+        password_hash: passwordHash,
+        hwid,
+        ip: geoIp,
+        last_login: new Date().toISOString(),
+        banned: false,
+        ban_reason: null,
+      });
+
+      const now = new Date();
+      const expires = new Date(now.getTime() + lic.duration_days * 86400000);
+      await store.updateLicense(lic.id, {
+        status: "used",
+        used_by: user.id,
+        activated_at: now.toISOString(),
+        expires_at: expires.toISOString(),
+        uses: lic.uses + 1,
+      });
+      sessionsMap.set(String(sessionId), { ...session, user_id: user.id, hwid, ip });
+      await store.createLog({ app_id: app.id, user_id: user.id, message: `registered ${username} de ${geoIp.includes("(") ? geoIp.substring(geoIp.indexOf("(")) : ip}`, level: "info" });
+
+      let subName = "basic";
+      if (lic.level === 2) subName = "VIP";
+      if (lic.level === 3) subName = "Combo";
+      if (lic.package_name && lic.package_name.trim() !== "" && lic.package_name !== "Bypass") {
+        if (lic.package_name.toLowerCase() === "basic") {
+          subName = "basic";
+        } else if (lic.package_name.toLowerCase() === "vip") {
+          subName = "VIP";
+        } else {
+          subName = lic.package_name;
+        }
+      }
+
+      const expiryStr = toUnixTimestamp(expires);
+      const responseUserData = {
+        username: user.username,
+        ip: user.ip || ip,
+        hwid: user.hwid || hwid || "",
+        createdate: toUnixTimestamp(user.created_at),
+        lastlogin: toUnixTimestamp(user.last_login),
+        expiry: expiryStr,
+        subscriptions: (
+          req.headers.get("x-vahalla-client") === "1.0" || 
+          req.headers.get("user-agent")?.includes("Vahalla") || 
+          String(p.name).toUpperCase().includes("WHITE") || 
+          String(p.name).toUpperCase().includes("BLK") ||
+          String(p.name).toUpperCase().includes("XITER")
+        ) ? [
+          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+        ] : (
+          (lic.level >= 2 || (lic.package_name && lic.package_name.toLowerCase() === "vip")) ? [
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ] : [
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ]
+        ),
+      };
+
+      return json({
+        success: true,
+        message: "Registered",
+        info: responseUserData,
+        userdata: responseUserData,
+        user_data: responseUserData,
+      });
+    }
+
+    if (type === "license") {
+      const appId = p.ownerid || p.appid;
+      const appName = p.name;
+      const sessionId = p.sessionid;
+      const key = p.key;
+      const hwid = p.hwid || null;
+
+      if ((!appId && !appName) || !key) return json({ success: false, message: "appid and key required" }, 400);
+      if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
+
+      let app: any = null;
+      if (appName) app = await store.getAppByName(String(appName));
+      if (!app && appId) app = await store.getAppByAppId(String(appId));
+      if (!app) return json({ success: false, message: "Application not found" }, 404);
+      if (app.status !== "active") return json({ success: false, message: "Application is " + app.status }, 403);
+
+      const session = sessionsMap.get(String(sessionId));
+      if (!session || session.app_id !== app.id) return json({ success: false, message: "Invalid session" }, 401);
+
+      const lic = await store.getLicenseByKey(app.id, String(key));
+      if (!lic) return json({ success: false, message: "Invalid license" }, 404);
+      if (lic.status === "banned") return json({ success: false, message: "License banned" }, 403);
+      if (lic.status === "paused") {
+        return json({ success: false, message: "Esta licencia está pausada por seguridad debido a doble inicio de sesión. Por favor, utiliza el asistente virtual para reactivarla." }, 403);
+      }
+
+      let assignedUser: any = null;
+      if (lic.used_by) {
+        assignedUser = await store.getAppUserById(lic.used_by);
+      }
+
+      // If license has no user assigned yet, find or create one so HWID is bound to the license
+      if (!assignedUser) {
+        const geoIp = await getGeoInfo(ip);
+        assignedUser = await store.getAppUser(app.id, String(key));
+        if (!assignedUser) {
+          const passwordHash = await bcrypt.hash("KEY_USER_" + Date.now(), 10);
+          assignedUser = await store.createAppUser({
+            app_id: app.id,
+            username: String(key),
+            email: null,
+            password_hash: passwordHash,
+            hwid: hwid || null,
+            ip: geoIp,
+            last_login: new Date().toISOString(),
+            banned: false,
+            ban_reason: null,
+          });
+        } else if (hwid && !assignedUser.hwid) {
+          await store.updateAppUser(assignedUser.id, { hwid });
+          assignedUser.hwid = hwid;
+        }
+        await store.updateLicense(lic.id, { used_by: assignedUser.id });
+        lic.used_by = assignedUser.id;
+      }
+
+      // Strict 1-PC HWID Lock check (all 1-use licenses are strictly locked to 1 PC)
+      const isMultiPc = !!(lic.max_uses && lic.max_uses > 1);
+      if (!isMultiPc && assignedUser?.hwid && hwid && assignedUser.hwid !== hwid) {
+        return json({ success: false, message: "HWID mismatch: Esta licencia está autorizada para 1 sola PC. Pide un reset de HWID a tu administrador para cambiar de PC." }, 403);
+      }
+
+      // If user had no HWID bound previously, bind the current HWID now
+      if (!isMultiPc && hwid && assignedUser && !assignedUser.hwid) {
+        await store.updateAppUser(assignedUser.id, { hwid });
+        assignedUser.hwid = hwid;
+      }
+
+      // Check for simultaneous sessions
+      if (assignedUser) {
+        const simultaneousDetected = await checkForSimultaneousSessions(assignedUser.id, hwid || "", lic.key);
+        if (simultaneousDetected && !isMultiPc) {
+          return json({ success: false, message: "Doble inicio de sesión detectado. Esta licencia ha sido pausada temporalmente por seguridad. Utiliza el asistente virtual para reactivarla." }, 403);
+        }
+      }
+
+      const now = new Date();
+      let expiresAt = lic.expires_at ? new Date(lic.expires_at) : null;
+      if (!expiresAt || expiresAt < now) {
+        expiresAt = new Date(now.getTime() + lic.duration_days * 86400000);
+        await store.updateLicense(lic.id, {
+          status: "used",
+          used_by: assignedUser ? assignedUser.id : (lic.used_by || session.user_id),
+          activated_at: lic.activated_at || now.toISOString(),
+          expires_at: expiresAt.toISOString(),
+          uses: lic.uses + 1,
+        });
+      } else {
+        await store.updateLicense(lic.id, { uses: lic.uses + 1 });
+      }
+
+      await store.createLog({ app_id: app.id, user_id: session.user_id, message: `license valid ${key}`, level: "info" });
+
+      let licUser = null;
+      if (lic.used_by) licUser = await store.getAppUserById(lic.used_by);
+      if (!licUser && session.user_id) licUser = await store.getAppUserById(session.user_id);
+      let subName = "basic";
+      if (lic.level === 2) subName = "VIP";
+      if (lic.level === 3) subName = "Combo";
+      if (lic.package_name && lic.package_name.trim() !== "" && lic.package_name !== "Bypass") {
+        if (lic.package_name.toLowerCase() === "basic") {
+          subName = "basic";
+        } else if (lic.package_name.toLowerCase() === "vip") {
+          subName = "VIP";
+        } else {
+          subName = lic.package_name;
+        }
+      }
+
+      const expiryStr = toUnixTimestamp(expiresAt);
+      const responseUserData = {
+        username: licUser ? licUser.username : key,
+        ip: licUser ? licUser.ip : ip,
+        hwid: licUser ? (licUser.hwid || hwid || "") : (hwid || ""),
+        createdate: toUnixTimestamp(licUser ? licUser.created_at : lic.created_at),
+        lastlogin: toUnixTimestamp(licUser ? licUser.last_login : now),
+        expiry: expiryStr,
+        subscriptions: (
+          req.headers.get("x-vahalla-client") === "1.0" || 
+          req.headers.get("user-agent")?.includes("Vahalla") || 
+          String(p.name).toUpperCase().includes("WHITE") || 
+          String(p.name).toUpperCase().includes("BLK") ||
+          String(p.name).toUpperCase().includes("XITER")
+        ) ? [
+          { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+          { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+          { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+        ] : (
+          (lic.level >= 2 || (lic.package_name && lic.package_name.toLowerCase() === "vip")) ? [
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ] : [
+            { subscription: "basic", name: "basic", key: key, expiry: expiryStr },
+            { subscription: "VIP", name: "VIP", key: key, expiry: expiryStr },
+            { subscription: "Combo", name: "Combo", key: key, expiry: expiryStr }
+          ]
+        ),
+      };
+
+      return json({
+        success: true,
+        message: "Logged in",
+        info: responseUserData,
+        userdata: responseUserData,
+        user_data: responseUserData,
+      });
+    }
+
+    if (type === "check") {
+      const sessionId = p.sessionid;
+      const checkName = p.name;
+      const checkOwnerid = p.ownerid || p.appid;
+
+      if (!sessionId) return json({ success: false, message: "sessionid required" }, 400);
+
+      let checkApp: any = null;
+      if (checkName) checkApp = await store.getAppByName(String(checkName));
+      if (!checkApp && checkOwnerid) checkApp = await store.getAppByAppId(String(checkOwnerid));
+      if (!checkApp) return json({ success: false, message: "Application not found" }, 404);
+
+      if (checkApp.status !== "active") return json({ success: false, message: "Application is " + checkApp.status }, 403);
+
+      const checkSession = sessionsMap.get(String(sessionId)) || await store.getSession(String(sessionId));
+      if (!checkSession || checkSession.app_id !== checkApp.id) return json({ success: false, message: "Invalid session" }, 401);
+
+      if (new Date(checkSession.expires_at) < new Date()) {
+        await store.invalidateSession(String(sessionId));
+        return json({ success: false, message: "Session expired" }, 401);
+      }
+
+      if (checkSession.user_id) {
+        const checkUser = await store.getAppUserById(checkSession.user_id);
+        if (!checkUser) return json({ success: false, message: "User not found" }, 401);
+        if (checkUser.banned) return json({ success: false, message: "You are banned: " + (checkUser.ban_reason || "") }, 403);
+
+        const allLics = await store.listLicenses({ appId: checkApp.id });
+        const now = new Date();
+        const activeLic = allLics.find(
+          (l: any) => l.used_by === checkSession.user_id &&
+            l.status === "used" &&
+            (!l.expires_at || new Date(l.expires_at) > now)
+        );
+        if (!activeLic) return json({ success: false, message: "Subscription expired" }, 403);
+      }
+
+      await store.createLog({ app_id: checkApp.id, user_id: checkSession.user_id || null, message: `check from ${ip}`, level: "info" });
+      return json({ success: true, message: "Session valid" });
+    }
+
+    if (type === "var") {
+      const varSessionId = p.sessionid;
+      const varid = p.varid || p.var;
+      const varName = p.name;
+      const varOwnerid = p.ownerid || p.appid;
+
+      if (!varSessionId) return json({ success: false, message: "sessionid required" }, 400);
+      if (!varid) return json({ success: false, message: "varid required" }, 400);
+
+      let varApp: any = null;
+      if (varName) varApp = await store.getAppByName(String(varName));
+      if (!varApp && varOwnerid) varApp = await store.getAppByAppId(String(varOwnerid));
+      if (!varApp) return json({ success: false, message: "Application not found" }, 404);
+      if (varApp.status !== "active") return json({ success: false, message: "Application is " + varApp.status }, 403);
+
+      const varSession = sessionsMap.get(String(varSessionId)) || await store.getSession(String(varSessionId));
+      if (!varSession || varSession.app_id !== varApp.id) return json({ success: false, message: "Invalid session" }, 401);
+      if (new Date(varSession.expires_at) < new Date()) return json({ success: false, message: "Session expired" }, 401);
+
+      const variable = await store.getVariable(varApp.id, String(varid));
+      if (!variable) return json({ success: false, message: "Variable not found" }, 404);
+      if (variable.authed && !varSession.user_id) return json({ success: false, message: "Authentication required to access this variable" }, 403);
+
+      await store.createLog({ app_id: varApp.id, user_id: varSession.user_id || null, message: `var fetch: ${varid}`, level: "info" });
+      return json({ success: true, message: variable.value });
+    }
+
+    if (type === "log") {
+      const logSessionId = p.sessionid;
+      const logMsg = p.message || p.msg;
+      const logName = p.name;
+      const logOwnerid = p.ownerid || p.appid;
+
+      if (!logSessionId) return json({ success: false, message: "sessionid required" }, 400);
+      if (!logMsg) return json({ success: false, message: "message required" }, 400);
+
+      let logApp: any = null;
+      if (logName) logApp = await store.getAppByName(String(logName));
+      if (!logApp && logOwnerid) logApp = await store.getAppByAppId(String(logOwnerid));
+      if (!logApp) return json({ success: false, message: "Application not found" }, 404);
+      if (logApp.status !== "active") return json({ success: false, message: "Application is " + logApp.status }, 403);
+
+      const logSession = sessionsMap.get(String(logSessionId)) || await store.getSession(String(logSessionId));
+      if (!logSession || logSession.app_id !== logApp.id) return json({ success: false, message: "Invalid session" }, 401);
+      if (new Date(logSession.expires_at) < new Date()) return json({ success: false, message: "Session expired" }, 401);
+
+      const sanitized = String(logMsg).replace(/[<>]/g, "").slice(0, 500);
+      await store.createLog({ app_id: logApp.id, user_id: logSession.user_id || null, message: `[CLIENT] ${sanitized} | ip=${ip}`, level: "info" });
+      return json({ success: true, message: "Log saved" });
+    }
+
+    return json({
+      success: true,
+      message: "KeyAuth API 1.0",
+      endpoints: ["init", "login", "register", "license", "check", "var", "log"],
+    });
+  } catch (e: any) {
+    return json({ success: false, message: e?.message || "Server error" }, 500);
+  }
+}
+
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const type = url.searchParams.get("type");
+  // Si tiene parámetro type, procesarlo como POST (el SDK de C++ manda GET con query params)
+  if (type) {
+    return POST(req);
+  }
+  return json({
+    success: false, message: "Method not allowed. Use POST.",
+  });
+}

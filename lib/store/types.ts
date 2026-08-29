@@ -1,0 +1,241 @@
+export interface Admin {
+  id: string;
+  email: string;
+  username?: string;
+  avatar_url?: string | null;
+  password_hash: string;
+  role: string;
+  created_at: string;
+  subscription_end: string | null;
+  subscription_app_id: string | null;
+  seller_label: string | null;
+  created_by?: string | null;
+  credits?: number;
+  max_apps?: number;
+  can_create_apps?: boolean;
+  can_generate_licenses?: boolean;
+  can_delete_licenses?: boolean;
+  can_reset_hwid?: boolean;
+  can_ban_users?: boolean;
+  can_modify_profile?: boolean;
+  status?: string;
+  permissions?: string[];
+  subscriptions?: string[];
+}
+
+export interface App {
+  id: string;
+  owner_id: string | null;
+  name: string;
+  app_id: string;
+  owner_secret: string;
+  app_secret: string;
+  version: string;
+  download_link: string | null;
+  webhook_url: string | null;
+  status: string;
+  seller_id: string | null;
+  level?: number;
+  created_at: string;
+}
+
+export interface AppUser {
+  id: string;
+  app_id: string;
+  username: string;
+  email: string | null;
+  password_hash: string;
+  hwid: string | null;
+  ip: string | null;
+  last_login: string | null;
+  banned: boolean;
+  ban_reason: string | null;
+  created_at: string;
+  balance?: number;
+  level?: number;
+}
+
+export interface License {
+  id: string;
+  app_id: string;
+  key: string;
+  duration_days: number;
+  level: number;
+  uses: number;
+  max_uses: number;
+  hwid_lock: boolean;
+  ip_lock: boolean;
+  status: string;
+  used_by: string | null;
+  activated_at: string | null;
+  expires_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  package_name?: string;
+  note?: string;
+}
+
+export interface Session {
+  id: string;
+  session_id: string;
+  app_id: string;
+  user_id: string | null;
+  ip: string | null;
+  hwid: string | null;
+  created_at: string;
+  expires_at: string;
+  valid: boolean;
+}
+
+export interface Variable {
+  id: string;
+  app_id: string;
+  name: string;
+  value: string;
+  authed: boolean;
+  created_at: string;
+}
+
+export interface Log {
+  id: string;
+  app_id: string | null;
+  user_id: string | null;
+  message: string;
+  level: string;
+  created_at: string;
+}
+
+export interface OAuthLink {
+  id: string;
+  admin_id: string;
+  provider: string;
+  provider_user_id: string;
+  email: string | null;
+  name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  app_id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration_days: number;
+  level: number;
+  features: string[];
+  status: string;
+  created_at: string;
+}
+
+export interface Subscriber {
+  id: string;
+  username: string;
+  password_hash: string;
+  subscription_type: string;
+  credits: number;
+  status: string;
+  created_at: string;
+}
+
+export interface Seller {
+  id: string;
+  username: string;
+  password_hash: string;
+  seller_key: string;
+  credits: number;
+  unlimited_credits: boolean;
+  can_use_api: boolean;
+  status: string;
+  parent_seller_id?: string | null;
+  created_by?: string | null;
+  created_at: string;
+}
+
+export interface Store {
+  getAdminByEmail(email: string): Promise<Admin | null>;
+  getAdminById(id: string): Promise<Admin | null>;
+  createAdmin(data: {
+    email: string;
+    password_hash: string;
+    role: string;
+    created_by?: string | null;
+    seller_label?: string;
+    credits?: number;
+    status?: string;
+    permissions?: string[];
+    subscriptions?: string[];
+    subscription_end?: string | null;
+  }): Promise<Admin>;
+  updateAdmin(id: string, data: Admin): Promise<Admin | null>;
+  deleteAdmin(id: string): Promise<void>;
+  listAdmins(): Promise<Admin[]>;
+
+  listApps(filter?: { ownerId?: string; sellerId?: string }): Promise<App[]>;
+  getAppById(id: string): Promise<App | null>;
+  getAppByAppId(appId: string): Promise<App | null>;
+  getAppByName(name: string): Promise<App | null>;
+  createApp(data: Omit<App, "id" | "created_at">): Promise<App>;
+  updateApp(id: string, data: App): Promise<App | null>;
+  deleteApp(id: string): Promise<void>;
+
+  getAppUser(appId: string, username: string): Promise<AppUser | null>;
+  getAppUserById(id: string): Promise<AppUser | null>;
+  createAppUser(data: Omit<AppUser, "id" | "created_at">): Promise<AppUser>;
+  updateAppUser(id: string, data: Partial<AppUser>): Promise<AppUser | null>;
+  deleteAppUser(id: string): Promise<void>;
+  listAppUsers(filter?: { appId?: string; banned?: boolean; limit?: number }): Promise<AppUser[]>;
+
+  getLicenseByKey(appId: string, key: string): Promise<License | null>;
+  getLicenseById(id: string): Promise<License | null>;
+  createLicenses(items: Omit<License, "id" | "created_at">[]): Promise<License[]>;
+  listLicenses(filter?: { appId?: string; status?: string; limit?: number }): Promise<License[]>;
+  updateLicense(id: string, data: Partial<License>): Promise<License | null>;
+  deleteLicense(id: string): Promise<void>;
+  resetLicenseHwid(id: string): Promise<License | null>;
+
+  getSession(sessionId: string): Promise<Session | null>;
+  createSession(data: Omit<Session, "id" | "created_at">): Promise<Session>;
+  updateSession(sessionId: string, data: Partial<Session>): Promise<Session | null>;
+  invalidateSession(sessionId: string): Promise<void>;
+  listSessionsForApp(appId: string, limit?: number): Promise<Session[]>;
+
+  listVariables(appId: string): Promise<Variable[]>;
+  getVariable(appId: string, name: string): Promise<Variable | null>;
+  upsertVariable(appId: string, name: string, value: string, authed: boolean): Promise<Variable>;
+  deleteVariable(id: string): Promise<void>;
+
+  createLog(data: Omit<Log, "id" | "created_at">): Promise<void>;
+  listLogs(filter?: { appId?: string; level?: string; limit?: number }): Promise<Log[]>;
+
+  getOAuthLink(provider: string, providerUserId: string): Promise<OAuthLink | null>;
+  listOAuthLinksForAdmin(adminId: string): Promise<OAuthLink[]>;
+  createOAuthLink(data: Omit<OAuthLink, "id" | "created_at">): Promise<OAuthLink>;
+  deleteOAuthLink(id: string): Promise<void>;
+
+  // Subscription Plans
+  getSubscriptionPlanById(id: string): Promise<SubscriptionPlan | null>;
+  getSubscriptionPlansByAppId(appId: string): Promise<SubscriptionPlan[]>;
+  createSubscriptionPlan(data: Omit<SubscriptionPlan, "id" | "created_at">): Promise<SubscriptionPlan>;
+  updateSubscriptionPlan(id: string, data: Partial<SubscriptionPlan>): Promise<SubscriptionPlan | null>;
+  deleteSubscriptionPlan(id: string): Promise<void>;
+
+  // Subscribers
+  getSubscriberById(id: string): Promise<Subscriber | null>;
+  getSubscriberByUsername(username: string): Promise<Subscriber | null>;
+  listSubscribers(): Promise<Subscriber[]>;
+  createSubscriber(data: Omit<Subscriber, "id" | "created_at">): Promise<Subscriber>;
+  updateSubscriber(id: string, data: Partial<Subscriber>): Promise<Subscriber | null>;
+  deleteSubscriber(id: string): Promise<void>;
+
+  // Sellers
+  getSellerById(id: string): Promise<Seller | null>;
+  getSellerByKey(key: string): Promise<Seller | null>;
+  getSellerByUsername(username: string): Promise<Seller | null>;
+  listSellers(): Promise<Seller[]>;
+  listSubSellers(parentSellerId: string): Promise<Seller[]>;
+  createSeller(data: Omit<Seller, "id" | "created_at">): Promise<Seller>;
+  updateSeller(id: string, data: Partial<Seller>): Promise<Seller | null>;
+  deleteSeller(id: string): Promise<void>;
+}

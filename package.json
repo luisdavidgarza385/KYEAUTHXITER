@@ -1,0 +1,42 @@
+{
+  "name": "keyauth-clone",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "@types/formidable": "^3.5.1",
+    "@types/nodemailer": "^8.0.1",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "formidable": "^3.5.4",
+    "lucide-react": "^1.24.0",
+    "next": "14.2.33",
+    "nodemailer": "^9.0.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "resedit": "^3.0.2",
+    "resend": "^6.18.0",
+    "tailwind-merge": "^2.5.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.16.11",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "14.2.33",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.3"
+  }
+}

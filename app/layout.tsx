@@ -1,0 +1,28 @@
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import { SecurityShield } from "@/components/SecurityShield";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+
+export const metadata: Metadata = {
+  title: "SecureX Auth — Secure Access Platform",
+  description: "License authentication & user management platform",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="es" className={`${inter.variable} ${mono.variable}`}>
+      <body className="font-sans">
+        <SecurityShield />
+        {children}
+      </body>
+    </html>
+  );
+}

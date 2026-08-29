@@ -1,0 +1,197 @@
+═══════════════════════════════════════════════════════════════
+🚀 KEYAUTH PHP CLIENT - INICIO RÁPIDO
+═══════════════════════════════════════════════════════════════
+
+📋 PASO 1: VERIFICA LOS REQUISITOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Abre una terminal (CMD o PowerShell) y ejecuta:
+
+  php -v
+  php -m | findstr curl
+  php -m | findstr json
+
+Deberías ver:
+  ✓ PHP 7.4 o superior
+  ✓ curl en la lista
+  ✓ json en la lista
+
+Si falta algo, revisa la sección "Solución de Problemas" abajo.
+
+═══════════════════════════════════════════════════════════════
+
+🔑 PASO 2: OBTÉN TUS CREDENCIALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ve a tu dashboard de KeyAuth y anota:
+
+  📝 APP_ID: __________________________________
+  
+  📝 APP_SECRET: _____________________________
+  
+  📝 API_URL: _________________________________
+     (ejemplo: https://tu-app.vercel.app/api/1.0)
+
+═══════════════════════════════════════════════════════════════
+
+⚙️ PASO 3: CONFIGURA EL CLIENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+En la terminal, navega a esta carpeta y ejecuta:
+
+  WINDOWS CMD:
+    copy config.example.php config.php
+    notepad config.php
+
+  WINDOWS POWERSHELL:
+    Copy-Item config.example.php config.php
+    notepad config.php
+
+Edita config.php y reemplaza con tus credenciales reales.
+
+═══════════════════════════════════════════════════════════════
+
+🧪 PASO 4: PRUEBA LA CONEXIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+En la terminal:
+
+  php test.php
+
+El script te pedirá tus credenciales y probará:
+  - Conexión a la API
+  - Inicialización de sesión
+  - Login/Registro/Licencias (tú eliges)
+
+Si todo funciona, verás mensajes con ✓
+
+═══════════════════════════════════════════════════════════════
+
+💻 PASO 5: USA EN TU CÓDIGO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copia KeyAuth.php a tu proyecto y usa:
+
+<?php
+require_once 'KeyAuth.php';
+
+$keyAuth = new KeyAuth(
+    'TU_APP_ID',
+    'TU_APP_SECRET',
+    'https://tu-app.vercel.app/api/1.0'
+);
+
+// SIEMPRE inicializar primero
+if (!$keyAuth->init()) {
+    die('Error: ' . $keyAuth->getLastError());
+}
+
+// Login
+if ($keyAuth->login('usuario', 'password')) {
+    echo "¡Login exitoso!";
+} else {
+    echo "Error: " . $keyAuth->getLastError();
+}
+?>
+
+═══════════════════════════════════════════════════════════════
+
+📚 PASO 6: APRENDE MÁS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Lee los ejemplos en este orden:
+
+  1. example-login.php        (más simple)
+  2. example-license.php      (validación de licencias)
+  3. example-complete.php     (todas las funciones)
+  4. LEEME.md                 (guía completa en español)
+
+═══════════════════════════════════════════════════════════════
+
+🐛 SOLUCIÓN DE PROBLEMAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEMA: "cURL extension not loaded"
+SOLUCIÓN:
+  1. Encuentra tu archivo php.ini:
+     php --ini
+  2. Abre php.ini con un editor
+  3. Busca: ;extension=curl
+  4. Quita el ; para que quede: extension=curl
+  5. Guarda y reinicia tu servidor web
+
+PROBLEMA: "Session not initialized"
+SOLUCIÓN:
+  Siempre llama a $keyAuth->init() ANTES de login/register/etc
+
+PROBLEMA: "Invalid application secret"
+SOLUCIÓN:
+  Verifica que tu APP_SECRET sea exactamente el del dashboard
+  (sin espacios extras al inicio o final)
+
+PROBLEMA: "Application not found"
+SOLUCIÓN:
+  1. Verifica tu APP_ID
+  2. Verifica que tu aplicación esté ACTIVA en el dashboard
+  3. Verifica que la API_URL sea correcta
+
+PROBLEMA: "Connection timeout" o "SSL certificate problem"
+SOLUCIÓN:
+  1. Verifica tu conexión a internet
+  2. Verifica que la API_URL sea correcta y use HTTPS
+  3. Si usas un servidor local, actualiza tus certificados CA
+
+═══════════════════════════════════════════════════════════════
+
+✅ CHECKLIST DE VERIFICACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Antes de usar en producción, verifica:
+
+  [ ] PHP 7.4+ instalado
+  [ ] cURL habilitado
+  [ ] config.php creado con credenciales correctas
+  [ ] test.php ejecutado exitosamente
+  [ ] Ejemplos revisados y entendidos
+  [ ] config.php en .gitignore (no subirlo a Git)
+  [ ] Usando HTTPS en producción
+  [ ] APP_SECRET nunca expuesto en cliente
+
+═══════════════════════════════════════════════════════════════
+
+🎯 CASOS DE USO RÁPIDOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROTEGER UN SCRIPT PHP:
+  → Ver: example-license.php
+
+SISTEMA DE LOGIN WEB:
+  → Ver: example-login.php
+
+PLUGIN DE WORDPRESS:
+  → Ver: example-wordpress-plugin.php
+
+API REST PROTEGIDA:
+  → Ver: example-rest-api.php
+
+USAR TODAS LAS FUNCIONES:
+  → Ver: example-complete.php
+
+═══════════════════════════════════════════════════════════════
+
+📞 ¿NECESITAS MÁS AYUDA?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Lee LEEME.md (español) o README.md (inglés)
+2. Revisa INDEX.txt para ver todos los archivos
+3. Ejecuta test.php para diagnóstico automático
+4. Revisa los ejemplos relevantes a tu caso de uso
+
+═══════════════════════════════════════════════════════════════
+
+¡Listo para comenzar! 🎉
+
+Recuerda: El archivo más importante es KeyAuth.php
+Todo lo demás son ejemplos y documentación.
+
+═══════════════════════════════════════════════════════════════

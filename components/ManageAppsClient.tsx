@@ -58,7 +58,7 @@ export function ManageAppsClient({
     }
   );
 
-  const [selectedLang, setSelectedLang] = useState<"csharp" | "cpp" | "python" | "js">("csharp");
+  const [selectedLang, setSelectedLang] = useState<"cpp" | "cpp_std" | "csharp" | "python" | "js">("cpp");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -267,6 +267,13 @@ export function ManageAppsClient({
 
   const getCode = (lang: string) => {
     if (lang === "cpp") {
+      return `const char* name = RGS("${currentApp.name}");
+const char* ownerid = RGS("${currentApp.ownerId}");
+const char* secret = RGS("${currentApp.secret}");
+const char* version = RGS("${currentApp.version}");
+const char* url = RGS("https://keyauthpro.xyz/api/1.0");`;
+    }
+    if (lang === "cpp_std") {
       return `std::string name = "${currentApp.name}";
 std::string ownerid = "${currentApp.ownerId}";
 std::string secret = "${currentApp.secret}";
@@ -371,8 +378,9 @@ const path = "";`;
             onChange={(e) => setSelectedLang(e.target.value as any)}
             className="bg-[#020713] border border-[#0099ff]/30 text-[#00c2ff] text-xs font-bold rounded-xl px-3 py-1.5 focus:outline-none cursor-pointer font-mono"
           >
+            <option value="cpp">C++ (RGS / const char*)</option>
+            <option value="cpp_std">C++ (std::string)</option>
             <option value="csharp">C# (.NET / Unity)</option>
-            <option value="cpp">C++ (MSVC / ISO)</option>
             <option value="python">Python 3.x</option>
             <option value="js">JavaScript / Node.js</option>
           </select>

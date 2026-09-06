@@ -25,6 +25,7 @@ import {
   X as XIcon,
   Star,
   Zap,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ const SECTIONS = [
       { href: "/dashboard/users", label: "Usuarios", icon: Users, adminOnly: false },
       { href: "/dashboard/subscriptions", label: "Suscripciones", icon: Layers, adminOnly: false, vipOnly: true },
       { href: "/dashboard/sub-resellers", label: "Sub-resellers", icon: Layers, adminOnly: false },
+      { href: "/dashboard/sub-managers", label: "Sub-managers", icon: UserCog, adminOnly: false },
       { href: "/dashboard/credits", label: "Créditos", icon: Coins, adminOnly: false },
       { href: "/dashboard/chat", label: "Chat Global", icon: MessageSquare, adminOnly: false },
       { href: "/dashboard/upgrade", label: "⚡ Mejorar Plan", icon: Star, adminOnly: false, highlight: true },

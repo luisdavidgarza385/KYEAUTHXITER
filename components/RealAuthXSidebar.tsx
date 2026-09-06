@@ -25,6 +25,7 @@ import {
   Lock,
   Settings,
   Star,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n";
@@ -138,6 +139,11 @@ export function RealAuthXSidebar({
                 href: "/dashboard/sub-resellers",
                 label: t.navSubResellers || "Sub-resellers",
                 icon: Layers,
+              },
+              {
+                href: "/dashboard/sub-managers",
+                label: "Sub-managers",
+                icon: UserCog,
               },
             ]
           : []),

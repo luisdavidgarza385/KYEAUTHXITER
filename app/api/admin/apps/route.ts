@@ -18,13 +18,18 @@ export async function POST(req: NextRequest) {
     const existing = await store.getAppByName(name);
     if (existing) return { status: 409, data: { success: false, message: "Application name already exists" } };
 
-    // Free plan: max 3 apps for non-superadmin users
+    // Free plan: max 3 apps for non-superadmin users, except managers with create_apps permission
     const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
     const isSuperAdmin = admin.email.toLowerCase() === bootstrapEmail.toLowerCase();
     if (!isSuperAdmin && admin.role !== "developer") {
       const adminData = await store.getAdminById(admin.id);
-      const hasPaidPlan = Array.isArray(adminData?.subscriptions) && (adminData?.subscriptions?.length ?? 0) > 0;
-      if (!hasPaidPlan) {
+      const canCreateUnlimited =
+        adminData?.can_create_apps === true ||
+        adminData?.permissions?.includes("create_apps") ||
+        (adminData?.role === "manager" && adminData?.can_create_apps !== false) ||
+        (Array.isArray(adminData?.subscriptions) && (adminData?.subscriptions?.length ?? 0) > 0);
+
+      if (!canCreateUnlimited) {
         const allApps = await store.listApps();
         const myApps = allApps.filter((a) => a.owner_id === admin.id);
         if (myApps.length >= 3) {
@@ -61,11 +66,15 @@ export async function GET(req: NextRequest) {
     const admin = await requireAdmin();
     const allApps = await store.listApps();
     const scopedIds = await getScopedAppIds(admin);
+    const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+    const isSuperAdmin = admin.email.toLowerCase() === bootstrapEmail.toLowerCase();
     
-    // Each user strictly sees ONLY their own apps (where owner_id === admin.id or seller_id === admin.id or in scopedIds)
-    const filtered = allApps.filter(
-      (a) => a.owner_id === admin.id || a.seller_id === admin.id || (scopedIds && scopedIds.includes(a.id))
-    );
+    // Each user strictly sees ONLY their own apps. SuperAdmin sees only admin's apps, NOT manager-created apps!
+    const filtered = (isSuperAdmin || admin.role === "admin")
+      ? allApps.filter((a) => a.owner_id === admin.id || !a.owner_id || a.owner_id === "0FY7WpdIue" || a.owner_id === "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9")
+      : allApps.filter(
+          (a) => a.owner_id === admin.id || a.seller_id === admin.id || (scopedIds && scopedIds.includes(a.id))
+        );
     
     return { data: { success: true, data: filtered } };
   });

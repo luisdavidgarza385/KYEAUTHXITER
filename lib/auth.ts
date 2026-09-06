@@ -7,7 +7,7 @@ import crypto from "crypto";
 export type AdminSession = {
   id: string;
   email: string;
-  role: "admin" | "seller" | "developer";
+  role: "admin" | "seller" | "developer" | "manager";
 };
 
 const COOKIE_NAME = "ka_admin_session";
@@ -58,7 +58,7 @@ export async function getCurrentAdmin(): Promise<AdminSession | null> {
     return {
       id: parsed.id,
       email: parsed.email,
-      role: isSuper ? "admin" : "seller",
+      role: isSuper ? "admin" : ((parsed.role as any) || "seller"),
     };
   } catch {
     return null;
@@ -127,14 +127,14 @@ export async function hasUnlimitedQuota(me: AdminSession): Promise<boolean> {
 }
 
 export async function checkSubResellerExpiration(me: AdminSession): Promise<{ expired: boolean; reason?: string }> {
-  if (me.role === "seller") {
+  if (me.role === "seller" || me.role === "manager") {
     const admin = await store.getAdminById(me.id);
     if (admin && admin.subscription_end) {
       const expDate = new Date(admin.subscription_end).getTime();
       if (expDate < Date.now()) {
         return {
           expired: true,
-          reason: "Tu suscripción de sub-reseller ha expirado. Por favor contacta al Desarrollador Principal para reactivar tu acceso."
+          reason: "Tu suscripción ha expirado. Por favor contacta al Administrador Principal para reactivar tu acceso."
         };
       }
     }

@@ -16,7 +16,11 @@ export default async function DashboardPage() {
     store.listAppUsers({ limit: 1000 }),
   ]);
 
-  const apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = me.email.toLowerCase() === bootstrapEmail.toLowerCase();
+  const apps = (isSuperAdmin || me.role === "admin")
+    ? allApps.filter((a) => a.owner_id === me.id || !a.owner_id || a.owner_id === "0FY7WpdIue" || a.owner_id === "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9")
+    : allApps.filter((a) => (scopedIds && scopedIds.includes(a.id)) || a.owner_id === me.id);
   const cookieStore = cookies();
   const cookieApp = cookieStore.get("ka_current_app")?.value;
   const currentApp = apps.find((a) => a.id === cookieApp || a.name === cookieApp) || apps[0] || {

@@ -9,11 +9,14 @@ export default async function ManageAppsPage() {
   const scopedIds = await getScopedAppIds(admin);
   let allApps = await store.listApps().catch(() => []);
 
-  // Filter apps according to permissions
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = admin.email.toLowerCase() === bootstrapEmail.toLowerCase();
+
+  // Filter apps according to permissions: Admin only sees admin apps, NOT manager-created apps!
   const visibleApps =
-    scopedIds === null
-      ? allApps
-      : allApps.filter((a) => scopedIds.includes(a.id) || a.owner_id === admin.id);
+    (isSuperAdmin || admin.role === "admin")
+      ? allApps.filter((a) => a.owner_id === admin.id || !a.owner_id || a.owner_id === "0FY7WpdIue" || a.owner_id === "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9")
+      : allApps.filter((a) => (scopedIds && scopedIds.includes(a.id)) || a.owner_id === admin.id);
 
   // Fetch licenses and users count for each app safely
   const allLicenses = await store.listLicenses().catch(() => []);

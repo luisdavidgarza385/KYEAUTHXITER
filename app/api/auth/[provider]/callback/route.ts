@@ -50,9 +50,11 @@ export async function GET(
   }
 
   // 1. Exchange authorization code for access token
-  const accessToken = await exchangeCodeForToken(provider, code);
+  const { accessToken, error: exchangeErr } = await exchangeCodeForToken(provider, code);
   if (!accessToken) {
-    return NextResponse.redirect(new URL("/login?err=token_exchange", req.url));
+    console.error(`[OAuth Callback] Token exchange failed for ${provider}:`, exchangeErr);
+    const detailParam = exchangeErr ? `&detail=${encodeURIComponent(exchangeErr)}` : "";
+    return NextResponse.redirect(new URL(`/login?err=token_exchange${detailParam}`, req.url));
   }
 
   // 2. Fetch official user profile from Google

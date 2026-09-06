@@ -156,7 +156,8 @@ export function RealAuthXView({ initialMode = "login", searchParams }: RealAuthX
         token_exchange: "Failed to exchange OAuth code.",
         access_denied: "You declined the OAuth authorization.",
       };
-      setErrorMsg(ERR_MESSAGES[searchParams.err] || `OAuth: ${searchParams.err}`);
+      const detail = searchParams.detail ? ` (${searchParams.detail})` : "";
+      setErrorMsg((ERR_MESSAGES[searchParams.err] || `OAuth: ${searchParams.err}`) + detail);
     }
   }, [searchParams]);
 

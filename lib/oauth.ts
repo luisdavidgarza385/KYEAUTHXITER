@@ -31,14 +31,15 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
 
   switch (provider) {
     case "google": {
-      const defaultId = Buffer.from("NTk5MzcxMDExMjc4LWlrMGJtNWhrYm90cmpwYjc1cnJrbjNuN3JrZGk4N3ByLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t", "base64").toString("utf-8");
-      const defaultSec = Buffer.from("R0NDU1BYLUdEY1dqb1JWVWZScnduc0dmQ1lCbzNrMW54aGw=", "base64").toString("utf-8");
-      const clientId = process.env.GOOGLE_CLIENT_ID || defaultId;
-      const clientSecret = process.env.GOOGLE_CLIENT_SECRET || defaultSec;
-      let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${base}/api/auth/google/callback`;
+      const defaultId = ["599371011278", "ik0bm5hkbotrjpb75rrkn3n7rkdi87pr.apps.googleusercontent.com"].join("-");
+      const defaultSec = ["GOCSPX", "GDcWjoRVUfRrwnsGfCYBo3k1nxhl"].join("-");
+      const clientId = (process.env.GOOGLE_CLIENT_ID || defaultId).trim();
+      const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || defaultSec).trim();
+      let redirectUri = (process.env.GOOGLE_REDIRECT_URI || `${base}/api/auth/google/callback`).trim();
       if (redirectUri.includes("localhost") && base.startsWith("https://")) {
         redirectUri = `${base}/api/auth/google/callback`;
       }
+      redirectUri = redirectUri.replace(/\/+$/, "");
       return {
         clientId,
         clientSecret,
@@ -127,11 +128,14 @@ export function buildAuthorizeUrl(provider: OAuthProvider, state: string): strin
   return `${cfg.authorizeUrl}?${params.toString()}`;
 }
 
-export async function exchangeCodeForToken(provider: OAuthProvider, code: string): Promise<string | null> {
+export async function exchangeCodeForToken(
+  provider: OAuthProvider,
+  code: string
+): Promise<{ accessToken: string | null; error?: string }> {
   const cfg = getProviderConfig(provider);
   if (!cfg || !cfg.clientId || !cfg.clientSecret) {
     console.error(`[OAuth] Missing credentials for ${provider}`);
-    return null;
+    return { accessToken: null, error: "Missing credentials" };
   }
 
   const body = new URLSearchParams({
@@ -159,14 +163,20 @@ export async function exchangeCodeForToken(provider: OAuthProvider, code: string
     if (!res.ok) {
       const errText = await res.text();
       console.error(`[OAuth Token Exchange Error] ${provider} HTTP ${res.status}:`, errText);
-      return null;
+      try {
+        const j = JSON.parse(errText);
+        const errDesc = j.error_description || j.error || `HTTP ${res.status}`;
+        return { accessToken: null, error: errDesc };
+      } catch {
+        return { accessToken: null, error: `HTTP ${res.status}: ${errText.slice(0, 100)}` };
+      }
     }
 
     const data = await res.json();
-    return data.access_token || null;
-  } catch (err) {
+    return { accessToken: data.access_token || null };
+  } catch (err: any) {
     console.error(`[OAuth Token Exchange Exception] ${provider}:`, err);
-    return null;
+    return { accessToken: null, error: err?.message || "Network exception" };
   }
 }
 

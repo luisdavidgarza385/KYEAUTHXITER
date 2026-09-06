@@ -78,7 +78,7 @@ export default async function CreditsPage() {
               ¿Necesitas más créditos?
             </h3>
             <p className="text-xs text-zinc-500 leading-relaxed">
-              Al registrarte recibes un saldo promocional de 3000 créditos. Si necesitas generar más licencias de manera ilimitada, puedes comprar una suscripción VIP en nuestra tienda para tener cuotas ilimitadas sin restricciones.
+              Al registrarte recibes un saldo promocional de 5000 créditos. Si necesitas generar más licencias de manera ilimitada, puedes comprar una suscripción VIP en nuestra tienda para tener cuotas ilimitadas sin restricciones.
             </p>
           </div>
           <div className="pt-4">

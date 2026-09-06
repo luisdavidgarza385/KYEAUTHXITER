@@ -71,6 +71,13 @@ export function DashboardPageClient({
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <Link
+                  href="/dashboard/apps"
+                  className="px-4 py-2.5 rounded-xl bg-[#00ff88]/15 hover:bg-[#00ff88]/25 border border-[#00ff88]/30 text-[#00ff88] text-xs font-bold transition-all flex items-center gap-1.5"
+                >
+                  <Grid className="w-4 h-4 text-[#00ff88]" />
+                  {t.navManageApps || "Crear / Gestionar App"}
+                </Link>
+                <Link
                   href="/dashboard/licenses"
                   className="px-4 py-2.5 rounded-xl bg-[#0088ff] hover:bg-[#0099ff] text-white text-xs font-bold shadow-[0_0_15px_rgba(0,136,255,0.4)] transition-all flex items-center gap-1.5"
                 >
@@ -138,17 +145,20 @@ export function DashboardPageClient({
       {/* ── 4 STAT METRIC CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Apps */}
-        <div className="rounded-2xl bg-[#040e24]/80 border border-[#0099ff]/25 p-5 flex items-center justify-between">
+        <Link
+          href="/dashboard/apps"
+          className="rounded-2xl bg-[#040e24]/80 border border-[#0099ff]/25 p-5 flex items-center justify-between hover:border-[#0099ff]/60 hover:bg-[#040e24] transition-all group cursor-pointer"
+        >
           <div>
-            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-mono">
+            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-mono group-hover:text-[#00c2ff] transition-colors">
               {t.totalApps || "TOTAL APLICACIONES"}
             </div>
             <div className="text-2xl font-black text-white mt-1">{appsCount}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#0088ff]/15 flex items-center justify-center text-[#00c2ff]">
+          <div className="w-10 h-10 rounded-xl bg-[#0088ff]/15 flex items-center justify-center text-[#00c2ff] group-hover:scale-110 transition-transform">
             <Grid className="w-5 h-5" />
           </div>
-        </div>
+        </Link>
 
         {/* Total Users */}
         <div className="rounded-2xl bg-[#040e24]/80 border border-[#0099ff]/25 p-5 flex items-center justify-between">

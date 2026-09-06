@@ -17,38 +17,14 @@ export async function POST(req: NextRequest, { params }: Params) {
     await updateProject(project.id, { lastBuild: { status: 'compiling', date: new Date().toISOString() } });
 
     // Build the API URL that the loader will use to download DLLs.
-    // Priority: NEXT_PUBLIC_BASE_URL env var (set this to your production domain)
-    // → VERCEL_URL (auto-set by Vercel in production)
-    // → x-forwarded-host header (behind a proxy/CDN)
-    // → host header fallback
-    let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+    // Always use NEXT_PUBLIC_BASE_URL (must be set to https://keyauthpro.xyz in Vercel env vars).
+    // VERCEL_URL is intentionally ignored — it points to the deployment-specific URL, not the custom domain.
+    let baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
 
-    if (!baseUrl || baseUrl.includes('localhost')) {
-      // Try Vercel's automatic production URL
-      const vercelUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL || '';
-      if (vercelUrl && !vercelUrl.includes('localhost')) {
-        baseUrl = `https://${vercelUrl}`;
-      }
+    if (!baseUrl || baseUrl.includes('localhost') || baseUrl.includes('vercel.app')) {
+      // Hard fallback to production domain
+      baseUrl = 'https://keyauthpro.xyz';
     }
-
-    if (!baseUrl || baseUrl.includes('localhost')) {
-      // Try forwarded host (e.g. behind Cloudflare / nginx)
-      const fwdHost = req.headers.get('x-forwarded-host') || '';
-      if (fwdHost && !fwdHost.includes('localhost')) {
-        const fwdProto = req.headers.get('x-forwarded-proto') || 'https';
-        baseUrl = `${fwdProto}://${fwdHost}`;
-      }
-    }
-
-    if (!baseUrl || baseUrl.includes('localhost')) {
-      // Last resort: use the request host as-is
-      const host = req.headers.get('host') || 'keyauthpro.xyz';
-      const proto = host.includes('localhost') ? 'http' : 'https';
-      baseUrl = `${proto}://${host}`;
-    }
-
-    // Strip trailing slash
-    baseUrl = baseUrl.replace(/\/$/, '');
 
     const apiUrl = `${baseUrl}/api/projects/${project.id}/dlls`;
 

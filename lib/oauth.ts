@@ -35,7 +35,10 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
       const defaultSec = Buffer.from("R0NDU1BYLUdEY1dqb1JWVWZScnduc0dmQ1lCbzNrMW54aGw=", "base64").toString("utf-8");
       const clientId = process.env.GOOGLE_CLIENT_ID || defaultId;
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET || defaultSec;
-      const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${base}/api/auth/google/callback`;
+      let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${base}/api/auth/google/callback`;
+      if (redirectUri.includes("localhost") && base.startsWith("https://")) {
+        redirectUri = `${base}/api/auth/google/callback`;
+      }
       return {
         clientId,
         clientSecret,
@@ -49,7 +52,10 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
     case "discord": {
       const clientId = process.env.DISCORD_CLIENT_ID || "";
       const clientSecret = process.env.DISCORD_CLIENT_SECRET || "";
-      const redirectUri = process.env.DISCORD_REDIRECT_URI || `${base}/api/auth/discord/callback`;
+      let redirectUri = process.env.DISCORD_REDIRECT_URI || `${base}/api/auth/discord/callback`;
+      if (redirectUri.includes("localhost") && base.startsWith("https://")) {
+        redirectUri = `${base}/api/auth/discord/callback`;
+      }
       return {
         clientId,
         clientSecret,
@@ -63,7 +69,10 @@ export function getProviderConfig(provider: OAuthProvider): OAuthConfig | null {
     case "apple": {
       const clientId = process.env.APPLE_CLIENT_ID || "";
       const clientSecret = process.env.APPLE_CLIENT_SECRET || "";
-      const redirectUri = process.env.APPLE_REDIRECT_URI || `${base}/api/auth/apple/callback`;
+      let redirectUri = process.env.APPLE_REDIRECT_URI || `${base}/api/auth/apple/callback`;
+      if (redirectUri.includes("localhost") && base.startsWith("https://")) {
+        redirectUri = `${base}/api/auth/apple/callback`;
+      }
       return {
         clientId,
         clientSecret,

@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: { provider: st
           email, 
           password_hash: placeholderPw, 
           role: "seller",
-          credits: 3000,
+          credits: 5000,
           status: "active"
         });
 

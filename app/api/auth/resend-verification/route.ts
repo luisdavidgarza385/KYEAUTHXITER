@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendVerificationEmail } from "@/lib/email";
+import { getBaseUrl } from "@/lib/oauth";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing email" }, { status: 400 });
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = getBaseUrl();
     const verifyUrl = `${baseUrl}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`;
     const username = email.split("@")[0];
 

@@ -8,6 +8,7 @@ import {
   getProviderConfig,
   verifyStateCookie,
   OAuthProvider,
+  getBaseUrl,
 } from "@/lib/oauth";
 import { store } from "@/lib/store";
 import { sendVerificationEmail } from "@/lib/email";
@@ -91,7 +92,7 @@ export async function GET(
       password_hash: randomPassword,
       role: isSuper ? "admin" : "seller",
       seller_label: rawDisplayName,
-      credits: 3000,
+      credits: 5000,
       status: "active",
       permissions: ["generar", "hwid", "ban", "delete"],
     });
@@ -117,7 +118,7 @@ export async function GET(
 
   // 4. Generate verification token and send verification email notification
   const verifyToken = crypto.randomBytes(24).toString("hex");
-  const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
   const verifyUrl = `${baseUrl}/api/auth/verify?token=${verifyToken}&email=${encodeURIComponent(admin.email)}`;
 
   // Dispatch email notification

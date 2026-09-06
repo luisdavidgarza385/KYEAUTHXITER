@@ -341,7 +341,7 @@ class RealAuthClient:
         self.owner_id = owner_id
         self.secret = secret
         self.version = version
-        self.api_url = "https://realauthx.com/api/1.0/"
+        self.api_url = "https://keyauthpro.xyz/api/1.0"
         self.last_message = ""
         self.user = {}
 
@@ -445,9 +445,9 @@ class RealAuthClient {
 #include "RealCrypt.h"
 #include "RealAuth.h"
 
-std::string Name_Owner = RealCrypt("9999");
-std::string OwnerId_Owner = RealCrypt("0FY7WpdIue");
-std::string Secret_Owner = RealCrypt("7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f");
+std::string Name_Owner = RealCrypt("LUMINOX AIMKILL");
+std::string OwnerId_Owner = RealCrypt("Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9");
+std::string Secret_Owner = RealCrypt("WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt");
 std::string Version_Owner = RealCrypt("1.0");
 
 RealAuth::Client AuthOwner(RealAuth::ApiUrl(), Name_Owner, OwnerId_Owner, Secret_Owner, Version_Owner);
@@ -481,9 +481,9 @@ int main() {
 #include "RealCrypt.h"
 #include "RealAuth.h"
 
-std::string Name_Owner = RealCrypt("9999");
-std::string OwnerId_Owner = RealCrypt("0FY7WpdIue");
-std::string Secret_Owner = RealCrypt("7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f");
+std::string Name_Owner = RealCrypt("LUMINOX AIMKILL");
+std::string OwnerId_Owner = RealCrypt("Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9");
+std::string Secret_Owner = RealCrypt("WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt");
 std::string Version_Owner = RealCrypt("1.0");
 
 RealAuth::Client AuthOwner(RealAuth::ApiUrl(), Name_Owner, OwnerId_Owner, Secret_Owner, Version_Owner);
@@ -530,7 +530,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        Client Auth = new Client("9999", "0FY7WpdIue", "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f", "1.0");
+        Client Auth = new Client("LUMINOX AIMKILL", "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9", "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt", "1.0");
         Auth.Init();
 
         Console.Write("Usuario: ");
@@ -558,7 +558,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        Client Auth = new Client("9999", "0FY7WpdIue", "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f", "1.0");
+        Client Auth = new Client("LUMINOX AIMKILL", "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9", "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt", "1.0");
         Auth.Init();
 
         Console.Write("Ingresa tu clave de licencia: ");
@@ -589,9 +589,9 @@ if (Auth.License("YOUR_LICENSE_KEY"))
         return `from realauth import RealAuthClient
 
 auth = RealAuthClient(
-    name="9999",
-    owner_id="0FY7WpdIue",
-    secret="7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f",
+    name="LUMINOX AIMKILL",
+    owner_id="Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9",
+    secret="WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt",
     version="1.0"
 )
 
@@ -611,9 +611,9 @@ print(f"Bienvenido {user}!")`;
         return `from realauth import RealAuthClient
 
 auth = RealAuthClient(
-    name="9999",
-    owner_id="0FY7WpdIue",
-    secret="7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f",
+    name="LUMINOX AIMKILL",
+    owner_id="Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9",
+    secret="WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt",
     version="1.0"
 )
 
@@ -638,9 +638,9 @@ if auth.license("YOUR_KEY"):
 const RealAuthClient = require("./realauth");
 
 const auth = new RealAuthClient(
-    "9999",
-    "0FY7WpdIue",
-    "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f",
+    "LUMINOX AIMKILL",
+    "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9",
+    "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt",
     "1.0"
 );
 
@@ -667,9 +667,9 @@ main();`;
 const RealAuthClient = require("./realauth");
 
 const auth = new RealAuthClient(
-    "9999",
-    "0FY7WpdIue",
-    "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f",
+    "LUMINOX AIMKILL",
+    "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9",
+    "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt",
     "1.0"
 );
 
@@ -699,7 +699,7 @@ if (ok) console.log("Licencia activa");`;
       return `<?php
 require_once "RealAuth.php";
 
-$auth = new RealAuthClient("9999", "0FY7WpdIue", "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f", "1.0");
+$auth = new RealAuthClient("LUMINOX AIMKILL", "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9", "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt", "1.0");
 $auth->init();
 
 $user = $_POST['username'] ?? '';
@@ -715,7 +715,7 @@ if ($auth->login($user, $pass)) {
     return `<?php
 require_once "RealAuth.php";
 
-$auth = new RealAuthClient("9999", "0FY7WpdIue", "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f", "1.0");
+$auth = new RealAuthClient("LUMINOX AIMKILL", "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9", "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt", "1.0");
 $auth->init();
 
 $key = $_POST['key'] ?? '';

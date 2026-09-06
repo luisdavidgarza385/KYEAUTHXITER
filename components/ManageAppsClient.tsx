@@ -41,11 +41,11 @@ export function ManageAppsClient({
   const [appsList, setAppsList] = useState<AppItemData[]>(initialApps);
   const [currentApp, setCurrentApp] = useState<AppItemData>(
     initialApps[0] || {
-      id: "app-9999",
-      name: "9999",
+      id: "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9",
+      name: "LUMINOX AIMKILL",
       description: "App Principal",
-      ownerId: "0FY7WpdIue",
-      secret: "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f",
+      ownerId: "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9",
+      secret: "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt",
       version: "1.0",
       downloadUrl: "",
       status: "active",
@@ -112,8 +112,8 @@ export function ManageAppsClient({
           id: created.id,
           name: created.name,
           description: newAppDesc.trim() || "App SecureX",
-          ownerId: created.owner_secret || "0FY7WpdIue",
-          secret: created.app_secret || "7f40bd3c9ffd860495dff6676f8ecd45c08e8b183a23d09db78a3fde27cddd4f",
+          ownerId: created.owner_secret || "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9",
+          secret: created.app_secret || "WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt",
           version: created.version || "1.0",
           downloadUrl: "",
           status: "active",

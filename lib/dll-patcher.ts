@@ -70,10 +70,10 @@ export function patchExe(baseExeBuf: Buffer, project: Project, apiUrl: string, i
     { old: '__TARGET_PROCESS__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',    val: project.process },
     { old: '__API_URL__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', val: apiUrl },
     { old: '__COLOR__xxxxxxx',                                                   val: project.color || '#00a0ff' },
-    { old: '__KA_NAME__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',    val: project.keyAuthName  || 'LOUDER' },
-    { old: '__KA_OWNER__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   val: project.keyAuthOwner || 'DqsBm5lI0dtaUwfV65Dvt1rGdfzMPpw3' },
+    { old: '__KA_NAME__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',    val: project.keyAuthName  || 'LUMINOX AIMKILL' },
+    { old: '__KA_OWNER__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   val: project.keyAuthOwner || 'Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9' },
     { old: '__KA_VER__xxxxxx',                                                   val: project.keyAuthVer   || '1.0' },
-    { old: '__KA_SECRET__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', val: project.keyAuthSecret || 'mqyA0yJr1m7Mzgi96nRlzOGlUnm1WWoxNCrnO3oHGqdgSIKb' },
+    { old: '__KA_SECRET__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', val: project.keyAuthSecret || 'WkgSAYNe6htfUKnuPe3jZcpN5pAqLUC5h3Qg1qw3bsQyT4Wt' },
   ];
 
   for (const p of patches) {

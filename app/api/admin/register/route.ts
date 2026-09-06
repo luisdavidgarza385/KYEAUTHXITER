@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       password_hash: hash,
       role,
       seller_label: sellerLabel,
-      credits: 3000,
+      credits: 5000,
       status: "active",
       permissions: ["generar", "hwid", "ban", "delete"]
     });

@@ -76,13 +76,13 @@ export function RealAuthXSidebar({
       icon: LayoutDashboard,
       exact: true,
     },
+    {
+      href: "/dashboard/apps",
+      label: t.navManageApps || "Gestionar apps",
+      icon: Grid,
+    },
     ...(isAdmin
       ? [
-          {
-            href: "/dashboard/apps",
-            label: t.navManageApps || "Gestionar apps",
-            icon: Grid,
-          },
           {
             href: "/dashboard/builder",
             label: t.navBuilder || "Builder",

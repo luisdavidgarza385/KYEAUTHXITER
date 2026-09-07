@@ -33,7 +33,6 @@ export default function SubManagersPage() {
   const [newPlan, setNewPlan] = useState<"ilimitado" | "credits">("ilimitado");
   const [newCredits, setNewCredits] = useState(5000);
   const [newExpiryDays, setNewExpiryDays] = useState(30);
-  const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   
   const [permCreateApps, setPermCreateApps] = useState(true);
@@ -52,7 +51,6 @@ export default function SubManagersPage() {
   const [editPlan, setEditPlan] = useState<"ilimitado" | "credits">("ilimitado");
   const [editCredits, setEditCredits] = useState(0);
   const [editExpiryDays, setEditExpiryDays] = useState(30);
-  const [editSelectedApps, setEditSelectedApps] = useState<string[]>([]);
   const [editShowPassword, setEditShowPassword] = useState(false);
   
   const [editPermCreateApps, setEditPermCreateApps] = useState(true);
@@ -64,9 +62,6 @@ export default function SubManagersPage() {
   const [editPermBan, setEditPermBan] = useState(false);
   const [editPermDelete, setEditPermDelete] = useState(false);
   const [editPermPrefix, setEditPermPrefix] = useState(false);
-  
-  // Apps state
-  const [apps, setApps] = useState<{ id: string; name: string }[]>([]);
   
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
@@ -85,23 +80,6 @@ export default function SubManagersPage() {
     } else {
       setNewPassword(pwd);
       setShowPassword(true);
-    }
-  }
-
-  function handleSelectAllApps(isEdit = false) {
-    const allIds = apps.map((a) => a.id);
-    if (isEdit) {
-      setEditSelectedApps(allIds);
-    } else {
-      setSelectedApps(allIds);
-    }
-  }
-
-  function handleDeselectAllApps(isEdit = false) {
-    if (isEdit) {
-      setEditSelectedApps([]);
-    } else {
-      setSelectedApps([]);
     }
   }
 
@@ -171,21 +149,8 @@ export default function SubManagersPage() {
     }
   }
 
-  async function fetchApps() {
-    try {
-      const res = await fetch("/api/admin/apps");
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setApps(data.data || []);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
-  
   useEffect(() => {
     fetchSubManagers();
-    fetchApps();
   }, []);
 
   async function handleDelete(id: string) {
@@ -208,7 +173,6 @@ export default function SubManagersPage() {
     setFormError(null);
     setFormLoading(true);
 
-    const subscriptions: string[] = selectedApps;
     const permissions: string[] = [];
     if (permCreateApps) permissions.push("create_apps");
     if (permBuilder) permissions.push("builder");
@@ -230,8 +194,7 @@ export default function SubManagersPage() {
           plan: newPlan,
           credits: newPlan === "credits" ? newCredits : 0,
           expiryDays: newExpiryDays,
-          permissions,
-          subscriptions
+          permissions
         })
       });
       
@@ -249,7 +212,6 @@ export default function SubManagersPage() {
       setNewPlan("ilimitado");
       setNewCredits(5000);
       setNewExpiryDays(30);
-      setSelectedApps([]);
       setPermCreateApps(true);
       setPermBuilder(true);
       setPermHex(true);
@@ -280,7 +242,6 @@ export default function SubManagersPage() {
       setEditExpiryDays(0);
     }
 
-    setEditSelectedApps(sub.subscriptions || []);
     setEditPermCreateApps(sub.permissions.includes("create_apps") || sub.can_create_apps === true);
     setEditPermBuilder(sub.permissions.includes("builder"));
     setEditPermHex(sub.permissions.includes("hex_converter"));
@@ -321,8 +282,7 @@ export default function SubManagersPage() {
           plan: editPlan,
           credits: editPlan === "credits" ? editCredits : 0,
           expiryDays: editExpiryDays,
-          permissions,
-          subscriptions: editSelectedApps
+          permissions
         })
       });
 
@@ -408,7 +368,6 @@ export default function SubManagersPage() {
                   <th className="px-5 py-4">PLAN</th>
                   <th className="px-5 py-4">CRÉDITOS</th>
                   <th className="px-5 py-4">SUSCRIPCIÓN / EXPIRACIÓN</th>
-                  <th className="px-5 py-4">APPS ASIGNADAS</th>
                   <th className="px-5 py-4">PERMISOS</th>
                   <th className="px-5 py-4">ESTADO</th>
                   <th className="px-5 py-4">CREADO</th>
@@ -451,28 +410,6 @@ export default function SubManagersPage() {
                       {/* Suscripción / Expiración */}
                       <td className="px-5 py-4">
                         {getExpiryBadge(sub.subscription_end)}
-                      </td>
-
-                      {/* Apps Asignadas */}
-                      <td className="px-5 py-4">
-                        {sub.subscriptions && sub.subscriptions.length > 0 ? (
-                          <div className="flex flex-wrap gap-1 max-w-xs">
-                            {sub.subscriptions.map((appId) => {
-                              const found = apps.find((a) => a.id === appId);
-                              return (
-                                <span
-                                  key={appId}
-                                  className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[10px] text-slate-300 truncate max-w-[120px]"
-                                  title={found ? found.name : appId}
-                                >
-                                  {found ? found.name : appId}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <span className="text-slate-500 text-[11px]">—</span>
-                        )}
                       </td>
 
                       {/* Permisos */}
@@ -874,58 +811,6 @@ export default function SubManagersPage() {
                 </div>
               </div>
 
-              {/* APLICACIONES ASIGNADAS */}
-              <div className="border-t border-slate-800/80 pt-3">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">
-                    ASIGNAR APLICACIONES EXISTENTES (OPCIONAL)
-                  </label>
-                  <div className="space-x-2 text-[9px] font-mono">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectAllApps(false)}
-                      className="text-[#00c2ff] hover:underline"
-                    >
-                      Marcar todas
-                    </button>
-                    <span className="text-slate-600">|</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeselectAllApps(false)}
-                      className="text-slate-400 hover:underline"
-                    >
-                      Desmarcar
-                    </button>
-                  </div>
-                </div>
-                {apps.length === 0 ? (
-                  <p className="text-[11px] text-slate-500">No hay aplicaciones creadas todavía.</p>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto pr-1">
-                    {apps.map((app) => (
-                      <label
-                        key={app.id}
-                        className="flex items-center gap-2 p-2 rounded-lg bg-[#020713] border border-slate-800 hover:border-slate-700 cursor-pointer text-xs"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedApps.includes(app.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedApps([...selectedApps, app.id]);
-                            } else {
-                              setSelectedApps(selectedApps.filter((id) => id !== app.id));
-                            }
-                          }}
-                          className="rounded bg-slate-900 border-slate-700 text-[#00c2ff]"
-                        />
-                        <span className="text-slate-300 truncate text-[11px]">{app.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {/* Modal Buttons */}
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
                 <button
@@ -1236,58 +1121,6 @@ export default function SubManagersPage() {
                     <span className="text-slate-300 text-xs">Modificar prefijo de licencias</span>
                   </label>
                 </div>
-              </div>
-
-              {/* Apps asignadas */}
-              <div className="border-t border-slate-800/80 pt-3">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">
-                    ASIGNAR APLICACIONES EXISTENTES
-                  </label>
-                  <div className="space-x-2 text-[9px] font-mono">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectAllApps(true)}
-                      className="text-[#00c2ff] hover:underline"
-                    >
-                      Marcar todas
-                    </button>
-                    <span className="text-slate-600">|</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeselectAllApps(true)}
-                      className="text-slate-400 hover:underline"
-                    >
-                      Desmarcar
-                    </button>
-                  </div>
-                </div>
-                {apps.length === 0 ? (
-                  <p className="text-[11px] text-slate-500">No hay aplicaciones creadas todavía.</p>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto pr-1">
-                    {apps.map((app) => (
-                      <label
-                        key={app.id}
-                        className="flex items-center gap-2 p-2 rounded-lg bg-[#020713] border border-slate-800 hover:border-slate-700 cursor-pointer text-xs"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={editSelectedApps.includes(app.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setEditSelectedApps([...editSelectedApps, app.id]);
-                            } else {
-                              setEditSelectedApps(editSelectedApps.filter((id) => id !== app.id));
-                            }
-                          }}
-                          className="rounded bg-slate-900 border-slate-700 text-[#00c2ff]"
-                        />
-                        <span className="text-slate-300 truncate text-[11px]">{app.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Modal Buttons */}

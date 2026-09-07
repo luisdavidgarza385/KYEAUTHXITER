@@ -88,8 +88,10 @@ export async function POST(req: NextRequest) {
       return json({ success: false, message: "Invalid credentials" }, 401);
     }
 
+    const effectiveRole = admin.permissions?.includes("manager") || admin.role === "manager" ? "manager" : admin.role;
+
     const cookieValue = Buffer.from(
-      JSON.stringify({ id: admin.id, email: admin.email, role: admin.role })
+      JSON.stringify({ id: admin.id, email: admin.email, role: effectiveRole })
     ).toString("base64");
 
     const remember = !!body?.remember;
@@ -102,7 +104,7 @@ export async function POST(req: NextRequest) {
       cookieOptions.maxAge = 60 * 60 * 24 * 30; // 30 days
     }
 
-    const res = json({ success: true, data: { id: admin.id, email: admin.email, role: admin.role } });
+    const res = json({ success: true, data: { id: admin.id, email: admin.email, role: effectiveRole } });
     res.cookies.set("ka_admin_session", cookieValue, cookieOptions);
     return res;
   } catch (e: any) {

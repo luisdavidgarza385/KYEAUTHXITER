@@ -23,6 +23,14 @@ function id(): string {
 
 const db = () => supabaseAdmin() as any;
 
+function normalizeAdminRole(admin: Admin | null): Admin | null {
+  if (!admin) return null;
+  if (admin.permissions?.includes("manager") || admin.role === "manager") {
+    admin.role = "manager";
+  }
+  return admin;
+}
+
 export const supabaseStore: Store = {
   async getAdminByEmail(emailOrUsername) {
     const e = emailOrUsername.toLowerCase();
@@ -31,7 +39,7 @@ export const supabaseStore: Store = {
       .select("*")
       .or(`email.ilike.${e},seller_label.ilike.${e}`)
       .maybeSingle();
-    return data as Admin | null;
+    return normalizeAdminRole(data as Admin | null);
   },
 
   async getAdminById(id) {
@@ -40,32 +48,48 @@ export const supabaseStore: Store = {
       .select("*")
       .eq("id", id)
       .maybeSingle();
-    return data as Admin | null;
+    return normalizeAdminRole(data as Admin | null);
   },
 
   async createAdmin(data) {
+    const isManager = data.role === "manager" || data.permissions?.includes("manager");
+    // Postgres check constraint admin_users_role_check only allows 'admin', 'seller', 'developer'
+    const dbRole = data.role === "manager" ? "seller" : data.role;
+    const permissions = [...(data.permissions || [])];
+    if (isManager && !permissions.includes("manager")) {
+      permissions.push("manager");
+    }
+
     const { data: row, error } = await db()
       .from("admin_users")
       .insert({
         email: data.email,
         password_hash: data.password_hash,
-        role: data.role,
+        role: dbRole,
         created_by: data.created_by || null,
         seller_label: data.seller_label || data.email.split("@")[0],
         credits: data.credits || 0,
         status: data.status || "active",
-        permissions: data.permissions || [],
+        permissions,
         subscriptions: data.subscriptions || [],
         subscription_end: data.subscription_end || null,
       } as any)
       .select()
       .single();
     if (error) throw error;
-    return row as Admin;
+    return normalizeAdminRole(row as Admin)!;
   },
 
   async updateAdmin(id, data) {
     const { avatar_url, ...updatePayload } = data;
+    const isManager = updatePayload.role === "manager" || updatePayload.permissions?.includes("manager");
+    if (updatePayload.role === "manager") {
+      updatePayload.role = "seller";
+    }
+    if (isManager && updatePayload.permissions && !updatePayload.permissions.includes("manager")) {
+      updatePayload.permissions.push("manager");
+    }
+
     const { data: row, error } = await db()
       .from("admin_users")
       .update(updatePayload)
@@ -73,7 +97,8 @@ export const supabaseStore: Store = {
       .select()
       .maybeSingle();
     if (error) throw error;
-    return row ? ({ ...(row as Admin), avatar_url } as Admin) : null;
+    const res = row ? ({ ...(row as Admin), avatar_url } as Admin) : null;
+    return normalizeAdminRole(res);
   },
 
   async deleteAdmin(id) {
@@ -83,7 +108,7 @@ export const supabaseStore: Store = {
 
   async listAdmins() {
     const { data } = await db().from("admin_users").select("*");
-    return (data || []) as Admin[];
+    return ((data || []) as Admin[]).map((a) => normalizeAdminRole(a)!);
   },
 
   async listApps(filter) {

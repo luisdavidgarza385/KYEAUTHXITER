@@ -14,10 +14,10 @@ export async function GET(req: NextRequest) {
     const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
     const isSuperAdmin = me.email.toLowerCase() === bootstrapEmail.toLowerCase();
 
-    // Filter sub-managers created by this user or having role "manager"
+    // Filter sub-managers created by this user or having role "manager" or permission "manager"
     const subManagers = allAdmins.filter(
-      (a) => a.role === "manager" && (isSuperAdmin || a.created_by === me.id)
-    );
+      (a) => (a.role === "manager" || a.permissions?.includes("manager")) && (isSuperAdmin || a.created_by === me.id)
+    ).map((a) => ({ ...a, role: "manager" }));
     return json({ success: true, data: subManagers });
   } catch (e: any) {
     return json({ success: false, message: e?.message || "Server error" }, 500);
@@ -34,7 +34,9 @@ export async function POST(req: NextRequest) {
     const plan = String(body?.plan || "ilimitado");
     const credits = Math.max(0, parseInt(String(body?.credits || 0)) || 0);
     const permissions = Array.isArray(body?.permissions) ? body.permissions : [];
-    const subscriptions = Array.isArray(body?.subscriptions) ? body.subscriptions : [];
+    if (!permissions.includes("manager")) {
+      permissions.push("manager");
+    }
     const expiryDays = parseInt(String(body?.expiryDays || 0)) || 0;
 
     let subscription_end: string | null = null;
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest) {
       credits: plan === "ilimitado" ? -1 : credits,
       status: "active",
       permissions,
-      subscriptions,
+      subscriptions: [],
       subscription_end,
       can_create_apps: canCreateApps,
     });
@@ -109,7 +111,9 @@ export async function PUT(req: NextRequest) {
     const plan = String(body?.plan || "ilimitado");
     const credits = Math.max(0, parseInt(String(body?.credits || 0)) || 0);
     const permissions = Array.isArray(body?.permissions) ? body.permissions : [];
-    const subscriptions = Array.isArray(body?.subscriptions) ? body.subscriptions : [];
+    if (!permissions.includes("manager")) {
+      permissions.push("manager");
+    }
 
     if (body?.expiryDays !== undefined) {
       const expiryDays = parseInt(String(body.expiryDays)) || 0;
@@ -131,11 +135,13 @@ export async function PUT(req: NextRequest) {
     }
 
     sub.credits = plan === "ilimitado" ? -1 : credits;
+    sub.role = "manager";
     sub.permissions = permissions;
-    sub.subscriptions = subscriptions;
+    sub.subscriptions = [];
     sub.can_create_apps = permissions.includes("create_apps");
 
     const updated = await store.updateAdmin(sub.id, sub);
+    return json({ success: true, data: updated });
     return json({ success: true, data: updated });
   } catch (e: any) {
     return json({ success: false, message: e?.message || "Server error" }, 500);

@@ -949,76 +949,7 @@ export default function BuilderPage() {
                 </div>
               </div>
 
-              {/* KeyAuth Credentials Header toggle */}
-              <div className="bg-zinc-900/40 rounded-xl p-3 border border-zinc-850 space-y-3">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300 border-b border-zinc-850/60 pb-2">
-                  <Info className="w-4.5 h-4.5 text-emerald-400" />
-                  Credenciales KeyAuth (Opcional)
-                </div>
 
-                {keyAuthApps.length > 0 && (
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-emerald-400 uppercase block">
-                      Vincular con App KeyAuth existente
-                    </label>
-                    <select
-                      onChange={(e) => handleSelectKaApp(e.target.value)}
-                      defaultValue=""
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500 cursor-pointer"
-                    >
-                      <option value="" disabled>--- Seleccione una aplicación ---</option>
-                      {keyAuthApps.map((a) => (
-                        <option key={a.id} value={a.app_id}>
-                          {a.name} ({a.app_id.slice(0, 8)}...)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">App Name</label>
-                    <input 
-                      type="text" 
-                      value={formKaName} 
-                      onChange={(e) => setFormKaName(e.target.value)}
-                      placeholder="Nombre en KeyAuth"
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Owner ID</label>
-                    <input 
-                      type="text" 
-                      value={formKaOwner} 
-                      onChange={(e) => setFormKaOwner(e.target.value)}
-                      placeholder="Owner ID"
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Version</label>
-                    <input 
-                      type="text" 
-                      value={formKaVer} 
-                      onChange={(e) => setFormKaVer(e.target.value)}
-                      placeholder="1.0"
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Secret Key</label>
-                    <input 
-                      type="text" 
-                      value={formKaSecret} 
-                      onChange={(e) => setFormKaSecret(e.target.value)}
-                      placeholder="KeyAuth Secret"
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
-              </div>
 
               <div className="pt-2">
                 <button 
@@ -1138,72 +1069,7 @@ export default function BuilderPage() {
                 </div>
               </div>
 
-              {/* KeyAuth Credentials */}
-              <div className="bg-zinc-900/40 rounded-xl p-3 border border-zinc-850 space-y-3">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300 border-b border-zinc-850/60 pb-2">
-                  <Info className="w-4.5 h-4.5 text-emerald-400" />
-                  Credenciales KeyAuth de la Aplicación
-                </div>
 
-                {keyAuthApps.length > 0 && (
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-emerald-400 uppercase block">
-                      Vincular con App KeyAuth existente
-                    </label>
-                    <select
-                      onChange={(e) => handleSelectKaApp(e.target.value)}
-                      defaultValue=""
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-300 focus:outline-none focus:border-emerald-500 cursor-pointer"
-                    >
-                      <option value="" disabled>--- Seleccione una aplicación ---</option>
-                      {keyAuthApps.map((a) => (
-                        <option key={a.id} value={a.app_id}>
-                          {a.name} ({a.app_id.slice(0, 8)}...)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">App Name</label>
-                    <input 
-                      type="text" 
-                      value={formKaName} 
-                      onChange={(e) => setFormKaName(e.target.value)}
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Owner ID</label>
-                    <input 
-                      type="text" 
-                      value={formKaOwner} 
-                      onChange={(e) => setFormKaOwner(e.target.value)}
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Version</label>
-                    <input 
-                      type="text" 
-                      value={formKaVer} 
-                      onChange={(e) => setFormKaVer(e.target.value)}
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Secret Key</label>
-                    <input 
-                      type="text" 
-                      value={formKaSecret} 
-                      onChange={(e) => setFormKaSecret(e.target.value)}
-                      className="w-full rounded-md bg-zinc-950 border border-zinc-800 p-2 text-xs text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
-              </div>
 
               <div className="pt-2">
                 <button 

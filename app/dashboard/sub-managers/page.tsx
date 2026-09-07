@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { 
   UserCog, Search, Plus, Trash2, Edit, Loader2, Check, X, 
-  Eye, EyeOff, RefreshCw, Clock, AlertTriangle, Sparkles, Grid
+  Eye, EyeOff, RefreshCw, Clock, AlertTriangle, Sparkles, Grid,
+  Terminal, Binary, Code2, ShieldCheck, Key
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -36,6 +37,9 @@ export default function SubManagersPage() {
   const [showPassword, setShowPassword] = useState(false);
   
   const [permCreateApps, setPermCreateApps] = useState(true);
+  const [permBuilder, setPermBuilder] = useState(true);
+  const [permHex, setPermHex] = useState(true);
+  const [permVariables, setPermVariables] = useState(true);
   const [permGenerar, setPermGenerar] = useState(true);
   const [permResetHwid, setPermResetHwid] = useState(true);
   const [permBan, setPermBan] = useState(true);
@@ -52,6 +56,9 @@ export default function SubManagersPage() {
   const [editShowPassword, setEditShowPassword] = useState(false);
   
   const [editPermCreateApps, setEditPermCreateApps] = useState(true);
+  const [editPermBuilder, setEditPermBuilder] = useState(false);
+  const [editPermHex, setEditPermHex] = useState(false);
+  const [editPermVariables, setEditPermVariables] = useState(false);
   const [editPermGenerar, setEditPermGenerar] = useState(true);
   const [editPermResetHwid, setEditPermResetHwid] = useState(false);
   const [editPermBan, setEditPermBan] = useState(false);
@@ -101,6 +108,9 @@ export default function SubManagersPage() {
   function handleSetAllPerms(val: boolean, isEdit = false) {
     if (isEdit) {
       setEditPermCreateApps(val);
+      setEditPermBuilder(val);
+      setEditPermHex(val);
+      setEditPermVariables(val);
       setEditPermGenerar(val);
       setEditPermResetHwid(val);
       setEditPermBan(val);
@@ -108,6 +118,9 @@ export default function SubManagersPage() {
       setEditPermPrefix(val);
     } else {
       setPermCreateApps(val);
+      setPermBuilder(val);
+      setPermHex(val);
+      setPermVariables(val);
       setPermGenerar(val);
       setPermResetHwid(val);
       setPermBan(val);
@@ -198,6 +211,9 @@ export default function SubManagersPage() {
     const subscriptions: string[] = selectedApps;
     const permissions: string[] = [];
     if (permCreateApps) permissions.push("create_apps");
+    if (permBuilder) permissions.push("builder");
+    if (permHex) permissions.push("hex_converter");
+    if (permVariables) permissions.push("variables");
     if (permGenerar) permissions.push("generar");
     if (permResetHwid) permissions.push("hwid");
     if (permBan) permissions.push("ban");
@@ -235,6 +251,9 @@ export default function SubManagersPage() {
       setNewExpiryDays(30);
       setSelectedApps([]);
       setPermCreateApps(true);
+      setPermBuilder(true);
+      setPermHex(true);
+      setPermVariables(true);
       setPermGenerar(true);
       setPermResetHwid(true);
       setPermBan(true);
@@ -263,6 +282,9 @@ export default function SubManagersPage() {
 
     setEditSelectedApps(sub.subscriptions || []);
     setEditPermCreateApps(sub.permissions.includes("create_apps") || sub.can_create_apps === true);
+    setEditPermBuilder(sub.permissions.includes("builder"));
+    setEditPermHex(sub.permissions.includes("hex_converter"));
+    setEditPermVariables(sub.permissions.includes("variables"));
     setEditPermGenerar(sub.permissions.includes("generar"));
     setEditPermResetHwid(sub.permissions.includes("hwid"));
     setEditPermBan(sub.permissions.includes("ban"));
@@ -280,6 +302,9 @@ export default function SubManagersPage() {
 
     const permissions: string[] = [];
     if (editPermCreateApps) permissions.push("create_apps");
+    if (editPermBuilder) permissions.push("builder");
+    if (editPermHex) permissions.push("hex_converter");
+    if (editPermVariables) permissions.push("variables");
     if (editPermGenerar) permissions.push("generar");
     if (editPermResetHwid) permissions.push("hwid");
     if (editPermBan) permissions.push("ban");
@@ -456,6 +481,21 @@ export default function SubManagersPage() {
                           {hasCreateApps && (
                             <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold flex items-center gap-1">
                               <Grid className="w-2.5 h-2.5 text-cyan-400" /> Crear Apps Ilimitadas
+                            </span>
+                          )}
+                          {sub.permissions?.includes("builder") && (
+                            <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold flex items-center gap-1">
+                              <Terminal className="w-2.5 h-2.5 text-amber-400" /> Builder [VIP]
+                            </span>
+                          )}
+                          {sub.permissions?.includes("hex_converter") && (
+                            <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold flex items-center gap-1">
+                              <Binary className="w-2.5 h-2.5 text-purple-400" /> Convertidor Hex
+                            </span>
+                          )}
+                          {sub.permissions?.includes("variables") && (
+                            <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold flex items-center gap-1">
+                              <Code2 className="w-2.5 h-2.5 text-blue-400" /> Variables Premium
                             </span>
                           )}
                           {sub.permissions?.includes("generar") && (
@@ -717,13 +757,13 @@ export default function SubManagersPage() {
                 </div>
 
                 {/* HIGHLIGHTED: CREATE APPS PERMISSION */}
-                <div className="mb-3 p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                <div className="mb-2 p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 flex items-center justify-between">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={permCreateApps}
                       onChange={(e) => setPermCreateApps(e.target.checked)}
-                      className="w-4 h-4 rounded bg-[#020713] border-slate-700 text-[#00c2ff] focus:ring-0"
+                      className="w-4 h-4 rounded bg-[#020713] border-slate-700 text-[#00c2ff] focus:ring-0 cursor-pointer"
                     />
                     <div>
                       <span className="text-xs font-bold text-white block">
@@ -739,7 +779,53 @@ export default function SubManagersPage() {
                   </span>
                 </div>
 
+                {/* HIGHLIGHTED: BUILDER VIP PERMISSION */}
+                <div className="mb-3 p-3 rounded-xl bg-amber-950/25 border border-amber-500/40 flex items-center justify-between">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={permBuilder}
+                      onChange={(e) => setPermBuilder(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#020713] border-slate-700 text-amber-400 focus:ring-0 cursor-pointer"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white block">
+                          Acceso a Builder
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-[8.5px] font-black tracking-wider shadow-[0_0_8px_rgba(245,158,11,0.5)]">
+                          VIP
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-amber-200/80">
+                        Permite al manager ingresar a la herramienta de compilación y descarga de loaders/ejecutables.
+                      </span>
+                    </div>
+                  </label>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-mono font-black shrink-0">
+                    VIP
+                  </span>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2 text-xs">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={permHex}
+                      onChange={(e) => setPermHex(e.target.checked)}
+                      className="rounded bg-[#020713] border-slate-700 text-purple-400"
+                    />
+                    <span className="text-slate-300 text-xs">Convertidor Hex</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={permVariables}
+                      onChange={(e) => setPermVariables(e.target.checked)}
+                      className="rounded bg-[#020713] border-slate-700 text-blue-400"
+                    />
+                    <span className="text-slate-300 text-xs">Variables de apps</span>
+                  </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
@@ -1035,13 +1121,13 @@ export default function SubManagersPage() {
                 </div>
 
                 {/* HIGHLIGHTED: CREATE APPS PERMISSION */}
-                <div className="mb-3 p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                <div className="mb-2 p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 flex items-center justify-between">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={editPermCreateApps}
                       onChange={(e) => setEditPermCreateApps(e.target.checked)}
-                      className="w-4 h-4 rounded bg-[#020713] border-slate-700 text-[#00c2ff]"
+                      className="w-4 h-4 rounded bg-[#020713] border-slate-700 text-[#00c2ff] focus:ring-0 cursor-pointer"
                     />
                     <div>
                       <span className="text-xs font-bold text-white block">
@@ -1057,7 +1143,53 @@ export default function SubManagersPage() {
                   </span>
                 </div>
 
+                {/* HIGHLIGHTED: BUILDER VIP PERMISSION */}
+                <div className="mb-3 p-3 rounded-xl bg-amber-950/25 border border-amber-500/40 flex items-center justify-between">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editPermBuilder}
+                      onChange={(e) => setEditPermBuilder(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#020713] border-slate-700 text-amber-400 focus:ring-0 cursor-pointer"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white block">
+                          Acceso a Builder
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-[8.5px] font-black tracking-wider shadow-[0_0_8px_rgba(245,158,11,0.5)]">
+                          VIP
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-amber-200/80">
+                        Permite al manager ingresar a la herramienta de compilación y descarga de loaders/ejecutables.
+                      </span>
+                    </div>
+                  </label>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-mono font-black shrink-0">
+                    VIP
+                  </span>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2 text-xs">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editPermHex}
+                      onChange={(e) => setEditPermHex(e.target.checked)}
+                      className="rounded bg-[#020713] border-slate-700 text-purple-400"
+                    />
+                    <span className="text-slate-300 text-xs">Convertidor Hex</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editPermVariables}
+                      onChange={(e) => setEditPermVariables(e.target.checked)}
+                      className="rounded bg-[#020713] border-slate-700 text-blue-400"
+                    />
+                    <span className="text-slate-300 text-xs">Variables de apps</span>
+                  </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"

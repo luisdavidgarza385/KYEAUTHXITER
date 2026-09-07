@@ -37,10 +37,11 @@ interface AppItem {
 }
 
 interface RealAuthXSidebarProps {
-  role: "admin" | "seller" | "developer";
+  role: "admin" | "seller" | "developer" | "manager";
   email: string;
   apps?: AppItem[];
   currentAppId?: string;
+  permissions?: string[];
 }
 
 export function RealAuthXSidebar({
@@ -48,6 +49,7 @@ export function RealAuthXSidebar({
   email,
   apps = [{ id: "9999", name: "9999" }],
   currentAppId = "9999",
+  permissions = [],
 }: RealAuthXSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -68,7 +70,9 @@ export function RealAuthXSidebar({
     };
   }, []);
 
-  const isAdmin = role === "admin";
+  const isAdmin = role === "admin" || role === "developer";
+  const canUseBuilder = isAdmin || permissions.includes("builder");
+  const canUseHex = isAdmin || permissions.includes("hex_converter");
 
   const generalItems = [
     {
@@ -82,7 +86,7 @@ export function RealAuthXSidebar({
       label: t.navManageApps || "Gestionar apps",
       icon: Grid,
     },
-    ...(isAdmin
+    ...(canUseBuilder
       ? [
           {
             href: "/dashboard/builder",
@@ -94,7 +98,7 @@ export function RealAuthXSidebar({
       : []),
   ];
 
-  const toolsSection = isAdmin
+  const toolsSection = canUseHex
     ? [
         {
           label: t.navTools || "HERRAMIENTAS",

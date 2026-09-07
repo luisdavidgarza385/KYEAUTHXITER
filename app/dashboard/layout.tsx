@@ -13,8 +13,17 @@ import { LanguageProvider } from "@/lib/i18n";
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const me = await requireAdmin();
   const scopedIds = await getScopedAppIds(me);
+  const adminData = await store.getAdminById(me.id);
+  const permissions = Array.isArray(adminData?.permissions) ? adminData.permissions : [];
+
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || "spectralx@gmail.com";
+  const isSuperAdmin = me.email.toLowerCase() === bootstrapEmail.toLowerCase();
   const allApps = await store.listApps();
-  const apps = scopedIds === null ? allApps : allApps.filter((a) => scopedIds.includes(a.id));
+  
+  // SuperAdmin sees only their own apps, NOT manager-created apps!
+  const apps = (isSuperAdmin || me.role === "admin")
+    ? allApps.filter((a) => a.owner_id === me.id || !a.owner_id || a.owner_id === "0FY7WpdIue" || a.owner_id === "Nf6SZ77yo1DBPmLl77qhf6WwaTOyCDE9")
+    : allApps.filter((a) => (scopedIds && scopedIds.includes(a.id)) || a.owner_id === me.id);
 
   // Determine current active application ID
   const cookieStore = cookies();
@@ -37,6 +46,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           email={me.email}
           apps={apps.length > 0 ? apps.map((a) => ({ id: a.id, name: a.name })) : [{ id: "9999", name: "9999" }]}
           currentAppId={currentAppId}
+          permissions={permissions}
         />
 
         <div className="flex-1 flex flex-col min-w-0 relative z-10">
